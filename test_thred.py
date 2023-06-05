@@ -8,18 +8,24 @@ from data.map import instruction_prompt_map
 import audio.recognition as recognition, audio.synthesis as synthesis, audio.play as play, audio.record as record
 import threading
 import queue
+import time
 
 running = True
+#lock = threading.Lock()
 # 模拟加载和运行模型的函数
 def load_and_run_model(input_queue):
     # 模型加载过程，可以根据实际情况进行编写
+    #global lock
+    #lock.acquire()
     print("模型加载中...")
     # 模型加载完成
+
     model = AutoModel.from_pretrained("THUDM/chatglm-6b-int4",trust_remote_code=True).half().cuda()
     tokenizer = AutoTokenizer.from_pretrained("THUDM/chatglm-6b-int4", trust_remote_code=True)
     corpus = faiss_corpus()
     
     print("模型加载完成")
+    #lock.release()
     global running
     while running:
         try:
@@ -49,19 +55,19 @@ input_queue = queue.Queue()
 
 # 创建一个线程，用于加载和运行模型
 model_thread = threading.Thread(target=load_and_run_model, args=(input_queue,))
+time.sleep(0.1)
 # 设置线程为后台线程，使程序可以退出
 model_thread.daemon = True
 # 启动线程
 model_thread.start()
-
+# lock.acquire()
+# lock.release()
 try:
     while True:
         # 接收用户输入
         input_data = input("请输入数据（输入exit退出）：")
         # 将输入数据放入输入队列
         if input_data == "exit":
-            running = False
-            input_queue.put(None)
             break
         input_queue.put(input_data)
 except KeyboardInterrupt:
