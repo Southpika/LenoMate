@@ -4,7 +4,7 @@ import argparse
 import faiss
 import numpy as np
 import os
-from map import instruction_prompt_map
+
 
 ## Predefined 
 def get_parser():

@@ -1,11 +1,11 @@
-from operation import prompt
-from operation import operation
+import operation.prompt as prompt
+import operation.operation as operation
 import torch
 from transformers import AutoTokenizer, AutoModel
 import warnings
-from search_doc_faiss import faiss_corpus
-from map import instruction_prompt_map
-import audio.recognition as recognition, synthesis, audio.play as play, audio.record as record
+from utils.search_doc_faiss import faiss_corpus
+from data.map import instruction_prompt_map
+import audio.recognition as recognition, audio.synthesis as synthesis, audio.play as play, audio.record as record
 
 warnings.filterwarnings("ignore")
 

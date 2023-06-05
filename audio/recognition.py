@@ -26,7 +26,7 @@ def main():
     token = get_token()
     # 2、打开需要识别的语音文件
     speech_data = []
-    with open("voice.wav", 'rb') as speech_file:
+    with open("./data/voice.wav", 'rb') as speech_file:
         speech_data = speech_file.read()
     length = len(speech_data)
     if length == 0:
