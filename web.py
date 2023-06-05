@@ -11,7 +11,7 @@ import os
 import main
 import maintext
 import audio.play as play
-import synthesis
+import audio.synthesis
 
 app = FastAPI()
 
