@@ -10,7 +10,7 @@ from fastapi.middleware.gzip import GZipMiddleware
 import os
 import main
 import maintext
-import play
+import audio.play as play
 import synthesis
 
 app = FastAPI()

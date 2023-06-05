@@ -5,7 +5,7 @@ from transformers import AutoTokenizer, AutoModel
 import warnings
 from search_doc_faiss import faiss_corpus
 from map import instruction_prompt_map
-import recognition, synthesis, play, record
+import audio.recognition as recognition, synthesis, audio.play as play, audio.record as record
 
 warnings.filterwarnings("ignore")
 
