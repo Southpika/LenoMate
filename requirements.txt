@@ -1,0 +1,6 @@
+screen_brightness_control
+pynvml
+transformers
+torch --index-url https://download.pytorch.org/whl/cu118
+peft
+bitsandbytes

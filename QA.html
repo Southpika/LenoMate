@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>问答界面</title>
+    <style>
+        body {
+            background-image: linear-gradient(
+                    0deg,
+                    rgba(247, 247, 247, 1) 23.8%,
+                    rgba(252, 221, 221, 1) 92%
+            );
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Lato', sans-serif;
+            margin: 0;
+        }
+
+        .container {
+            width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .message-container {
+            margin-bottom: 10px;
+        }
+
+        .user-message {
+            background-color: #f1f1f1;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .bot-message {
+            background-color: #e0eaf6;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .input-container {
+            display: flex;
+            margin-top: 20px;
+        }
+
+        .input-container input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .input-container input[type="submit"] {
+            padding: 10px 20px;
+            margin-left: 10px;
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .input-container button {
+            padding: 10px 20px;
+            margin-left: 10px;
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="message-container">
+        <div class="bot-message">欢迎来到LenoMate!</div>
+    </div>
+    <div id="messageArea"></div>
+    <div class="input-container">
+        <input type="text" id="userInput" placeholder="请输入问题">
+        <input type="submit" value="发送" onclick="sendMessage()">
+        <button id="recordButton" onclick="toggleRecording()">录音</button>
+    </div>
+</div>
+
+<script>
+    var isRecording = false;
+    var mediaRecorder;
+    var recordedChunks = [];
+
+    let xhr = new XMLHttpRequest();
+    xhr.open('POST', 'http://localhost:8081/', true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.send(JSON.stringify({ userInput: userInput }));
+
+    function sendMessage() {
+        var userInput = document.getElementById('userInput').value;
+        if (userInput.trim() !== '') {
+            var userMessage = '<div class="message-container"><div class="user-message">' + userInput + '</div></div>';
+            document.getElementById('userInput').value = '';
+            document.getElementById('messageArea').innerHTML += userMessage;
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', 'http://localhost:8081/text', true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+                    if (xhr.status === 200) {
+                        var botMessage = '<div class="message-container"><div class="bot-message">' + xhr.responseText + '</div></div>';
+                        document.getElementById('messageArea').innerHTML += botMessage;
+                    } else {
+                        console.error('请求失败: ' + xhr.status);
+                    }
+                }
+            };
+            xhr.send(JSON.stringify({ userInput: userInput }));
+        }
+    }
+
+    function toggleRecording() {
+        if (isRecording) {
+            // 停止录音
+            mediaRecorder.stop();
+            isRecording = false;
+        } else {
+            // 开始录音
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(function(stream) {
+                    mediaRecorder = new MediaRecorder(stream);
+                    mediaRecorder.start();
+                    isRecording = true;
+
+                    recordedChunks = [];
+
+                    mediaRecorder.addEventListener('dataavailable', function(event) {
+                        recordedChunks.push(event.data);
+                    });
+
+                    mediaRecorder.addEventListener('stop', function() {
+                        // 将录音数据发送给后端
+                        var blob = new Blob(recordedChunks, { type: 'audio/wav' });
+                        var formData = new FormData();
+                        formData.append('audioData', blob);
+
+                        var xhr = new XMLHttpRequest();
+                        xhr.open('POST', 'http://localhost:8081/audio', true);
+                        xhr.onreadystatechange = function() {
+                            if (xhr.readyState === XMLHttpRequest.DONE) {
+                                if (xhr.status === 200) {
+                                    var botMessage = '<div class="message-container"><div class="bot-message">' + xhr.responseText + '</div></div>';
+                                    document.getElementById('messageArea').innerHTML += botMessage;
+                                } else {
+                                    console.error('请求失败: ' + xhr.status);
+                                }
+                            }
+                        };
+                        xhr.send(formData);
+                    });
+                })
+                .catch(function(error) {
+                    console.error('无法访问麦克风：' + error);
+                });
+        }
+    }
+</script>
+</body>
+</html>

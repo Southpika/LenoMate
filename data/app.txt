@@ -1,0 +1,50 @@
+QQ音乐
+edge
+计算器
+文件资源管理器
+控制面板
+记事本
+画图
+命令提示符
+Windows Media Player
+任务管理器
+远程桌面连接
+Internet Explorer
+Microsoft Edge
+Microsoft Word
+Microsoft Excel
+Microsoft PowerPoint
+Microsoft Outlook
+Google Chrome
+Adobe Photoshop
+微信
+支付宝
+腾讯QQ
+百度网盘
+迅雷
+360安全卫士
+搜狗输入法
+UC浏览器
+酷狗音乐
+网易云音乐
+携程旅行
+美团
+滴滴出行
+京东
+淘宝
+新浪微博
+今日头条
+优酷
+爱奇艺
+腾讯视频
+哔哩哔哩
+知乎
+百度地图
+高德地图
+58同城
+大众点评
+滴滴外卖
+美团外卖
+微店
+拼多多
+WPS Office
