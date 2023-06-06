@@ -4,3 +4,11 @@ transformers
 torch --index-url https://download.pytorch.org/whl/cu118
 peft
 bitsandbytes
+scipy
+faiss-cpu
+cpm_kernels
+sentencepiece
+fastapi
+uvicorn
+python-multipart
+pyaudio
