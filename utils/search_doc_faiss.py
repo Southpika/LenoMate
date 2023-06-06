@@ -30,6 +30,15 @@ def cls_pooling(model_output,return_tensors=False):
     else:
         return l2_normalization(model_output.last_hidden_state[:,0])
 
+def mean_pooling(model_output, attention_mask, return_tensors=False):
+    token_embeddings = model_output[0]  # First element of model_output contains all token embeddings
+    input_mask_expanded = attention_mask.unsqueeze(-1).expand(token_embeddings.size()).float()
+    output = torch.sum(token_embeddings * input_mask_expanded, 1) / torch.clamp(input_mask_expanded.sum(1), min=1e-9)
+    if not return_tensors:
+        return output.cpu().numpy()
+    else:
+        return output
+
 args = get_parser()
 
 class faiss_corpus:
@@ -52,9 +61,11 @@ class faiss_corpus:
         print('[INFO]Creating Document Embeddings')
         print(self.corpus)
         self.model.eval()
+        input_data = self.tokenizer(self.corpus, padding=True, return_tensors="pt")
         with torch.no_grad():
-            corpus_embeddings = self.model(**self.tokenizer(self.corpus, padding=True, return_tensors="pt").to(self.device))
-        corpus_embeddings = cls_pooling(corpus_embeddings)
+            corpus_embeddings = self.model(**input_data.to(self.device))
+        # corpus_embeddings = cls_pooling(corpus_embeddings)
+        corpus_embeddings = mean_pooling(corpus_embeddings,attention_mask=input_data['attention_mask'])
         features = l2_normalization(corpus_embeddings)
         dim = features.shape[1]
         index_ip = faiss.IndexFlatIP(dim)
@@ -66,11 +77,14 @@ class faiss_corpus:
         self.index_ip = faiss.read_index(self.args.index_location)
 
     def search(self,query = '如何更换花呗绑定银行卡',verbose=False):
-        self.load()       
+        self.load()
+        input_data = self.tokenizer(query, padding=True, return_tensors="pt")  
+        self.model.eval()     
         with torch.no_grad():
-            query_embeddings = self.model(**self.tokenizer(query, padding=True, return_tensors="pt").to(self.device))
-            query_embeddings = cls_pooling(query_embeddings)
-            feature_search = query_embeddings        
+            query_embeddings = self.model(**input_data.to(self.device))
+            # query_embeddings = cls_pooling(query_embeddings)
+            query_embeddings = mean_pooling(query_embeddings,attention_mask=input_data['attention_mask'])
+            feature_search = l2_normalization(query_embeddings)        
             D, I = self.index_ip.search(feature_search, self.args.k)
             idx,score = int(I[0][0]),float(D[0][0]) 
             # if args.search == 1:

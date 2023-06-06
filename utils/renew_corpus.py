@@ -2,7 +2,6 @@ from search_doc_faiss import faiss_corpus
 
 import argparse
 
-from map import instruction_prompt_map
 
 ## Predefined 
 

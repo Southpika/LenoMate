@@ -20,7 +20,8 @@ def load_and_run_model(input_queue):
     corpus = faiss_corpus()
     
     print("模型加载完成")
-    global running
+    global running, lock
+    lock.acquire()
     while running:
         try:
 
@@ -28,7 +29,6 @@ def load_and_run_model(input_queue):
             try:
                 input_statement = input_statement
                 selected_idx,score = corpus.search(query = input_statement,verbose=False)
-                # 运行模型，这里我们简单地将输入数据乘以2
                 torch.cuda.empty_cache()
 
                 # 将结果转换为字符串
@@ -43,9 +43,12 @@ def load_and_run_model(input_queue):
         except KeyboardInterrupt:
             running = False
             break
+    lock.release()
 
 # 创建一个输入队列
 input_queue = queue.Queue()
+
+lock = threading.Lock()
 
 # 创建一个线程，用于加载和运行模型
 model_thread = threading.Thread(target=load_and_run_model, args=(input_queue,))
@@ -54,6 +57,7 @@ model_thread.daemon = True
 # 启动线程
 model_thread.start()
 
+lock.acquire()
 try:
     while True:
         # 接收用户输入
@@ -66,6 +70,7 @@ try:
         input_queue.put(input_data)
 except KeyboardInterrupt:
     pass
+lock.release()
 
 input_queue.put(None)  # 发送终止信号给模型线程
 # 退出程序时，清空输入队列并等待模型线程结束
