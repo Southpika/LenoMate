@@ -62,13 +62,9 @@ def load_and_run_model(input_queue):
             try:
                 input_statement = input_statement
                 selected_idx, score = corpus.search(query=input_statement, verbose=False)
-                # 运行模型，这里我们简单地将输入数据乘以2
                 torch.cuda.empty_cache()
-
-                # 将结果转换为字符串
                 opt = eval(f"operation.Operation{selected_idx}")(input_statement)
                 result = opt.fit(model, tokenizer)
-
                 # 处理完成后，可以将结果返回给主线程，或者进行其他操作
                 print("模型输出：", result)
             except:

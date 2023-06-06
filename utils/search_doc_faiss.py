@@ -91,7 +91,7 @@ class faiss_corpus:
             #     idx = instruction_prompt_map[idx]
             # else:
             #     idx = name_exe_map[idx]
-            print(idx,score)
+            # print(idx,score)
         if verbose:
             print(self.corpus[idx], "(Score: {:.4f})".format(score))
         return  idx,score

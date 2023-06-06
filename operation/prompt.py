@@ -30,7 +30,7 @@ class Prompt1(Prompt):
 
 class Prompt2(Prompt):
     def __init__(self,inp) -> None:
-        self.prompt = f"""基于以下已知信息，简洁和专业的总结以下文本到5个字以内，总结中不要含任何标点
+        self.prompt = f"""基于以下已知信息，简洁和专业的总结以下已知内容到5个字以内，总结中不要含任何标点
 ##已知内容:
 {inp}
 ##总结："""

@@ -3,7 +3,7 @@ instruction_prompt_map={
     1:1,
     2:2,
     3:3,
-    4:1,
+    4:4,
 }
 
 name_exe_map = {
