@@ -20,19 +20,20 @@ class Prompt0(Prompt):
 """
 class Prompt1(Prompt):
     def __init__(self,inp,context) -> None:
-        self.prompt = f"""<用户>：请你根据结合以下input内容回答：
-{inp}
-##input:
+        self.prompt = f"""基于以下已知信息，简洁和专业的来回答用户的问题。
+如果无法从中得到答案，请说 "根据已知信息无法回答该问题" 或 "没有提供足够的相关信息"，不允许在答案中添加编造成分，答案请使用中文。
+##已知内容:
 {context}
-<ChatGLM-6B>：
-"""
+##问题:
+{inp}
+##回答："""
+
 class Prompt2(Prompt):
     def __init__(self,inp) -> None:
-        self.prompt = f"""<用户>：请精简总结以下文本到5个字以内，不要含标点
-##input:
+        self.prompt = f"""基于以下已知信息，简洁和专业的总结以下文本到5个字以内，总结中不要含任何标点
+##已知内容:
 {inp}
-<ChatGLM-6B>：
-"""
+##总结："""
 class Prompt3(Prompt):
     def __init__(self,inp,context) -> None:
         self.prompt = f"""<用户>：请结合input的软件库帮我找到要打开的软件，输出请写[文件.exe]

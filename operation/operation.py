@@ -109,7 +109,7 @@ class Operation2(Operation):
             print(tokenizer.decode(out[0]).split('<ChatGLM-6B>:'))
             answer = tokenizer.decode(out[0]).split('<ChatGLM-6B>:')[1].strip()
             
-            self.summary = answer
+            self.summary = answer.strip('。')
 
         file_name = 'LenoMate_'+self.summary+'_'+time_suffix()+'.txt'
         file_name = os.path.join(default_path,file_name)
