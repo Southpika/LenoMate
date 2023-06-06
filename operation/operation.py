@@ -106,8 +106,8 @@ class Operation2(Operation):
                 # stopping_criteria = StoppingCriteriaList([stop_criteria])
                 # do_sample = True
             )
-            print(tokenizer.decode(out[0]).split('<ChatGLM-6B>:'))
-            answer = tokenizer.decode(out[0]).split('<ChatGLM-6B>:')[1].strip()
+            print('operation3 output',tokenizer.decode(out[0]).split('##总结:'))
+            answer = tokenizer.decode(out[0]).split('##总结:')[1].strip()
             
             self.summary = answer.strip('。')
 
