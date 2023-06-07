@@ -149,8 +149,8 @@
         xhr.send(JSON.stringify({userInput: userInput}));
     }
 
-        function sendMessage3(userInput) {
-        if (userInput.trim() !== '') {
+    function sendMessage3(userInput = '', back = false) {
+        if (userInput.trim() !== '' || back) {
             var xhr = new XMLHttpRequest();
             xhr.open('POST', 'http://localhost:8081/text3', true);
             xhr.setRequestHeader('Content-Type', 'application/json');
@@ -159,19 +159,23 @@
                     if (xhr.status === 200) {
                         var botMessage = '<div class="message-container"><div class="bot-message">' + userInput + '</div></div>';
                         document.getElementById('messageArea').innerHTML += botMessage;
+                        if (back) {
+                            botMessage = '<div class="message-container"><div class="user-message">' + xhr.responseText + '</div></div>';
+                            document.getElementById('messageArea').innerHTML += botMessage;
+                        }
                     } else {
                         console.error('请求失败: ' + xhr.status);
                     }
                 }
             };
-            xhr.send(JSON.stringify({userInput: userInput}));
+            xhr.send(JSON.stringify({userInput: userInput, back: back}));
         }
     }
 
     function toggleRecording() {
         if (isRecording) {
             // 停止录音
-            sendMessage3('"请稍等"');
+            sendMessage3('"请稍等"', true);
             mediaRecorder.stop();
             isRecording = false;
         } else {
