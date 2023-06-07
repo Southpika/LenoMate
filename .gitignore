@@ -1,3 +1,6 @@
 build/
 result.wav
 exe_location.json
+__pycache__/main.cpython-310.pyc
+operation/__pycache__/operation.cpython-310.pyc
+__pycache__/maintext.cpython-310.pyc
