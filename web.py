@@ -101,13 +101,20 @@ async def start(data: Dict):
     play.play()
 
 
+@app.options("/")
+async def start(data: Dict):
+    start = "你好，我是LenoMate，请问有什么可以帮您"
+    synthesis.main(start)
+    play.play()
+
+
 @app.post("/audio")
 async def audio(audioData: bytes = File(...)):
-    with open('./voice1.wav', 'wb') as f:
+    with open('data/voice1.wav', 'wb') as f:
         f.write(audioData)
     f.close()
 
-    os.system('ffmpeg -y -i voice1.wav -ac 1 -ar 16000 voice.wav')
+    os.system('ffmpeg -y -i data/voice1.wav -ac 1 -ar 16000 data/voice.wav')
     text = main.main()
     # os.system('rm ./voice.wav')
     return text
