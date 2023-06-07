@@ -30,7 +30,7 @@ def main(input_statement):
     # print(opt.fit(model,tokenizer))
     result = opt.fit(model,tokenizer)
     # synthesis.main(result)
-    play.play()
+    # play.play()
     return result
 
 if __name__ == '__main__':
