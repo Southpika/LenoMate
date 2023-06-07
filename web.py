@@ -110,6 +110,10 @@ async def text(data: Dict):
     mode = not mode
     return '已切换成功能模式' if mode else '已切换成聊天模式'
 
+@app.post("/text3")
+async def text(data: Dict):
+    sys_thred(data.get("userInput"))
+
 
 @app.post("/")
 async def start(data: Dict):

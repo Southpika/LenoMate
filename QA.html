@@ -149,17 +149,34 @@
         xhr.send(JSON.stringify({userInput: userInput}));
     }
 
+        function sendMessage3(userInput) {
+        if (userInput.trim() !== '') {
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', 'http://localhost:8081/text3', true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+                    if (xhr.status === 200) {
+                        var botMessage = '<div class="message-container"><div class="bot-message">' + userInput + '</div></div>';
+                        document.getElementById('messageArea').innerHTML += botMessage;
+                    } else {
+                        console.error('请求失败: ' + xhr.status);
+                    }
+                }
+            };
+            xhr.send(JSON.stringify({userInput: userInput}));
+        }
+    }
+
     function toggleRecording() {
         if (isRecording) {
             // 停止录音
-            var botMessage = '<div class="message-container"><div class="bot-message">' + '请稍等' + '</div></div>';
-            document.getElementById('messageArea').innerHTML += botMessage;
+            sendMessage3('"请稍等"');
             mediaRecorder.stop();
             isRecording = false;
         } else {
             // 开始录音
-            var botMessage = '<div class="message-container"><div class="bot-message">' + '我在听' + '</div></div>';
-            document.getElementById('messageArea').innerHTML += botMessage;
+            sendMessage3('"我在听"');
             navigator.mediaDevices.getUserMedia({audio: true})
                 .then(function (stream) {
                     mediaRecorder = new MediaRecorder(stream);
