@@ -1,7 +1,13 @@
 build/
 result.wav
 exe_location.json
-__pycache__/main.cpython-310.pyc
-operation/__pycache__/operation.cpython-310.pyc
-__pycache__/maintext.cpython-310.pyc
-.idea
+main.cpython-310.pyc
+operation.cpython-310.pyc
+maintext.cpython-310.pyc
+.idea/
+main.cpython-310.pyc
+maintext.cpython-310.pyc
+play.cpython-310.pyc
+search_doc_faiss.cpython-310.pyc
+prompt.cpython-310.pyc
+operation.cpython-310.pyc
