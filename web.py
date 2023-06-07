@@ -38,7 +38,7 @@ app.add_middleware(GZipMiddleware)
 
 running = True
 
-
+output_queue = queue.Queue()
 # lock = threading.Lock()
 # 模拟加载和运行模型的函数
 def load_and_run_model(input_queue):
@@ -65,6 +65,7 @@ def load_and_run_model(input_queue):
                 torch.cuda.empty_cache()
                 opt = eval(f"operation.Operation{selected_idx}")(input_statement)
                 result = opt.fit(model, tokenizer)
+                output_queue.put(result)
                 # 处理完成后，可以将结果返回给主线程，或者进行其他操作
                 print("模型输出：", result)
             except:
@@ -86,7 +87,7 @@ model_thread.start()
 @app.post("/text")
 async def text(data: Dict):
     input_queue.put(data.get("userInput"))
-    return "1"
+    return output_queue.get()
 
 @app.post("/")
 async def start(data: Dict):
