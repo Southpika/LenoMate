@@ -39,13 +39,22 @@ app.add_middleware(GZipMiddleware)
 running = True
 
 output_queue = queue.Queue()
+
+
+# lock = threading.Lock()
+# 模拟加载和运行模型的函数
 def load_and_run_model(input_queue):
-    global mode
+    # 模型加载过程，可以根据实际情况进行编写
+    # global lock
+    # lock.acquire()
     print("模型加载中...")
+    # 模型加载完成
+
     model = AutoModel.from_pretrained("THUDM/chatglm-6b-int4", trust_remote_code=True).half().cuda()
     tokenizer = AutoTokenizer.from_pretrained("THUDM/chatglm-6b-int4", trust_remote_code=True)
     corpus = faiss_corpus()
-    print("模型加载完成...")
+
+    print("模型加载完成")
     # lock.release()
     global running
 
@@ -61,9 +70,9 @@ def load_and_run_model(input_queue):
                 opt = eval(f"operation.Operation{selected_idx}")(input_statement)
                 result = opt.fit(model, tokenizer)
                 output_queue.put(result)
+                # 处理完成后，可以将结果返回给主线程，或者进行其他操作
                 print("模型输出：", result)
-
-            except KeyboardInterrupt:
+            except:
                 running = False
                 break
         if mode:
@@ -89,6 +98,7 @@ def load_and_run_model(input_queue):
 
 # 创建一个输入队列
 input_queue = queue.Queue()
+
 # 创建一个线程，用于加载和运行模型
 model_thread = threading.Thread(target=load_and_run_model, args=(input_queue,))
 model_thread.daemon = True
@@ -102,18 +112,24 @@ async def text(data: Dict):
     return output_queue.get()
 
 
-mode = True # True为聊天模式
+mode = True
 
 
 @app.post("/text2")
 async def text(data: Dict):
     global mode
     mode = not mode
-    return '已切换成聊天模式' if mode else '已切换成功能模式'
+    res = '已切换成聊天模式' if mode else '已切换成功能模式'
+    thred = threading.Thread(target=sys_thred, args=(res,))
+    thred.start()
+    return res
 
 @app.post("/text3")
 async def text(data: Dict):
-    sys_thred(data.get("userInput"))
+    if data.get("userInput"):
+        sys_thred(data.get("userInput"))
+    if data.get("back"):
+        return recognition.main()
 
 
 @app.post("/")
