@@ -4,10 +4,11 @@ from time import sleep, ctime
 
 class MyClass(object):
 
-    def func(self,name,sec):
+    def func(self, name, sec):
         print('---开始---', name, '时间', ctime())
         sleep(sec)
         print('***结束***', name, '时间', ctime())
+
 
 def main():
     # 创建 Thread 实例
@@ -22,5 +23,6 @@ def main():
     t1.join()  # join() 等待线程终止，要不然一直挂起
     t2.join()
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     main()

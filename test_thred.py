@@ -11,21 +11,23 @@ import queue
 import time
 
 running = True
-#lock = threading.Lock()
+
+
+# lock = threading.Lock()
 # 模拟加载和运行模型的函数
 def load_and_run_model(input_queue):
     # 模型加载过程，可以根据实际情况进行编写
-    #global lock
-    #lock.acquire()
+    # global lock
+    # lock.acquire()
     print("模型加载中...")
     # 模型加载完成
 
-    model = AutoModel.from_pretrained("THUDM/chatglm-6b-int4",trust_remote_code=True).half().cuda()
+    model = AutoModel.from_pretrained("THUDM/chatglm-6b-int4", trust_remote_code=True).half().cuda()
     tokenizer = AutoTokenizer.from_pretrained("THUDM/chatglm-6b-int4", trust_remote_code=True)
     corpus = faiss_corpus()
-    
+
     print("模型加载完成")
-    #lock.release()
+    # lock.release()
     global running
     while running:
         try:
@@ -33,12 +35,12 @@ def load_and_run_model(input_queue):
             input_statement = input_queue.get()
             try:
                 input_statement = input_statement
-                selected_idx,score = corpus.search(query = input_statement,verbose=False)
+                selected_idx, score = corpus.search(query=input_statement, verbose=False)
                 torch.cuda.empty_cache()
 
                 # 将结果转换为字符串
                 opt = eval(f"operation.Operation{selected_idx}")(input_statement)
-                result = opt.fit(model,tokenizer)
+                result = opt.fit(model, tokenizer)
 
                 # 处理完成后，可以将结果返回给主线程，或者进行其他操作
                 print("模型输出：", result)
@@ -49,6 +51,7 @@ def load_and_run_model(input_queue):
             running = False
             break
     lock.release()
+
 
 # 创建一个输入队列
 input_queue = queue.Queue()

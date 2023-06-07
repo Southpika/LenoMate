@@ -28,10 +28,10 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],#允许进行跨域请求的来源列表，*作为通配符
-    allow_credentials=True,#跨域请求支持cookie，默认为否
-    allow_methods=["*"],#允许跨域请求的HTTP方法
-    allow_headers=["*"],#允许跨域请求的HTTP头列表
+    allow_origins=["*"],  # 允许进行跨域请求的来源列表，*作为通配符
+    allow_credentials=True,  # 跨域请求支持cookie，默认为否
+    allow_methods=["*"],  # 允许跨域请求的HTTP方法
+    allow_headers=["*"],  # 允许跨域请求的HTTP头列表
 )
 
 app.add_middleware(GZipMiddleware)
@@ -39,6 +39,8 @@ app.add_middleware(GZipMiddleware)
 running = True
 
 output_queue = queue.Queue()
+
+
 # lock = threading.Lock()
 # 模拟加载和运行模型的函数
 def load_and_run_model(input_queue):
@@ -84,10 +86,13 @@ model_thread = threading.Thread(target=load_and_run_model, args=(input_queue,))
 model_thread.daemon = True
 # 启动线程
 model_thread.start()
+
+
 @app.post("/text")
 async def text(data: Dict):
     input_queue.put(data.get("userInput"))
     return output_queue.get()
+
 
 @app.post("/")
 async def start(data: Dict):
@@ -95,10 +100,10 @@ async def start(data: Dict):
     synthesis.main(start)
     play.play()
 
+
 @app.post("/audio")
 async def audio(audioData: bytes = File(...)):
-
-    with open('./voice1.wav','wb') as f:
+    with open('./voice1.wav', 'wb') as f:
         f.write(audioData)
     f.close()
 
@@ -107,8 +112,8 @@ async def audio(audioData: bytes = File(...)):
     # os.system('rm ./voice.wav')
     return text
 
-if __name__ == '__main__':
 
+if __name__ == '__main__':
     uvicorn.run(app=app, host="127.0.0.1", port=8081)
     # start = "你好，我是LenoMate，请问有什么可以帮您"
     # synthesis.main(start)

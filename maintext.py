@@ -9,6 +9,7 @@ import audio.recognition as recognition, audio.synthesis as synthesis, audio.pla
 
 warnings.filterwarnings("ignore")
 
+
 ##
 def main(input_statement):
     corpus = faiss_corpus()
@@ -17,21 +18,22 @@ def main(input_statement):
 
     # input_statement = input("你想要做什么？\n")
     # input_statement = result + '\n'
-    selected_idx,score = corpus.search(query = input_statement,verbose=True)
+    selected_idx, score = corpus.search(query=input_statement, verbose=True)
 
     torch.cuda.empty_cache()
 
     # prompt = eval(f"prompt.Prompt{instruction_prompt_map[selected_idx]}")(input_statement)
     # prompt = prompt.Prompt0(input_statement)
     print('Loading...')
-    model = AutoModel.from_pretrained("THUDM/chatglm-6b-int4",trust_remote_code=True).half().cuda()
+    model = AutoModel.from_pretrained("THUDM/chatglm-6b-int4", trust_remote_code=True).half().cuda()
     tokenizer = AutoTokenizer.from_pretrained("THUDM/chatglm-6b-int4", trust_remote_code=True)
     opt = eval(f"operation.Operation{selected_idx}")(input_statement)
     # print(opt.fit(model,tokenizer))
-    result = opt.fit(model,tokenizer)
+    result = opt.fit(model, tokenizer)
     # synthesis.main(result)
     # play.play()
     return result
+
 
 if __name__ == '__main__':
     main(input("你想要做什么？\n"))
