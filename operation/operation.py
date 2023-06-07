@@ -79,7 +79,7 @@ class Operation1(Operation):
                 # stopping_criteria = StoppingCriteriaList([stop_criteria])
                 # do_sample = True
             )
-            answer = tokenizer.decode(out[0]).split('<ChatGLM-6B>:')[1].strip().strip('：')
+            answer = tokenizer.decode(out[0]).split('##回答：')[1].strip().strip('：')
             return answer
 
 default_path = os.path.join(os.path.expanduser("~"), "Desktop") ## desktop_path
