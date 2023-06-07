@@ -50,7 +50,7 @@ def main(TEXT="你好，我是联想语音助手。"):
         print('回答结果：', TEXT)
         # print("tts success")
         # 合成成功即将数据存入文件
-        with open("../data/result.wav", 'wb') as of:
+        with open("./data/result.wav", 'wb') as of:
             of.write(result_str)
 
 

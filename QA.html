@@ -152,13 +152,13 @@
     function toggleRecording() {
         if (isRecording) {
             // 停止录音
-            var botMessage = '<div class="message-container"><div class="bot-message">' + '请稍等' + '</div></div>';
+            var botMessage = '<div class="message-container"><div class="bot-message">' + '"请稍等"' + '</div></div>';
             document.getElementById('messageArea').innerHTML += botMessage;
             mediaRecorder.stop();
             isRecording = false;
         } else {
             // 开始录音
-            var botMessage = '<div class="message-container"><div class="bot-message">' + '我在听' + '</div></div>';
+            var botMessage = '<div class="message-container"><div class="bot-message">' + '"我在听"' + '</div></div>';
             document.getElementById('messageArea').innerHTML += botMessage;
             navigator.mediaDevices.getUserMedia({audio: true})
                 .then(function (stream) {

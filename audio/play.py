@@ -4,7 +4,7 @@ import pyaudio
 
 # 播放
 def play():
-    wf = wave.open(r"../data/result.wav", 'rb')
+    wf = wave.open(r"./data/result.wav", 'rb')
     p = pyaudio.PyAudio()
     stream = p.open(format=p.get_format_from_width(wf.getsampwidth()),
                     channels=wf.getnchannels(),
