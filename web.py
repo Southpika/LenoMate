@@ -93,7 +93,10 @@ async def text(data: Dict):
     input_queue.put(data.get("userInput"))
     return output_queue.get()
 
+
 mode = True
+
+
 @app.post("/text2")
 async def text(data: Dict):
     global mode
@@ -115,6 +118,11 @@ async def start(data: Dict):
     play.play()
 
 
+def sys_thred(result):
+    synthesis.main(result)
+    play.play()
+
+
 @app.post("/audio")
 async def audio(audioData: bytes = File(...)):
     with open('data/voice1.wav', 'wb') as f:
@@ -122,9 +130,12 @@ async def audio(audioData: bytes = File(...)):
     f.close()
 
     os.system('ffmpeg -y -i data/voice1.wav -ac 1 -ar 16000 data/voice.wav')
-    text = main.main()
-    # os.system('rm ./voice.wav')
-    return text
+    input_statement = recognition.main()
+    input_queue.put(input_statement)
+    result = output_queue.get()
+    thred = threading.Thread(target=sys_thred, args=(result,))
+    thred.start()
+    return result
 
 
 if __name__ == '__main__':
