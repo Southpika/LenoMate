@@ -93,6 +93,13 @@ async def text(data: Dict):
     input_queue.put(data.get("userInput"))
     return output_queue.get()
 
+mode = True
+@app.post("/text2")
+async def text(data: Dict):
+    global mode
+    mode = not mode
+    return '已切换成聊天模式' if mode else '已切换成功能模式'
+
 
 @app.post("/")
 async def start(data: Dict):
