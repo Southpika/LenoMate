@@ -1,6 +1,6 @@
-
-from transformers import StoppingCriteriaList,StoppingCriteria
+from transformers import StoppingCriteriaList, StoppingCriteria
 import torch
+
 
 class StopWordsCriteria(StoppingCriteria):
     def __init__(self, tokenizer, stop_words, stream_callback):
