@@ -48,13 +48,14 @@ def load_and_run_model(input_queue):
     print("模型加载完成...")
     # lock.release()
     global running
-    if not mode:
-        print("当前为命令模式...")
-        
-        while running:
-            try:
 
-                input_statement = input_queue.get()
+        
+    while running:
+        input_statement = input_queue.get()
+        if not mode:
+
+            print("当前为命令模式...")
+            try:
                 selected_idx, score = corpus.search(query=input_statement, verbose=False)
                 torch.cuda.empty_cache()
                 opt = eval(f"operation.Operation{selected_idx}")(input_statement)
@@ -65,10 +66,10 @@ def load_and_run_model(input_queue):
             except KeyboardInterrupt:
                 running = False
                 break
-    if mode:
-        print("当前为聊天模式...")
-        while running:
-            input_statement = input_queue.get()
+        if mode:
+
+            print("当前为聊天模式...")
+
             prompt_chat = f"""用户：{input_statement}
             ChatGLM-6B：
             """
@@ -108,7 +109,7 @@ mode = True # True为聊天模式
 async def text(data: Dict):
     global mode
     mode = not mode
-    return '已切换成功能模式' if mode else '已切换成聊天模式'
+    return '已切换成聊天模式' if mode else '已切换成功能模式'
 
 @app.post("/text3")
 async def text(data: Dict):

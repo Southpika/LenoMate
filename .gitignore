@@ -11,3 +11,6 @@ play.cpython-310.pyc
 search_doc_faiss.cpython-310.pyc
 prompt.cpython-310.pyc
 operation.cpython-310.pyc
+operation/__pycache__/
+audio/__pycache__/
+
