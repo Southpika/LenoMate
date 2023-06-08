@@ -90,7 +90,10 @@ model_thread.start()
 @app.post("/text")
 async def text(data: Dict):
     input_queue.put(data.get("userInput"))
-    return output_queue.get()
+    result = output_queue.get()
+    thred = threading.Thread(target=sys_thred, args=(result,))
+    thred.start()
+    return result
 
 
 @app.post("/text2") #切换按钮
@@ -102,7 +105,7 @@ async def text(data: Dict):
     thred.start()
     return res
 
-@app.post("/text3")
+@app.post("/text3") #识别和合成
 async def text(data: Dict):
     if data.get("userInput"):
         sys_thred(data.get("userInput"))
@@ -134,14 +137,13 @@ async def audio(audioData: bytes = File(...)):
     with open('data/voice1.wav', 'wb') as f:
         f.write(audioData)
     f.close()
-
     os.system('ffmpeg -y -i data/voice1.wav -ac 1 -ar 16000 data/voice.wav')
     input_statement = recognition.main()
     input_queue.put(input_statement)
     result = output_queue.get()
     thred = threading.Thread(target=sys_thred, args=(result,))
     thred.start()
-    return json.dumps({"input_statement": input_statement, "result": result})
+    return result
 
 
 if __name__ == '__main__':

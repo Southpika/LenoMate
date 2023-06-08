@@ -14,3 +14,5 @@ operation.cpython-310.pyc
 operation/__pycache__/
 audio/__pycache__/
 
+data/voice.wav
+data/voice1.wav

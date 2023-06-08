@@ -82,7 +82,7 @@
 
 <div class="container">
     <div class="message-container">
-        <div class="bot-message">LenoMate: "你好，我是LenoMate，请问有什么可以帮您?"</div>
+        <div class="bot-message">当前为聊天模式</div>
     </div>
     <div id="messageArea"></div>
     <div class="input-container">
@@ -138,10 +138,7 @@
         xhr.onreadystatechange = function () {
             if (xhr.readyState === XMLHttpRequest.DONE) {
                 if (xhr.status === 200) {
-                    var json_object = JSON.parse(xhr.responseText)
-                    var userMessage = '<div class="message-container"><div class="user-message">' + json_object.result + '</div></div>';
-                    document.getElementById('messageArea').innerHTML += userMessage;
-                    var botMessage = '<div class="message-container"><div class="bot-message">' + json_object.result + '</div></div>';
+                    var botMessage = '<div class="message-container"><div class="bot-message">' + xhr.responseText + '</div></div>';
                     document.getElementById('messageArea').innerHTML += botMessage;
                 } else {
                     console.error('请求失败: ' + xhr.status);
@@ -151,11 +148,7 @@
         xhr.send(JSON.stringify({userInput: userInput}));
     }
 
-    function sendMessage3(userInput='', display=false, back = false) {
-        if (display) {
-            var botMessage = '<div class="message-container"><div class="bot-message">' + userInput + '</div></div>';
-            document.getElementById('messageArea').innerHTML += botMessage;
-        }
+    function sendMessage3(userInput='', back=false) {
         var xhr = new XMLHttpRequest();
         xhr.open('POST', 'http://localhost:8081/text3', true);
         xhr.setRequestHeader('Content-Type', 'application/json');
@@ -163,8 +156,8 @@
             if (xhr.readyState === XMLHttpRequest.DONE) {
                 if (xhr.status === 200) {
                     if (back) {
-                        botMessage = '<div class="message-container"><div class="user-message">' + xhr.responseText + '</div></div>';
-                        document.getElementById('messageArea').innerHTML += botMessage;
+                        userMessage = '<div class="message-container"><div class="user-message">' + xhr.responseText + '</div></div>';
+                        document.getElementById('messageArea').innerHTML += userMessage;
                     }
                 } else {
                     console.error('请求失败: ' + xhr.status);
@@ -179,6 +172,7 @@
             // 停止录音;
             mediaRecorder.stop();
             isRecording = false;
+            sendMessage3(userInput='', back=true)
         } else {
             // 开始录音
             sendMessage3('"我在听"');
@@ -202,6 +196,7 @@
 
                         var xhr = new XMLHttpRequest();
                         xhr.open('POST', 'http://localhost:8081/audio', true);
+                        xhr.send(formData);
                         xhr.onreadystatechange = function () {
                             if (xhr.readyState === XMLHttpRequest.DONE) {
                                 if (xhr.status === 200) {
@@ -212,7 +207,6 @@
                                 }
                             }
                         };
-                        xhr.send(formData);
                     });
                 })
                 .catch(function (error) {
