@@ -20,6 +20,7 @@ import audio.recognition as recognition, audio.synthesis as synthesis, audio.pla
 import threading
 import queue
 import time
+import json
 
 app = FastAPI()
 
@@ -140,7 +141,7 @@ async def audio(audioData: bytes = File(...)):
     result = output_queue.get()
     thred = threading.Thread(target=sys_thred, args=(result,))
     thred.start()
-    return result
+    return json.dumps({"input_statement": input_statement, "result": result})
 
 
 if __name__ == '__main__':
