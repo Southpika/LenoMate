@@ -3,13 +3,10 @@
 from typing import Dict
 from fastapi import FastAPI, File, UploadFile, Form
 import uvicorn
-import main
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 import os
-import main
-import maintext
 import audio.play as play
 import audio.synthesis as synthesis
 import operation.prompt as prompt
@@ -37,32 +34,19 @@ app.add_middleware(
 app.add_middleware(GZipMiddleware)
 
 running = True
+mode = True #聊天为True
 
-output_queue = queue.Queue()
-
-
-# lock = threading.Lock()
-# 模拟加载和运行模型的函数
 def load_and_run_model(input_queue):
-    # 模型加载过程，可以根据实际情况进行编写
-    # global lock
-    # lock.acquire()
     print("模型加载中...")
-    # 模型加载完成
-
     model = AutoModel.from_pretrained("THUDM/chatglm-6b-int4", trust_remote_code=True).half().cuda()
     tokenizer = AutoTokenizer.from_pretrained("THUDM/chatglm-6b-int4", trust_remote_code=True)
     corpus = faiss_corpus()
-
     print("模型加载完成")
-    # lock.release()
-    global running
 
-        
+    global running
     while running:
         input_statement = input_queue.get()
         if not mode:
-
             print("当前为命令模式...")
             try:
                 selected_idx, score = corpus.search(query=input_statement, verbose=False)
@@ -70,15 +54,12 @@ def load_and_run_model(input_queue):
                 opt = eval(f"operation.Operation{selected_idx}")(input_statement)
                 result = opt.fit(model, tokenizer)
                 output_queue.put(result)
-                # 处理完成后，可以将结果返回给主线程，或者进行其他操作
                 print("模型输出：", result)
             except:
                 running = False
                 break
         if mode:
-
             print("当前为聊天模式...")
-
             prompt_chat = f"""用户：{input_statement}
             ChatGLM-6B：
             """
@@ -95,10 +76,9 @@ def load_and_run_model(input_queue):
             output_queue.put(answer)
         
 
-
 # 创建一个输入队列
 input_queue = queue.Queue()
-
+output_queue = queue.Queue()
 # 创建一个线程，用于加载和运行模型
 model_thread = threading.Thread(target=load_and_run_model, args=(input_queue,))
 model_thread.daemon = True
@@ -112,10 +92,7 @@ async def text(data: Dict):
     return output_queue.get()
 
 
-mode = True
-
-
-@app.post("/text2")
+@app.post("/text2") #切换按钮
 async def text(data: Dict):
     global mode
     mode = not mode
