@@ -106,13 +106,17 @@
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.send(JSON.stringify({userInput: userInput}));
 
-    function sendMessage() {
-        var userInput = document.getElementById('userInput').value;
+    function sendMessage(content='', exist=false) {
+        if (!exist) {
+            var userInput = document.getElementById('userInput').value;
+        } else {
+            userInput = content
+        }
+
         if (userInput.trim() !== '') {
             var userMessage = '<div class="message-container"><div class="user-message">' + userInput + '</div></div>';
             document.getElementById('userInput').value = '';
             document.getElementById('messageArea').innerHTML += userMessage;
-
             var xhr = new XMLHttpRequest();
             xhr.open('POST', 'http://localhost:8081/text', true);
             xhr.setRequestHeader('Content-Type', 'application/json');
@@ -131,7 +135,6 @@
     }
 
     function sendMessage2() {
-        var userInput = document.getElementById('userInput').value;
         var xhr = new XMLHttpRequest();
         xhr.open('POST', 'http://localhost:8081/text2', true);
         xhr.setRequestHeader('Content-Type', 'application/json');
@@ -156,8 +159,8 @@
             if (xhr.readyState === XMLHttpRequest.DONE) {
                 if (xhr.status === 200) {
                     if (back) {
-                        userMessage = '<div class="message-container"><div class="user-message">' + xhr.responseText + '</div></div>';
-                        document.getElementById('messageArea').innerHTML += userMessage;
+                        botMessage = '<div class="message-container"><div class="bot-message">' + xhr.responseText + '</div></div>';
+                        document.getElementById('messageArea').innerHTML += botMessage;
                     }
                 } else {
                     console.error('请求失败: ' + xhr.status);
@@ -172,7 +175,6 @@
             // 停止录音;
             mediaRecorder.stop();
             isRecording = false;
-            sendMessage3(userInput='', back=true)
         } else {
             // 开始录音
             sendMessage3('"我在听"');
@@ -181,9 +183,7 @@
                     mediaRecorder = new MediaRecorder(stream);
                     mediaRecorder.start();
                     isRecording = true;
-
                     recordedChunks = [];
-
                     mediaRecorder.addEventListener('dataavailable', function (event) {
                         recordedChunks.push(event.data);
                     });
@@ -197,11 +197,11 @@
                         var xhr = new XMLHttpRequest();
                         xhr.open('POST', 'http://localhost:8081/audio', true);
                         xhr.send(formData);
+
                         xhr.onreadystatechange = function () {
                             if (xhr.readyState === XMLHttpRequest.DONE) {
                                 if (xhr.status === 200) {
-                                    var botMessage = '<div class="message-container"><div class="bot-message">' + xhr.responseText + '</div></div>';
-                                    document.getElementById('messageArea').innerHTML += botMessage;
+                                    sendMessage(xhr.responseText, true)
                                 } else {
                                     console.error('请求失败: ' + xhr.status);
                                 }

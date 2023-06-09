@@ -35,7 +35,8 @@ app.add_middleware(
 app.add_middleware(GZipMiddleware)
 
 running = True
-mode = True #聊天为True
+mode = True  # 聊天为True
+
 
 def load_and_run_model(input_queue):
     print("模型加载中...")
@@ -71,11 +72,11 @@ def load_and_run_model(input_queue):
                     input_ids=input_ids,
                     max_length=200,
                     temperature=0.3,
-                    top_p = 0.95,
+                    top_p=0.95,
                 )
             answer = tokenizer.decode(out[0]).split('ChatGLM-6B:')[1].strip('\n').strip()
             output_queue.put(answer)
-        
+
 
 # 创建一个输入队列
 input_queue = queue.Queue()
@@ -96,7 +97,7 @@ async def text(data: Dict):
     return result
 
 
-@app.post("/text2") #切换按钮
+@app.post("/text2")  # 切换按钮
 async def text(data: Dict):
     global mode
     mode = not mode
@@ -105,12 +106,13 @@ async def text(data: Dict):
     thred.start()
     return res
 
-@app.post("/text3") #识别和合成
+
+@app.post("/text3")  # 识别和合成
 async def text(data: Dict):
-    if data.get("userInput"):
-        sys_thred(data.get("userInput"))
-    if data.get("back"):
-        return recognition.main()
+    res = data.get("userInput")
+    thred = threading.Thread(target=sys_thred, args=(res,))
+    thred.start()
+    return res
 
 
 @app.post("/")
@@ -139,11 +141,7 @@ async def audio(audioData: bytes = File(...)):
     f.close()
     os.system('ffmpeg -y -i data/voice1.wav -ac 1 -ar 16000 data/voice.wav')
     input_statement = recognition.main()
-    input_queue.put(input_statement)
-    result = output_queue.get()
-    thred = threading.Thread(target=sys_thred, args=(result,))
-    thred.start()
-    return result
+    return input_statement
 
 
 if __name__ == '__main__':
