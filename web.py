@@ -62,19 +62,18 @@ def load_and_run_model(input_queue):
                 break
         if mode:
             print("当前为聊天模式...")
-            prompt_chat = f"""用户：{input_statement}
-            ChatGLM-6B：
-            """
+            prompt_chat = f"""<用户>：{input_statement}
+            <ChatGLM-6B>："""
             model.eval()
             with torch.no_grad():
                 input_ids = tokenizer.encode(prompt_chat, return_tensors='pt').to('cuda')
                 out = model.generate(
                     input_ids=input_ids,
                     max_length=200,
-                    temperature=0.3,
+                    temperature=0.9,
                     top_p=0.95,
                 )
-            answer = tokenizer.decode(out[0]).split('ChatGLM-6B:')[1].strip('\n').strip()
+            answer = tokenizer.decode(out[0]).split('<ChatGLM-6B>:')[1].strip('\n').strip()
             output_queue.put(answer)
 
 
