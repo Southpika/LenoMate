@@ -36,4 +36,4 @@ def main(input_statement):
 
 
 if __name__ == '__main__':
-    main(input("你想要做什么？\n"))
+    print(main(input("你想要做什么？\n")))

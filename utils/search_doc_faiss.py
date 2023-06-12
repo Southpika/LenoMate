@@ -93,7 +93,7 @@ class faiss_corpus:
             #     idx = name_exe_map[idx]
             # print(idx,score)
         if verbose:
-            print(self.corpus[idx], "(Score: {:.4f})".format(score))
+            print(idx,self.corpus[idx], "(Score: {:.4f})".format(score))
         return  idx,score
 
 if __name__ == '__main__':

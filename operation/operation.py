@@ -85,6 +85,7 @@ class Operation1(Operation):
 default_path = os.path.join(os.path.expanduser("~"), "Desktop") ## desktop_path
 def time_suffix():
     return time.strftime("%Y%m%d%H%M%S", time.localtime(time.time()))
+
 class Operation2(Operation):
     def __init__(self,inputs,path=default_path,summary='notebook'):
         self.path = path
@@ -92,7 +93,6 @@ class Operation2(Operation):
         self.summary = summary
         
     def fit(self,model,tokenizer):
-
         self.prompt = prompt.Prompt2(self.inputs).prompt
         model.eval()
         with torch.no_grad():
@@ -117,6 +117,7 @@ class Operation2(Operation):
             f.write(self.inputs)
         f.close()
         return f'已完成记录，保存在桌面，文件名称为{file_name}'
+    
 def get_parser():
     parser = argparse.ArgumentParser('Opening APP')
     
@@ -131,7 +132,8 @@ def get_parser():
     parser.add_argument('--search', default=2)
     args = parser.parse_args()      
     return args
-args_app = get_parser()    
+args_app = get_parser()  
+
 class Operation3(Operation):
     def __init__(self,inputs):
         self.tool = search_tool()
@@ -146,7 +148,33 @@ class Operation3(Operation):
         app_name = corpus.corpus[selected_idx]
         print(f'find app {app_name}')
         return self.tool.open_app(b = name_exe_map[app_name])
-        
+class Operation4(Operation):
+    def __init__(self,inputs): 
+        from operation.get_cominfo import computer_info
+        import pythoncom
+        computer = computer_info()
+        pythoncom.CoInitialize()
+        self.context = computer.fit()
+        self.inputs = inputs
+
+    def fit(self,model,tokenizer):
+        self.prompt = prompt.Prompt1(self.inputs,self.context).prompt
+        model.eval()
+        with torch.no_grad():
+            input_ids = tokenizer.encode(self.prompt, return_tensors='pt').to('cuda')
+            out = model.generate(
+                input_ids=input_ids,
+                max_length=300,
+                temperature=0.3,
+                top_p = 0.95,
+                # repetition_penalty = 1.15,
+                # stopping_criteria = StoppingCriteriaList([stop_criteria])
+                # do_sample = True
+            )
+            answer = tokenizer.decode(out[0]).split('##回答')[1].strip(':').strip()
+
+            return answer
+
 
 
 if __name__=='__main__':

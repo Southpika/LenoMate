@@ -51,13 +51,15 @@ def load_and_run_model(input_queue):
         if not mode:
             print("当前为命令模式...")
             try:
-                selected_idx, score = corpus.search(query=input_statement, verbose=False)
+                selected_idx, score = corpus.search(query=input_statement, verbose=True)
                 torch.cuda.empty_cache()
                 opt = eval(f"operation.Operation{selected_idx}")(input_statement)
                 result = opt.fit(model, tokenizer)
                 output_queue.put(result)
                 print("模型输出：", result)
-            except:
+            except Exception as e:
+                print('#'*50)
+                print('error info',e)
                 running = False
                 break
         if mode:

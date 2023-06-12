@@ -26,3 +26,5 @@ with open(args_app.document_corpus,'r',encoding='utf-8') as f:
         corpus.append(line.strip('\n'))
 corpus = faiss_corpus(args = args_app)
 corpus.fit()
+
+#如果需要更新app匹配 把index_location改成app_map.index document-corpus改成app.text
