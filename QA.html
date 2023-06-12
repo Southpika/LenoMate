@@ -171,7 +171,7 @@
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === XMLHttpRequest.DONE) {
                     if (xhr.status === 200) {
-                        var botMessage = '<div class="message-container"><div class="bot-message">' + xhr.responseText + '</div></div>';
+                        var botMessage = '<div class="message-container"><div class="bot-message">' + xhr.responseText.replace(/"/g, '').replace(/\\n/g, '<br>') + '</div></div>';
                         document.getElementById('messageArea').innerHTML += botMessage;
                     } else {
                         console.error('请求失败: ' + xhr.status);
@@ -189,7 +189,7 @@
         xhr.onreadystatechange = function () {
             if (xhr.readyState === XMLHttpRequest.DONE) {
                 if (xhr.status === 200) {
-                    var botMessage = '<div class="message-container"><div class="tishi-message">' + xhr.responseText + '</div></div>';
+                    var botMessage = '<div class="message-container"><div class="tishi-message">' + xhr.responseText.replace(/"/g, '').replace(/\\n/g, '<br>') + '</div></div>';
                     // document.getElementById('messageArea').innerHTML += botMessage;
                     document.getElementById("tishi").innerHTML = botMessage;
                 } else {
@@ -208,7 +208,7 @@
             if (xhr.readyState === XMLHttpRequest.DONE) {
                 if (xhr.status === 200) {
                     if (back) {
-                        botMessage = '<div class="message-container"><div class="bot-message">' + xhr.responseText + '</div></div>';
+                        botMessage = '<div class="message-container"><div class="bot-message">' + xhr.responseText.replace(/"/g, '') + '</div></div>';
                         document.getElementById('messageArea').innerHTML += botMessage;
                     }
                 } else {
