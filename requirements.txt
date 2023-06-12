@@ -13,3 +13,4 @@ uvicorn
 python-multipart
 pyaudio
 chardet
+uuid
