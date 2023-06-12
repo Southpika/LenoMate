@@ -102,7 +102,7 @@ async def text(data: Dict):
 async def text(data: Dict):
     global mode
     mode = not mode
-    res = '已切换成聊天模式' if mode else '已切换成功能模式'
+    res = '当前为聊天模式' if mode else '当前为功能模式'
     thred = threading.Thread(target=sys_thred, args=(res,))
     thred.start()
     return res

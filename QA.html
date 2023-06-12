@@ -85,6 +85,12 @@
             align-self: flex-start;
         }
 
+        .tishi-message {
+            background-color: #ffffff00;
+            
+            align-self: center;
+        }
+
 
         .input-container {
             display: flex;
@@ -111,7 +117,7 @@
         .input-container button {
             padding: 10px 20px;
             margin-left: 10px;
-            background-color: #4CAF50;
+            background-color: #2196f3b5;
             color: #fff;
             border: none;
             border-radius: 5px;
@@ -124,7 +130,7 @@
 
 <div class="container">
     <div class="message-container">
-        <div class="bot-message">当前为聊天模式</div>
+        <div class="tishi-message">当前为聊天模式</div>
     </div>
     <div id="messageArea"></div>
     <div class="input-container">
@@ -135,7 +141,7 @@
 </div>
 
 <div class="input-container">
-    <input type="submit" value="模式切换" onclick="sendMessage2()">
+    <input type="submit" style="background-color: #009d06; border-radius: 15px" value="模式切换" onclick="sendMessage2()">
 </div>
 
 <script>
@@ -183,7 +189,7 @@
         xhr.onreadystatechange = function () {
             if (xhr.readyState === XMLHttpRequest.DONE) {
                 if (xhr.status === 200) {
-                    var botMessage = '<div class="message-container"><div class="bot-message">' + xhr.responseText + '</div></div>';
+                    var botMessage = '<div class="message-container"><div class="tishi-message">' + xhr.responseText + '</div></div>';
                     document.getElementById('messageArea').innerHTML += botMessage;
                 } else {
                     console.error('请求失败: ' + xhr.status);

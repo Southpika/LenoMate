@@ -21,3 +21,4 @@ audio/__pycache__/recognition.cpython-310.pyc
 audio/__pycache__/record.cpython-310.pyc
 audio/__pycache__/synthesis.cpython-310.pyc
 
+utils/__pycache__/
