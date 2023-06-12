@@ -6,9 +6,13 @@
     <style>
         body {
             background-image: linear-gradient(
-                    0deg,
-                    rgba(247, 247, 247, 1) 23.8%,
-                    rgba(252, 221, 221, 1) 92%
+                    20deg,
+                    rgba(255,247,214, 1) 40%,
+                    rgba(126,194,255, 1) 85%
+
+
+                    /* rgba(247, 247, 247, 1) 23.8%, */
+                    /* rgba(252, 221, 221, 1) 92% */
             );
             height: 100vh;
             display: flex;
@@ -28,7 +32,10 @@
         }
 
         .message-container {
-            width: 600px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            width: 800px;
             margin-bottom: 10px;
         }
 
@@ -36,12 +43,14 @@
             background-color: #f1f1f1;
             padding: 10px;
             border-radius: 5px;
+            align-self: flex-end;
         }
 
         .bot-message {
             background-color: #e0eaf6;
             padding: 10px;
             border-radius: 5px;
+            align-self: flex-start;
         }
 
         .input-container {
