@@ -2,5 +2,9 @@
     "Taskmgr.exe": "C:/Windows\\System32",
     "msedge.exe": "C:/Program Files (x86)\\Microsoft\\Edge\\Application",
     "iexplore.exe": "C:/Program Files\\Internet Explorer",
-    "QQMusic.exe": "C:/Program Files (x86)\\Tencent\\QQMusic"
+    "QQMusic.exe": "C:/Program Files (x86)\\Tencent\\QQMusic",
+    "calc.exe": "C:/Windows\\System32",
+    "wmplayer.exe": "C:/Program Files\\Windows Media Player",
+    "mstsc.exe": "C:/Windows\\System32",
+    "notepad.exe": "C:/Users\\89721\\AppData\\Local\\Microsoft\\WindowsApps"
 }

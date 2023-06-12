@@ -87,7 +87,7 @@
 
         .tishi-message {
             background-color: #ffffff00;
-            
+            font-weight:bold;
             align-self: center;
         }
 
@@ -130,7 +130,7 @@
 
 <div class="container">
     <div class="message-container">
-        <div class="tishi-message">当前为聊天模式</div>
+        <div class="tishi-message" id="tishi" >当前为聊天模式</div>
     </div>
     <div id="messageArea"></div>
     <div class="input-container">
@@ -190,7 +190,8 @@
             if (xhr.readyState === XMLHttpRequest.DONE) {
                 if (xhr.status === 200) {
                     var botMessage = '<div class="message-container"><div class="tishi-message">' + xhr.responseText + '</div></div>';
-                    document.getElementById('messageArea').innerHTML += botMessage;
+                    // document.getElementById('messageArea').innerHTML += botMessage;
+                    document.getElementById("tishi").innerHTML = botMessage;
                 } else {
                     console.error('请求失败: ' + xhr.status);
                 }

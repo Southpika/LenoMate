@@ -53,7 +53,7 @@ class Operation0(Operation):
         try:
             self.num = int(re.findall(r"\d+\.?\d*",answer.split('数字:')[1])[0])
         except:
-            self.num = answer.split('数字:')[1]
+            self.num = answer.split('数字:')[1] #TODO：需添加正则表达式匹配 数字（）
 
 class Operation1(Operation):
     def __init__(self,input_statement) -> None:
