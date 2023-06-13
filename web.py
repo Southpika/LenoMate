@@ -71,7 +71,7 @@ def load_and_run_model(input_queue):
                 input_ids = tokenizer.encode(prompt_chat, return_tensors='pt').to('cuda')
                 out = model.generate(
                     input_ids=input_ids,
-                    max_length=200,
+                    max_length=300,
                     temperature=0.9,
                     top_p=0.95,
                 )

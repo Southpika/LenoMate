@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>问答界面</title>
+    <title>LenoMate</title>
     <style>
         body {
             background-image: linear-gradient(
@@ -21,6 +21,7 @@
             justify-content: center;
             font-family: 'Lato', sans-serif;
             margin: 0;
+            /* overflow: auto; */
         }
 
         .container {
@@ -29,12 +30,33 @@
             padding: 20px;
             border: 1px solid #ccc;
             border-radius: 5px;
+            overflow-y: auto;  /* 加入滚动条，内容自动延伸 */
+            background-attachment: fixed;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
 
+        /* 调整滚动条 */
+        .container::-webkit-scrollbar {
+        width: 5px;
+        height: 0px;
+        }
+
+        .container::-webkit-scrollbar-track {
+        background-color: transparent;
+        }
+
+        .container::-webkit-scrollbar-thumb {
+        background-color: #888;
+        border-radius: 10px;
+        }
+
+        .container::-webkit-scrollbar-thumb:hover {
+        background-color: #555;
+        }
         .message-container {
             display: flex;
             flex-direction: column;
-            align-items: flex-start;
+            align-items: flex-start; /* 给里面的元素加入动态左右置顶，并且框随着内容变化 */
             width: 800px;
             margin-bottom: 10px;
         }
@@ -63,6 +85,7 @@
         border-top: 10px solid transparent;
         border-left: 10px solid #fff7d6;
         transform: translateY(-50%);
+ 
         }
 
         .bot-message::before {
@@ -73,16 +96,19 @@
         border-top: 10px solid transparent;
         border-right: 10px solid #8acafd96;
         transform: translateY(-50%);
+
         }
 
         .user-message {
             background-color: #fff7d6;
-            align-self: flex-end;
+            align-self: flex-end; /* 左右侧 */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* 阴影立体效果 */
         }
 
         .bot-message {
             background-color: #8acafd96;
             align-self: flex-start;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); 
         }
 
         .tishi-message {

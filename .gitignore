@@ -22,3 +22,5 @@ audio/__pycache__/record.cpython-310.pyc
 audio/__pycache__/synthesis.cpython-310.pyc
 
 utils/__pycache__/
+data/voice.wav
+data/voice1.wav
