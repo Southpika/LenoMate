@@ -160,7 +160,7 @@
     </div>
     <div id="messageArea"></div>
     <div class="input-container">
-        <input type="text" id="userInput" placeholder="请输入问题">
+        <input type="text" id="userInput" placeholder="请输入问题" onkeydown="handleKeyPress(event)">
         <input type="submit" value="发送" onclick="sendMessage()">
         <button id="recordButton" onclick="toggleRecording()">录音</button>
     </div>
@@ -179,7 +179,13 @@
     xhr.open('POST', 'http://localhost:8081/', true);
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.send(JSON.stringify({userInput: userInput}));
-
+    
+    function handleKeyPress(event) {
+        if (event.keyCode === 13) { // 按下回车键的键码是13
+            event.preventDefault(); // 阻止默认的回车键行为（如换行）
+            sendMessage(); 
+        }
+    }
     function sendMessage(content='', exist=false) {
         if (!exist) {
             var userInput = document.getElementById('userInput').value;
