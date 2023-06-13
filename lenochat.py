@@ -1,5 +1,8 @@
 import os
-
+import time
 os.system(
-    "START chrome.exe http://localhost:63342/LenoMate/QA.html?_ijt=u33qel2voi8dieldu0condpiaf&_ij_reload=RELOAD_ON_SAVE")
+    "START chrome.exe http://localhost:8081/")
 os.system("cd D:\\LenoMate && D: && activate QA && python web.py")
+
+
+

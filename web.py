@@ -92,13 +92,15 @@ model_thread.start()
 
 @app.get("/")
 def read_root():
-    with open("QA.html") as file:
+    with open("QA.html", encoding="utf-8") as file:
         html_content = file.read()
     return HTMLResponse(content=html_content, status_code=200)
 
 
 @app.post("/text")
 async def text(data: Dict):
+    thred = threading.Thread(target=sys_thred, args=("请稍等",))
+    thred.start()
     input_queue.put(data.get("userInput"))
     result = output_queue.get()
     thred = threading.Thread(target=sys_thred, args=(result,))
