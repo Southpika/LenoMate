@@ -277,7 +277,7 @@
                             if (xhr.readyState === XMLHttpRequest.DONE) {
                                 if (xhr.status === 200) {
                                     sendMessage3('"请稍等"')
-                                    sendMessage(xhr.responseText, true)
+                                    sendMessage(xhr.responseText.replace(/"/g, ''), true)
                                 } else {
                                     console.error('请求失败: ' + xhr.status);
                                 }

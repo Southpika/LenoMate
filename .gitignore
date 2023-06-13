@@ -1,16 +1,7 @@
 build/
+data/
 result.wav
 exe_location.json
-main.cpython-310.pyc
-operation.cpython-310.pyc
-maintext.cpython-310.pyc
-.idea/
-main.cpython-310.pyc
-maintext.cpython-310.pyc
-play.cpython-310.pyc
-search_doc_faiss.cpython-310.pyc
-prompt.cpython-310.pyc
-operation.cpython-310.pyc
 operation/__pycache__/
 audio/__pycache__/
 
@@ -24,3 +15,5 @@ audio/__pycache__/synthesis.cpython-310.pyc
 utils/__pycache__/
 data/voice.wav
 data/voice1.wav
+.idea/misc.xml
+.idea/tzh_workspace_v2.iml
