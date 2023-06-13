@@ -108,7 +108,7 @@ async def text(data: Dict):
     return res
 
 
-@app.post("/text3")  # 识别和合成
+@app.post("/text3")  # 合成
 async def text(data: Dict):
     res = data.get("userInput")
     thred = threading.Thread(target=sys_thred, args=(res,))
