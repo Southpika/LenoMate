@@ -6,6 +6,7 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
+from fastapi.responses import HTMLResponse
 import os
 import audio.play as play
 import audio.synthesis as synthesis
@@ -58,8 +59,8 @@ def load_and_run_model(input_queue):
                 output_queue.put(result)
                 print("模型输出：", result)
             except Exception as e:
-                print('#'*50)
-                print('error info',e)
+                print('#' * 50)
+                print('error info', e)
                 running = False
                 break
         if mode:
@@ -87,6 +88,13 @@ model_thread = threading.Thread(target=load_and_run_model, args=(input_queue,))
 model_thread.daemon = True
 # 启动线程
 model_thread.start()
+
+
+@app.get("/")
+def read_root():
+    with open("QA.html") as file:
+        html_content = file.read()
+    return HTMLResponse(content=html_content, status_code=200)
 
 
 @app.post("/text")
