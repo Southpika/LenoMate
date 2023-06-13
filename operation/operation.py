@@ -49,11 +49,12 @@ class Operation0(Operation):
             answer = tokenizer.decode(out[0]).split('##output:')[1]
             print(answer)
 
-        self.task = answer.split('任务:')[0]
+        pattern =  "数字(?:\(.+?\))?:\s*"
+        answer = re.split(pattern,answer)[1]
         try:
-            self.num = int(re.findall(r"\d+\.?\d*",answer.split('数字:')[1])[0])
+            self.num = int(re.findall(r"\d+\.?\d*",answer)[0])
         except:
-            self.num = answer.split('数字:')[1] #TODO：需添加正则表达式匹配 数字（）
+            self.num = answer
 
 class Operation1(Operation):
     def __init__(self,input_statement) -> None:
