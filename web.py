@@ -37,7 +37,7 @@ app.add_middleware(GZipMiddleware)
 mode = True  # 聊天为True
 
 
-def load_and_run_model():
+def load_and_run_model(input_queue):
     print("模型加载中...")
     model = AutoModel.from_pretrained("THUDM/chatglm-6b-int4", trust_remote_code=True).half().cuda()
     tokenizer = AutoTokenizer.from_pretrained("THUDM/chatglm-6b-int4", trust_remote_code=True)
@@ -84,7 +84,7 @@ def load_and_run_audio():
             # 使用麦克风录制音频
             with sr.Microphone(sample_rate=8000) as source:
                 r = sr.Recognizer()
-                audio_frame = r.listen(source)
+                audio_frame = r.listen(source, 2)
 
             # 使用语音识别器解析音频
             # result = r.recognize_google(audio, language="zh-CN")
@@ -147,6 +147,8 @@ model_thread2.start()
 def start():
     with open("QA.html", encoding="utf-8") as file:
         html_content = file.read()
+    thred = threading.Thread(target=sys, args=("你好，我是LenoMate，可以叫我小诺，请问有什么可以帮您？",))
+    thred.start()
     return HTMLResponse(content=html_content, status_code=200)
 
 

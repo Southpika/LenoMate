@@ -14,3 +14,4 @@ python-multipart
 pyaudio
 chardet
 uuid
+SpeechRecognition
