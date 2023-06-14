@@ -1,5 +1,4 @@
 # -*- coding: UTF-8 -*-
-
 from typing import Dict
 from fastapi import FastAPI, File, UploadFile, Form
 import uvicorn
@@ -10,6 +9,7 @@ from fastapi.responses import HTMLResponse
 import os
 import audio.play as play
 import audio.synthesis as synthesis
+import audio.recognition as recognition
 import operation.prompt as prompt
 import operation.operation as operation
 import torch
@@ -17,14 +17,14 @@ from transformers import AutoTokenizer, AutoModel
 import warnings
 from utils.search_doc_faiss import faiss_corpus
 from data.map import instruction_prompt_map
-import audio.recognition as recognition, audio.synthesis as synthesis, audio.play as play, audio.record as record
 import threading
 import queue
 import time
+import speech_recognition as sr
 import json
+from urllib import request, parse, error
 
 app = FastAPI()
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # 允许进行跨域请求的来源列表，*作为通配符
@@ -32,22 +32,19 @@ app.add_middleware(
     allow_methods=["*"],  # 允许跨域请求的HTTP方法
     allow_headers=["*"],  # 允许跨域请求的HTTP头列表
 )
-
 app.add_middleware(GZipMiddleware)
 
-running = True
 mode = True  # 聊天为True
 
 
-def load_and_run_model(input_queue):
+def load_and_run_model():
     print("模型加载中...")
     model = AutoModel.from_pretrained("THUDM/chatglm-6b-int4", trust_remote_code=True).half().cuda()
     tokenizer = AutoTokenizer.from_pretrained("THUDM/chatglm-6b-int4", trust_remote_code=True)
     corpus = faiss_corpus()
     print("模型加载完成")
 
-    global running
-    while running:
+    while True:
         input_statement = input_queue.get()
         if not mode:
             print("当前为命令模式...")
@@ -80,18 +77,74 @@ def load_and_run_model(input_queue):
             output_queue.put(answer)
 
 
+def load_and_run_audio():
+    while True:
+        print("处于待唤醒状态")
+        try:
+            # 使用麦克风录制音频
+            with sr.Microphone(sample_rate=8000) as source:
+                r = sr.Recognizer()
+                audio_frame = r.listen(source)
+
+            # 使用语音识别器解析音频
+            # result = r.recognize_google(audio, language="zh-CN")
+            result = recognition.main2(audio_frame.frame_data)
+            print("识别结果：", result)
+
+            # 根据指令执行相应的操作
+            if "小诺" in result:
+                # 执行您的程序代码
+                sys("我在听")
+                output_queue.put("我在听")
+
+                while True:
+                    print("处于已唤醒状态")
+                    try:
+                        # 使用麦克风录制音频
+                        with sr.Microphone(sample_rate=8000) as source:
+                            r = sr.Recognizer()
+                            audio_frame = r.listen(source, 2)
+
+                        # 使用语音识别器解析音频
+                        # result = r.recognize_google(audio, language="zh-CN")
+                        result = recognition.main2(audio_frame.frame_data)
+                        print("识别结果：", result)
+
+                        # 根据指令执行相应的操作
+                        if not result.strip():
+                            sys("你好像没有说话，试试说小诺小诺唤醒我")
+                            output_queue.put("你好像没有说话，试试说小诺小诺唤醒我")
+                            break
+                        else:
+                            sys("请稍等")
+                            output_queue.put("请稍等")
+                            input_queue.put(result)
+
+                    except sr.RequestError as e:
+                        print("无法连接", str(e))
+                    except (sr.WaitTimeoutError, sr.UnknownValueError):
+                        print("无法识别语音。")
+
+        except sr.RequestError as e:
+            print("无法连接", str(e))
+        except (sr.WaitTimeoutError, sr.UnknownValueError):
+            print("无法识别语音。")
+
+
 # 创建一个输入队列
 input_queue = queue.Queue()
 output_queue = queue.Queue()
 # 创建一个线程，用于加载和运行模型
 model_thread = threading.Thread(target=load_and_run_model, args=(input_queue,))
-model_thread.daemon = True
+model_thread2 = threading.Thread(target=load_and_run_audio)
+model_thread.daemon = model_thread2.daemon = True
 # 启动线程
 model_thread.start()
+model_thread2.start()
 
 
 @app.get("/")
-def read_root():
+def start():
     with open("QA.html", encoding="utf-8") as file:
         html_content = file.read()
     return HTMLResponse(content=html_content, status_code=200)
@@ -99,64 +152,34 @@ def read_root():
 
 @app.post("/text")
 async def text(data: Dict):
-    thred = threading.Thread(target=sys_thred, args=("请稍等",))
+    thred = threading.Thread(target=sys, args=("请稍等",))
     thred.start()
     input_queue.put(data.get("userInput"))
     result = output_queue.get()
-    thred = threading.Thread(target=sys_thred, args=(result,))
+    thred = threading.Thread(target=sys, args=(result,))
     thred.start()
     return result
 
 
 @app.post("/text2")  # 切换按钮
-async def text(data: Dict):
+async def text2(data: Dict):
     global mode
     mode = not mode
     res = '当前为聊天模式' if mode else '当前为功能模式'
-    thred = threading.Thread(target=sys_thred, args=(res,))
+    thred = threading.Thread(target=sys, args=(res,))
     thred.start()
     return res
 
 
-@app.post("/text3")  # 合成
-async def text(data: Dict):
-    res = data.get("userInput")
-    thred = threading.Thread(target=sys_thred, args=(res,))
-    thred.start()
-    return res
-
-
-@app.post("/")
-async def start(data: Dict):
-    start = "你好，我是LenoMate，请问有什么可以帮您"
-    synthesis.main(start)
-    play.play()
-
-
-@app.options("/")
-async def start(data: Dict):
-    start = "你好，我是LenoMate，请问有什么可以帮您"
-    synthesis.main(start)
-    play.play()
-
-
-def sys_thred(result):
+def sys(result):
     synthesis.main(result)
     play.play()
 
 
 @app.post("/audio")
-async def audio(audioData: bytes = File(...)):
-    with open('data/voice1.wav', 'wb') as f:
-        f.write(audioData)
-    f.close()
-    os.system('ffmpeg -y -i data/voice1.wav -ac 1 -ar 16000 data/voice.wav')
-    input_statement = recognition.main()
-    return input_statement
+async def audio():
+    return output_queue.get()
 
 
 if __name__ == '__main__':
     uvicorn.run(app=app, host="127.0.0.1", port=8081)
-    # start = "你好，我是LenoMate，请问有什么可以帮您"
-    # synthesis.main(start)
-    # play.play()

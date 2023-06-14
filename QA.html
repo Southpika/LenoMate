@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-cn" xmlns="http://www.w3.org/1999/html">
 <head>
     <meta charset="UTF-8">
     <title>LenoMate</title>
@@ -7,12 +7,8 @@
         body {
             background-image: linear-gradient(
                     20deg,
-                    rgba(255,247,214, 1) 40%,
-                    rgba(126,194,255, 1) 85%
-
-
-                    /* rgba(247, 247, 247, 1) 23.8%, */
-                    /* rgba(252, 221, 221, 1) 92% */
+                    rgba(255, 247, 214, 1) 40%,
+                    rgba(126, 194, 255, 1) 85% /* rgba(247, 247, 247, 1) 23.8%, */ /* rgba(252, 221, 221, 1) 92% */
             );
             height: 100vh;
             display: flex;
@@ -30,29 +26,30 @@
             padding: 20px;
             border: 1px solid #ccc;
             border-radius: 5px;
-            overflow-y: auto;  /* 加入滚动条，内容自动延伸 */
+            overflow-y: auto; /* 加入滚动条，内容自动延伸 */
             background-attachment: fixed;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
 
         /* 调整滚动条 */
         .container::-webkit-scrollbar {
-        width: 5px;
-        height: 0px;
+            width: 5px;
+            height: 0px;
         }
 
         .container::-webkit-scrollbar-track {
-        background-color: transparent;
+            background-color: transparent;
         }
 
         .container::-webkit-scrollbar-thumb {
-        background-color: #888;
-        border-radius: 10px;
+            background-color: #888;
+            border-radius: 10px;
         }
 
         .container::-webkit-scrollbar-thumb:hover {
-        background-color: #555;
+            background-color: #555;
         }
+
         .message-container {
             display: flex;
             flex-direction: column;
@@ -63,39 +60,39 @@
 
         .user-message,
         .bot-message {
-        position: relative;
-        padding: 10px;
-        border-radius: 15px;
-        margin-bottom: 10px;
+            position: relative;
+            padding: 10px;
+            border-radius: 15px;
+            margin-bottom: 10px;
         }
 
         .user-message::before,
         .bot-message::before {
-        content: "";
-        position: absolute;
-        width: 0;
-        height: 0;
+            content: "";
+            position: absolute;
+            width: 0;
+            height: 0;
         }
 
         .user-message::before {
-        content: "";
-        position: absolute;
-        top: 50%;
-        right: -10px;
-        border-top: 10px solid transparent;
-        border-left: 10px solid #fff7d6;
-        transform: translateY(-50%);
- 
+            content: "";
+            position: absolute;
+            top: 50%;
+            right: -10px;
+            border-top: 10px solid transparent;
+            border-left: 10px solid #fff7d6;
+            transform: translateY(-50%);
+
         }
 
         .bot-message::before {
-        content: "";
-        position: absolute;
-        top: 50%;
-        left: -10px;
-        border-top: 10px solid transparent;
-        border-right: 10px solid #8acafd96;
-        transform: translateY(-50%);
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: -10px;
+            border-top: 10px solid transparent;
+            border-right: 10px solid #8acafd96;
+            transform: translateY(-50%);
 
         }
 
@@ -108,15 +105,14 @@
         .bot-message {
             background-color: #8acafd96;
             align-self: flex-start;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); 
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
 
         .tishi-message {
             background-color: #ffffff00;
-            font-weight:bold;
+            font-weight: bold;
             align-self: center;
         }
-
 
         .input-container {
             display: flex;
@@ -152,76 +148,62 @@
     </style>
 </head>
 <body>
-
-
 <div class="container">
     <div class="message-container">
-        <div class="tishi-message" id="tishi" >当前为聊天模式</div>
+        <div class="tishi-message">当前为聊天模式</div>
     </div>
     <div id="messageArea"></div>
     <div class="input-container">
         <input type="text" id="userInput" placeholder="请输入问题" onkeydown="handleKeyPress(event)">
-        <input type="submit" value="发送" onclick="sendMessage()">
-        <button id="recordButton" onclick="toggleRecording()">录音</button>
+        <button onclick="sendMessage()">发送</button>
+        <button style="background-color: #009d06" onclick="sendMessage2()">模式切换</button>
     </div>
 </div>
 
-<div class="input-container">
-    <input type="submit" style="background-color: #009d06; border-radius: 15px" value="模式切换" onclick="sendMessage2()">
-</div>
-
 <script>
-    var isRecording = false;
-    var mediaRecorder;
-    var recordedChunks = [];
+    var xhr = new XMLHttpRequest();
 
-    let xhr = new XMLHttpRequest();
-    xhr.open('POST', 'http://localhost:8081/', true);
-    xhr.setRequestHeader('Content-Type', 'application/json');
-    xhr.send(JSON.stringify({userInput: userInput}));
-    
     function handleKeyPress(event) {
         if (event.keyCode === 13) { // 按下回车键的键码是13
             event.preventDefault(); // 阻止默认的回车键行为（如换行）
-            sendMessage(); 
+            sendMessage();
         }
     }
-    function sendMessage(content='', exist=false) {
+
+    function sendMessage(content = '', exist = false) {
         if (!exist) {
-            var userInput = document.getElementById('userInput').value;
-        } else {
-            userInput = content
+            content = document.getElementById('userInput').value;
         }
 
-        if (userInput.trim() !== '') {
-            var userMessage = '<div class="message-container"><div class="user-message">' + userInput + '</div></div>';
+        if (content.trim() !== '') {
+            let userMessage = '<div class="message-container"><div class="user-message">' + content + '</div></div>';
             document.getElementById('userInput').value = '';
             document.getElementById('messageArea').innerHTML += userMessage;
-            var xhr = new XMLHttpRequest();
-            xhr.open('POST', 'http://localhost:8081/text', true);
-            xhr.setRequestHeader('Content-Type', 'application/json');
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState === XMLHttpRequest.DONE) {
-                    if (xhr.status === 200) {
-                        var botMessage = '<div class="message-container"><div class="bot-message">' + xhr.responseText.replace(/"/g, '').replace(/\\n/g, '<br>') + '</div></div>';
-                        document.getElementById('messageArea').innerHTML += botMessage;
-                    } else {
-                        console.error('请求失败: ' + xhr.status);
+
+            if (!exist) {
+                xhr.open('POST', 'http://localhost:8081/text', true);
+                xhr.setRequestHeader('Content-Type', 'application/json');
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState === XMLHttpRequest.DONE) {
+                        if (xhr.status === 200) {
+                            let botMessage = '<div class="message-container"><div class="bot-message">' + xhr.responseText.replace(/"/g, '').replace(/\\n/g, '<br>') + '</div></div>';
+                            document.getElementById('messageArea').innerHTML += botMessage;
+                        } else {
+                            console.error('请求失败: ' + xhr.status);
+                        }
                     }
-                }
-            };
-            xhr.send(JSON.stringify({userInput: userInput}));
+                };
+                xhr.send(JSON.stringify({userInput: content}));
+            }
         }
     }
 
     function sendMessage2() {
-        var xhr = new XMLHttpRequest();
-        xhr.open('POST', 'http://localhost:8081/text2', true);
-        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.open('GET', 'http://localhost:8081/text2', true);
         xhr.onreadystatechange = function () {
             if (xhr.readyState === XMLHttpRequest.DONE) {
                 if (xhr.status === 200) {
-                    var botMessage = '<div class="message-container"><div class="tishi-message">' + xhr.responseText.replace(/"/g, '').replace(/\\n/g, '<br>') + '</div></div>';
+                    let botMessage = '<div class="message-container"><div class="tishi-message">' + xhr.responseText.replace(/"/g, '').replace(/\\n/g, '<br>') + '</div></div>';
                     // document.getElementById('messageArea').innerHTML += botMessage;
                     document.getElementById("messageArea").innerHTML += botMessage;
                 } else {
@@ -229,73 +211,22 @@
                 }
             }
         };
-        xhr.send(JSON.stringify({userInput: userInput}));
     }
 
-    function sendMessage3(userInput='', back=false) {
-        var xhr = new XMLHttpRequest();
-        xhr.open('POST', 'http://localhost:8081/text3', true);
-        xhr.setRequestHeader('Content-Type', 'application/json');
+    function getMessage() {
+        xhr.open('GET', 'http://localhost:8081/audio', true);
         xhr.onreadystatechange = function () {
             if (xhr.readyState === XMLHttpRequest.DONE) {
                 if (xhr.status === 200) {
-                    if (back) {
-                        botMessage = '<div class="message-container"><div class="bot-message">' + xhr.responseText.replace(/"/g, '') + '</div></div>';
-                        document.getElementById('messageArea').innerHTML += botMessage;
-                    }
+                    sendMessage(xhr.responseText.replace(/"/g, ''), true)
                 } else {
                     console.error('请求失败: ' + xhr.status);
                 }
             }
         };
-        xhr.send(JSON.stringify({userInput: userInput, back: back}));
     }
 
-    function toggleRecording() {
-        if (isRecording) {
-            // 停止录音;
-            mediaRecorder.stop();
-            isRecording = false;
-        } else {
-            // 开始录音
-            sendMessage3('"我在听"');
-            navigator.mediaDevices.getUserMedia({audio: true})
-                .then(function (stream) {
-                    mediaRecorder = new MediaRecorder(stream);
-                    mediaRecorder.start();
-                    isRecording = true;
-                    recordedChunks = [];
-                    mediaRecorder.addEventListener('dataavailable', function (event) {
-                        recordedChunks.push(event.data);
-                    });
-
-                    mediaRecorder.addEventListener('stop', function () {
-                        // 将录音数据发送给后端
-                        var blob = new Blob(recordedChunks, {type: 'audio/wav'});
-                        var formData = new FormData();
-                        formData.append('audioData', blob);
-
-                        var xhr = new XMLHttpRequest();
-                        xhr.open('POST', 'http://localhost:8081/audio', true);
-                        xhr.send(formData);
-
-                        xhr.onreadystatechange = function () {
-                            if (xhr.readyState === XMLHttpRequest.DONE) {
-                                if (xhr.status === 200) {
-                                    sendMessage3('"请稍等"')
-                                    sendMessage(xhr.responseText.replace(/"/g, ''), true)
-                                } else {
-                                    console.error('请求失败: ' + xhr.status);
-                                }
-                            }
-                        };
-                    });
-                })
-                .catch(function (error) {
-                    console.error('无法访问麦克风：' + error);
-                });
-        }
-    }
+    setInterval(getMessage, 1000)
 </script>
 </body>
 </html>
