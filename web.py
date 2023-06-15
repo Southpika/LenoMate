@@ -37,7 +37,7 @@ app.add_middleware(GZipMiddleware)
 mode = True  # 聊天为True
 
 
-def load_and_run_model(input_queue):
+def load_and_run_model():
     print("模型加载中...")
     model = AutoModel.from_pretrained("THUDM/chatglm-6b-int4", trust_remote_code=True).half().cuda()
     tokenizer = AutoTokenizer.from_pretrained("THUDM/chatglm-6b-int4", trust_remote_code=True)
@@ -45,7 +45,7 @@ def load_and_run_model(input_queue):
     print("模型加载完成")
 
     while True:
-        input_statement = input_queue.get()
+        input_statement, switch = input_queue.get()
         if not mode:
             print("当前为命令模式...")
             try:
@@ -53,7 +53,10 @@ def load_and_run_model(input_queue):
                 torch.cuda.empty_cache()
                 opt = eval(f"operation.Operation{selected_idx}")(input_statement)
                 result = opt.fit(model, tokenizer)
-                output_queue.put(result)
+                if switch:
+                    output_queue.put(result)
+                else:
+                    output_queue2.put(result)
                 print("模型输出：", result)
             except Exception as e:
                 print('#' * 50)
@@ -74,7 +77,10 @@ def load_and_run_model(input_queue):
                     top_p=0.95,
                 )
             answer = tokenizer.decode(out[0]).split('<ChatGLM-6B>:')[1].strip('\n').strip()
-            output_queue.put(answer)
+            if switch:
+                output_queue.put(answer)
+            else:
+                output_queue2.put(answer)
 
 
 def load_and_run_audio():
@@ -118,7 +124,8 @@ def load_and_run_audio():
                         else:
                             sys("请稍等")
                             output_queue.put("请稍等")
-                            input_queue.put(result)
+                            input_queue.put((result, False))
+                            output_queue.put(output_queue2.get())
 
                     except sr.RequestError as e:
                         print("无法连接", str(e))
@@ -134,8 +141,9 @@ def load_and_run_audio():
 # 创建一个输入队列
 input_queue = queue.Queue()
 output_queue = queue.Queue()
+output_queue2 = queue.Queue()
 # 创建一个线程，用于加载和运行模型
-model_thread = threading.Thread(target=load_and_run_model, args=(input_queue,))
+model_thread = threading.Thread(target=load_and_run_model)
 model_thread2 = threading.Thread(target=load_and_run_audio)
 model_thread.daemon = model_thread2.daemon = True
 # 启动线程
@@ -156,7 +164,7 @@ def start():
 async def text(data: Dict):
     thred = threading.Thread(target=sys, args=("请稍等",))
     thred.start()
-    input_queue.put(data.get("userInput"))
+    input_queue.put((data.get("userInput"), True))
     result = output_queue.get()
     thred = threading.Thread(target=sys, args=(result,))
     thred.start()
