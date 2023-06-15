@@ -57,6 +57,7 @@ def load_and_run_model():
                 result = opt.fit(model, tokenizer)
                 if switch:
                     output_queue.put((result, True))
+                    sys(result)
                 else:
                     output_queue2.put(result)
                 print("模型输出：", result)
@@ -81,6 +82,7 @@ def load_and_run_model():
             answer = tokenizer.decode(out[0]).split('<ChatGLM-6B>:')[1].strip('\n').strip()
             if switch:
                 output_queue.put((answer, True))
+                sys(answer)
             else:
                 output_queue2.put(answer)
 
@@ -172,10 +174,6 @@ def text(data: Dict):
     thred = threading.Thread(target=sys, args=("请稍等",))
     thred.start()
     input_queue.put((data.get("userInput"), True))
-    result = output_queue.get()[0]
-    thred = threading.Thread(target=sys, args=(result,))
-    thred.start()
-    return result
 
 
 @app.post("/text2")  # 切换按钮
