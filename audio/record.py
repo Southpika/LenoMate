@@ -3,11 +3,11 @@ import sys
 import wave
 from tqdm import tqdm
 
-TIME = 5  # 录音时间
+TIME = 30  # 录音时间
 
 # 如果没有参数，就将输出文件设置为'01.wav'
 if len(sys.argv) == 1:
-    file_name = "01.wav"
+    file_name = "../data/result.wav"
 else:
     file_name = sys.argv[1]
 
@@ -21,7 +21,7 @@ def main():
     record_buf = []
 
     # 开始采样
-    for i in tqdm(range(8 * 5)):  # 录音5秒
+    for i in tqdm(range(8 * 30)):  # 录音5秒
         audio_data = stream.read(2048)  # 读出声卡缓冲区的音频数据
         record_buf.append(audio_data)  # 将读出的音频数据追加到record_buf列表
 

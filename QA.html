@@ -145,6 +145,7 @@
             border-radius: 5px;
             cursor: pointer;
         }
+
     </style>
 </head>
 <body>
@@ -161,26 +162,32 @@
 </div>
 
 <script>
-    var xhr = new XMLHttpRequest();
-
     function handleKeyPress(event) {
         if (event.keyCode === 13) { // 按下回车键的键码是13
             event.preventDefault(); // 阻止默认的回车键行为（如换行）
             sendMessage();
         }
+        console.log('已执行handleKeyPress');
     }
 
-    function sendMessage(content = '', exist = false) {
+    function sendMessage(content = '', exist = false, bot = false) {
         if (!exist) {
             content = document.getElementById('userInput').value;
         }
 
         if (content.trim() !== '') {
-            let userMessage = '<div class="message-container"><div class="user-message">' + content + '</div></div>';
-            document.getElementById('userInput').value = '';
-            document.getElementById('messageArea').innerHTML += userMessage;
+            if (!bot) {
+                let userMessage = '<div class="message-container"><div class="user-message">' + content + '</div></div>';
+                document.getElementById('userInput').value = '';
+                document.getElementById('messageArea').innerHTML += userMessage;
+            } else {
+                let botMessage = '<div class="message-container"><div class="bot-message">' + content + '</div></div>';
+                document.getElementById('userInput').value = '';
+                document.getElementById('messageArea').innerHTML += botMessage;
+            }
 
             if (!exist) {
+                var xhr = new XMLHttpRequest();
                 xhr.open('POST', 'http://localhost:8081/text', true);
                 xhr.setRequestHeader('Content-Type', 'application/json');
                 xhr.onreadystatechange = function () {
@@ -196,37 +203,55 @@
                 xhr.send(JSON.stringify({userInput: content}));
             }
         }
+        console.log('已执行sendMessage');
     }
 
     function sendMessage2() {
-        xhr.open('GET', 'http://localhost:8081/text2', true);
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', 'http://localhost:8081/text2', true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
         xhr.onreadystatechange = function () {
             if (xhr.readyState === XMLHttpRequest.DONE) {
                 if (xhr.status === 200) {
+                    console.log(xhr.responseText);
                     let botMessage = '<div class="message-container"><div class="tishi-message">' + xhr.responseText.replace(/"/g, '').replace(/\\n/g, '<br>') + '</div></div>';
-                    // document.getElementById('messageArea').innerHTML += botMessage;
                     document.getElementById("messageArea").innerHTML += botMessage;
                 } else {
                     console.error('请求失败: ' + xhr.status);
                 }
             }
         };
+        xhr.send(JSON.stringify({userInput: "content"}));
+        console.log('已执行sendMessage2');
     }
 
     function getMessage() {
-        xhr.open('GET', 'http://localhost:8081/audio', true);
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', 'http://localhost:8081/audio', true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
         xhr.onreadystatechange = function () {
             if (xhr.readyState === XMLHttpRequest.DONE) {
                 if (xhr.status === 200) {
-                    sendMessage(xhr.responseText.replace(/"/g, ''), true)
+                    console.log(xhr.responseText);
+                    var obj = JSON.parse(xhr.responseText);
+                    sendMessage(obj["result"].replace(/"/g, ''), true, obj["bot"]);
+                    getMessage2()
                 } else {
                     console.error('请求失败: ' + xhr.status);
                 }
             }
         };
+        xhr.send(JSON.stringify({userInput: "content"}));
+        console.log('已执行getMessage');
     }
 
-    setInterval(getMessage, 1000)
+    function getMessage2() {
+        getMessage()
+        console.log('已执行getMessage2');
+    }
+
+    getMessage()
+
 </script>
 </body>
 </html>

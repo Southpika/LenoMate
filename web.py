@@ -6,6 +6,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import HTMLResponse
+from fastapi.responses import JSONResponse
 import os
 import audio.play as play
 import audio.synthesis as synthesis
@@ -23,6 +24,7 @@ import time
 import speech_recognition as sr
 import json
 from urllib import request, parse, error
+from typing import Dict
 
 app = FastAPI()
 app.add_middleware(
@@ -54,7 +56,7 @@ def load_and_run_model():
                 opt = eval(f"operation.Operation{selected_idx}")(input_statement)
                 result = opt.fit(model, tokenizer)
                 if switch:
-                    output_queue.put(result)
+                    output_queue.put((result, True))
                 else:
                     output_queue2.put(result)
                 print("模型输出：", result)
@@ -78,7 +80,7 @@ def load_and_run_model():
                 )
             answer = tokenizer.decode(out[0]).split('<ChatGLM-6B>:')[1].strip('\n').strip()
             if switch:
-                output_queue.put(answer)
+                output_queue.put((answer, True))
             else:
                 output_queue2.put(answer)
 
@@ -90,7 +92,7 @@ def load_and_run_audio():
             # 使用麦克风录制音频
             with sr.Microphone(sample_rate=8000) as source:
                 r = sr.Recognizer()
-                audio_frame = r.listen(source, 2)
+                audio_frame = r.listen(source)
 
             # 使用语音识别器解析音频
             # result = r.recognize_google(audio, language="zh-CN")
@@ -98,18 +100,17 @@ def load_and_run_audio():
             print("识别结果：", result)
 
             # 根据指令执行相应的操作
-            if "小诺" in result:
+            if "小诺" in result or "想诺" in result:
                 # 执行您的程序代码
                 sys("我在听")
-                output_queue.put("我在听")
-
                 while True:
                     print("处于已唤醒状态")
+
                     try:
                         # 使用麦克风录制音频
                         with sr.Microphone(sample_rate=8000) as source:
                             r = sr.Recognizer()
-                            audio_frame = r.listen(source, 2)
+                            audio_frame = r.listen(source, 3)
 
                         # 使用语音识别器解析音频
                         # result = r.recognize_google(audio, language="zh-CN")
@@ -119,18 +120,24 @@ def load_and_run_audio():
                         # 根据指令执行相应的操作
                         if not result.strip():
                             sys("你好像没有说话，试试说小诺小诺唤醒我")
-                            output_queue.put("你好像没有说话，试试说小诺小诺唤醒我")
                             break
                         else:
-                            sys("请稍等")
-                            output_queue.put("请稍等")
+                            output_queue.put((result, False))
                             input_queue.put((result, False))
-                            output_queue.put(output_queue2.get())
+                            sys("请稍等")
+                            temp = output_queue2.get()
+                            output_queue.put((temp, True))
+                            print(output_queue.queue)
+                            sys(temp)
+
 
                     except sr.RequestError as e:
                         print("无法连接", str(e))
+                        sys("你好像没有说话，试试说小诺小诺唤醒我")
+                        break
                     except (sr.WaitTimeoutError, sr.UnknownValueError):
-                        print("无法识别语音。")
+                        sys("你好像没有说话，试试说小诺小诺唤醒我")
+                        break
 
         except sr.RequestError as e:
             print("无法连接", str(e))
@@ -161,18 +168,18 @@ def start():
 
 
 @app.post("/text")
-async def text(data: Dict):
+def text(data: Dict):
     thred = threading.Thread(target=sys, args=("请稍等",))
     thred.start()
     input_queue.put((data.get("userInput"), True))
-    result = output_queue.get()
+    result = output_queue.get()[0]
     thred = threading.Thread(target=sys, args=(result,))
     thred.start()
     return result
 
 
 @app.post("/text2")  # 切换按钮
-async def text2(data: Dict):
+def text2(data: Dict):
     global mode
     mode = not mode
     res = '当前为聊天模式' if mode else '当前为功能模式'
@@ -187,8 +194,10 @@ def sys(result):
 
 
 @app.post("/audio")
-async def audio():
-    return output_queue.get()
+def audio(data: Dict):
+    result, bot = output_queue.get()
+    print(output_queue.queue)
+    return JSONResponse(content={"result": result, "bot": bot})
 
 
 if __name__ == '__main__':
