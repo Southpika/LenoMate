@@ -4,7 +4,7 @@ result.wav
 exe_location.json
 operation/__pycache__/
 audio/__pycache__/
-
+data/__pycache__/
 data/voice.wav
 data/voice1.wav
 audio/__pycache__/play.cpython-310.pyc

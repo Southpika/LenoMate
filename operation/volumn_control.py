@@ -4,6 +4,19 @@ from ctypes import cast, POINTER
 from comtypes import CLSCTX_ALL
 from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
 import time
+
+def find_closest_key(my_dict, num):
+    closest_key = None
+    min_difference = float('inf')  # 初始差值设置为无穷大
+
+    for key in my_dict:
+        difference = abs(num - key)  # 计算差值的绝对值
+
+        if difference < min_difference:
+            min_difference = difference
+            closest_key = key
+
+    return closest_key
 class vol_ctrl:
     def __init__(self):
         
@@ -37,7 +50,8 @@ class vol_ctrl:
         self.interface = self.devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
         self.volume = cast(self.interface, POINTER(IAudioEndpointVolume))
         self.vl = self.volume.GetMasterVolumeLevel()
-        self.vl_real = self.volume_match_2[round(self.vl,2)]
+        
+        self.vl_real = self.volume_match_2[find_closest_key(self.volume_match_2,self.vl)]
 
     def mute_all(self,mute=True):
         self.mute = mute

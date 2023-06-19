@@ -55,7 +55,8 @@ def load_and_run_model():
                 torch.cuda.empty_cache()
                 if selected_idx == 5:
                     opt = eval(f"operation.Operation{selected_idx}")(input_statement,model_sim,tokenizer_sim)
-                opt = eval(f"operation.Operation{selected_idx}")(input_statement)
+                else:
+                    opt = eval(f"operation.Operation{selected_idx}")(input_statement)
                 result = opt.fit(model, tokenizer)
                 if switch:
                     output_queue.put((result, True))

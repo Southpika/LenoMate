@@ -69,7 +69,7 @@ def play():
     # 关闭音频文件
     wf.close()
 
-    print("声音播放完毕，程序结束")
+    # print("声音播放完毕，程序结束")
     return True
 
 if __name__ == '__main__':

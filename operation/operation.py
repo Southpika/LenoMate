@@ -194,7 +194,12 @@ class Operation5():
 
     def fit(self,model,tokenizer,remote = False):
         self.judge()
-        if not self.selected: self.vol_ctrl.mute_all()
+        if self.selected=='静音': 
+            self.vol_ctrl.mute_all()
+            return "已静音"
+        if self.selected=='取消静音': 
+            self.vol_ctrl.mute_all(mute=False)
+            return "已取消静音"
         if not remote:
             self.vl = self.vol_ctrl.vl_real
             context = '电脑当前音量为'+str(self.vl)
