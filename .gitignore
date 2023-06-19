@@ -1,5 +1,5 @@
 build/
-data/
+
 result.wav
 exe_location.json
 operation/__pycache__/

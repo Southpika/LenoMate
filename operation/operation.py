@@ -8,6 +8,7 @@ import operation
 import operation.prompt as prompt
 import re
 from operation.open_app import search_tool
+import numpy as np
 
 class Operation:
     def fit(self):
@@ -149,6 +150,7 @@ class Operation3(Operation):
         app_name = corpus.corpus[selected_idx]
         print(f'find app {app_name}')
         return self.tool.open_app(b = name_exe_map[app_name])
+    
 class Operation4(Operation):
     def __init__(self,inputs): 
         from operation.get_cominfo import computer_info
@@ -175,6 +177,46 @@ class Operation4(Operation):
             answer = tokenizer.decode(out[0]).split('##回答')[1].strip(':').strip()
 
             return answer
+        
+class Operation5():
+    def __init__(self,inputs,model_sim,tokenizer_sim) -> None:
+        from operation.volumn_control import vol_ctrl
+        self.vol_ctrl = vol_ctrl()
+        self.inputs = inputs
+        self.model_sim = model_sim
+        self.tokenizer_sim = tokenizer_sim
+
+    def fit(self,model,tokenizer):
+        self.judge()
+        if not self.selected: self.vol_ctrl.mute_all()
+        pass
+
+    def judge(self):
+        _mute = '静音，取消静音'
+        _normal = '调节音量'
+        corpus = [_mute,_normal]
+        self.model_sim.eval()
+        input_data = self.tokenizer_sim(self.inputs, return_tensors="pt")
+        corp = self.tokenizer_sim(corpus, return_tensors="pt",padding=True)
+        with torch.no_grad():
+            corpus_embeddings = self.model_sim(**corp.to('cuda'))
+            input_embeddings = self.model_sim(**input_data.to('cuda'))
+        corpus_embeddings = self._pooling(corpus_embeddings,attention_mask=corp['attention_mask'])
+        input_embeddings = self._pooling(input_embeddings,attention_mask=input_data['attention_mask'])
+        self.selected = corpus[(corpus_embeddings@input_embeddings.T).argmax(axis=0)[0]]
+        print(f"[音量调节功能]音量功能匹配为'{self.selected}'")
+
+    def _pooling(self,model_output,attention_mask):
+        token_embeddings = model_output[0]  # First element of model_output contains all token embeddings
+        input_mask_expanded = attention_mask.unsqueeze(-1).expand(token_embeddings.size()).float()
+        output = torch.sum(token_embeddings * input_mask_expanded, 1) / torch.clamp(input_mask_expanded.sum(1), min=1e-9)
+        return self._l2_normalization(output.cpu().numpy())
+    
+    def _l2_normalization(self,data):
+        if data.ndim == 1:
+            return data / np.linalg.norm(data).reshape(-1,1)
+        else:
+            return data/ np.linalg.norm(data,axis=1).reshape(-1,1)
 
 
 

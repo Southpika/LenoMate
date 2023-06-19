@@ -42,12 +42,16 @@ def mean_pooling(model_output, attention_mask, return_tensors=False):
 args = get_parser()
 
 class faiss_corpus:
-    def __init__(self,args=args):
+    def __init__(self,model=None,tokenizer=None,args=args):
         print('[INFO]Loading Model')
         self.args = args
         self.device = args.device
-        self.tokenizer = AutoTokenizer.from_pretrained(args.model_name)
-        self.model = AutoModel.from_pretrained(args.model_name).to(self.device)
+        if not (model and tokenizer):
+            self.tokenizer = AutoTokenizer.from_pretrained(args.model_name)
+            self.model = AutoModel.from_pretrained(args.model_name).to(self.device)
+        else:
+            self.tokenizer = tokenizer
+            self.model = model
         ## Loading data 
         self.corpus = []
         with open(args.document_corpus,'r',encoding='utf-8') as f:
