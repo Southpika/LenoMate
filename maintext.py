@@ -27,7 +27,12 @@ def main(input_statement):
     print('Loading...')
     model = AutoModel.from_pretrained("THUDM/chatglm-6b-int4", trust_remote_code=True).half().cuda()
     tokenizer = AutoTokenizer.from_pretrained("THUDM/chatglm-6b-int4", trust_remote_code=True)
-    opt = eval(f"operation.Operation{selected_idx}")(input_statement)
+    model_sim =  AutoModel.from_pretrained("GanymedeNil/text2vec-large-chinese").to('cuda')
+    tokenizer_sim = AutoTokenizer.from_pretrained("GanymedeNil/text2vec-large-chinese")
+    if selected_idx == 5:
+        opt = eval(f"operation.Operation{selected_idx}")(input_statement,model_sim,tokenizer_sim)
+    else:
+        opt = eval(f"operation.Operation{selected_idx}")(input_statement)
     # print(opt.fit(model,tokenizer))
     result = opt.fit(model, tokenizer)
     # synthesis.main(result)

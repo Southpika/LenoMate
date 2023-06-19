@@ -36,19 +36,21 @@ class vol_ctrl:
         self.devices = AudioUtilities.GetSpeakers()
         self.interface = self.devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
         self.volume = cast(self.interface, POINTER(IAudioEndpointVolume))
+        self.vl = self.volume.GetMasterVolumeLevel()
+        self.vl_real = self.volume_match_2[round(self.vl,2)]
 
     def mute_all(self,mute=True):
         self.mute = mute
         if self.mute: self.volume.SetMute(1, None)
         else: self.volume.SetMute(0, None)
 
-    def alter(self,num):
+    def alter(self,num,verbose=False):
         if num > 0:
             self.mute_all(mute = False)
-        vl = self.volume.GetMasterVolumeLevel()
-        print('get current volumn',vl)
+        
+        if verbose:print('get current volumn',self.vl)
         self.volume.SetMasterVolumeLevel(self.volume_match[int(num)], None)
-        print('alter to ',num)
+        if verbose:print('alter to ',num)
 
 if __name__ == '__main__':
     vol_ctrl = vol_ctrl()

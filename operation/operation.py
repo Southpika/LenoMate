@@ -20,10 +20,14 @@ class Operation0(Operation):
         self.brightness = brightness
         self.inputs =  input_statement
 
-    def fit(self,model,tokenizer):
-        bright = sbc.get_brightness()[0]
-        context = '电脑当前屏幕亮度为'+str(bright)
-        self.prompt = prompt.Prompt0(context,self.inputs).prompt
+    def fit(self,model,tokenizer,remote=False):
+        if not remote:
+            bright = sbc.get_brightness()[0]
+            context = '电脑当前屏幕亮度为'+str(bright)
+        if remote:
+            context = remote
+        
+        self.prompt = prompt.Prompt0(self.inputs,context).prompt
         self.extract_info(self.prompt,model,tokenizer)
         self.brightness = self.num
         
@@ -33,17 +37,7 @@ class Operation0(Operation):
         except:
             sbc.set_brightness(100)
             return f'由于你没有指定亮度，已从{bright}%调至100%亮度'
-        if isinstance(self.brightness,int):
-            
-            return f'已调至{self.brightness}%'
-        else:
-            
-            self.brightness = bright+30
-            sbc.set_brightness(self.brightness)
-            if self.brightness > 100:
-                return f'由于你没有指定亮度，已从{bright}%调至100%亮度'
-            else:
-                return f'由于你没有指定亮度，已从{bright}%调至{self.brightness}%亮度'
+
             
     def extract_info(self,prompt,model,tokenizer):
         
@@ -198,15 +192,28 @@ class Operation5():
         self.model_sim = model_sim
         self.tokenizer_sim = tokenizer_sim
 
-    def fit(self,model,tokenizer):
+    def fit(self,model,tokenizer,remote = False):
         self.judge()
         if not self.selected: self.vol_ctrl.mute_all()
-        pass
+        if not remote:
+            self.vl = self.vol_ctrl.vl_real
+            context = '电脑当前音量为'+str(self.vl)
+        if remote:
+            context = remote
+        self.prompt = prompt.Prompt4(context,self.inputs).prompt
+        self.extract_info(self.prompt,model,tokenizer)
+        self.vol = self.num
+        try:
+            self.vol_ctrl.alter(self.num)
+            return self.answer
+        except:
+            return f'对不起，我没识别到您的指令，请重新描述~'
 
     def judge(self):
-        _mute = '静音，取消静音'
+        _mute = '静音'
         _normal = '调节音量'
-        corpus = [_mute,_normal]
+        _no_mute = '取消静音'
+        corpus = [_mute,_normal,_no_mute]
         self.model_sim.eval()
         input_data = self.tokenizer_sim(self.inputs, return_tensors="pt")
         corp = self.tokenizer_sim(corpus, return_tensors="pt",padding=True)
@@ -229,7 +236,23 @@ class Operation5():
             return data / np.linalg.norm(data).reshape(-1,1)
         else:
             return data/ np.linalg.norm(data,axis=1).reshape(-1,1)
-
+        
+    def extract_info(self,prompt,model,tokenizer):
+        model.eval()
+        with torch.no_grad():
+            input_ids = tokenizer.encode(prompt, return_tensors='pt').to('cuda')
+            out = model.generate(
+                input_ids=input_ids,
+                max_length=200,
+                temperature=0.3,
+                top_p = 0.95,
+                # repetition_penalty = 1.15,
+                # stopping_criteria = StoppingCriteriaList([stop_criteria])
+                # do_sample = True
+            )
+            self.answer = tokenizer.decode(out[0]).split('<bot>:')[1]
+            print('[音量调节功能]',self.answer)
+            self.num = int(re.findall(r"\d+\.?\d*",self.answer)[-1])
 
 
 if __name__=='__main__':
