@@ -18,15 +18,26 @@ class Operation:
 class Operation0(Operation):
     def __init__(self,input_statement,brightness=None) -> None:
         self.brightness = brightness
-        self.prompt = prompt.Prompt0(input_statement).prompt
+        self.inputs =  input_statement
+
     def fit(self,model,tokenizer):
+        bright = sbc.get_brightness()[0]
+        context = '电脑当前屏幕亮度为'+str(bright)
+        self.prompt = prompt.Prompt0(context,self.inputs).prompt
         self.extract_info(self.prompt,model,tokenizer)
         self.brightness = self.num
-        if isinstance(self.brightness,int):
+        
+        try:
             sbc.set_brightness(self.brightness)
+            return self.answer
+        except:
+            sbc.set_brightness(100)
+            return f'由于你没有指定亮度，已从{bright}%调至100%亮度'
+        if isinstance(self.brightness,int):
+            
             return f'已调至{self.brightness}%'
         else:
-            bright = sbc.get_brightness()[0]
+            
             self.brightness = bright+30
             sbc.set_brightness(self.brightness)
             if self.brightness > 100:
@@ -35,6 +46,7 @@ class Operation0(Operation):
                 return f'由于你没有指定亮度，已从{bright}%调至{self.brightness}%亮度'
             
     def extract_info(self,prompt,model,tokenizer):
+        
         model.eval()
         with torch.no_grad():
             input_ids = tokenizer.encode(prompt, return_tensors='pt').to('cuda')
@@ -47,15 +59,15 @@ class Operation0(Operation):
                 # stopping_criteria = StoppingCriteriaList([stop_criteria])
                 # do_sample = True
             )
-            answer = tokenizer.decode(out[0]).split('##output:')[1]
-            print(answer)
-
-        pattern =  "数字(?:\(.+?\))?:\s*"
-        answer = re.split(pattern,answer)[1]
-        try:
-            self.num = int(re.findall(r"\d+\.?\d*",answer)[0])
-        except:
-            self.num = answer
+            self.answer = tokenizer.decode(out[0]).split('<bot>:')[1]
+            print('[屏幕亮度调节功能]',self.answer)
+            self.num = int(re.findall(r"\d+\.?\d*",self.answer)[-1])
+        # pattern =  "数字(?:\(.+?\))?:\s*"
+        # answer = re.split(pattern,answer)[1]
+        # try:
+        #     self.num = int(re.findall(r"\d+\.?\d*",answer)[0])
+        # except:
+        #     self.num = answer
 
 class Operation1(Operation):
     def __init__(self,input_statement) -> None:
