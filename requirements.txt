@@ -15,3 +15,5 @@ pyaudio
 chardet
 uuid
 SpeechRecognition
+pycaw
+comtypes

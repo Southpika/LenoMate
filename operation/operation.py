@@ -173,7 +173,7 @@ class Operation4(Operation):
             input_ids = tokenizer.encode(self.prompt, return_tensors='pt').to('cuda')
             out = model.generate(
                 input_ids=input_ids,
-                max_length=300,
+                max_length=400,
                 temperature=0.3,
                 top_p = 0.95,
                 # repetition_penalty = 1.15,
