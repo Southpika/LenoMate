@@ -5,9 +5,8 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
-from fastapi.responses import HTMLResponse
-from fastapi.responses import JSONResponse
-import os
+from fastapi.responses import HTMLResponse,JSONResponse
+
 import audio.play as play
 import audio.synthesis as synthesis
 import audio.recognition as recognition
@@ -15,14 +14,13 @@ import operation.prompt as prompt
 import operation.operation as operation
 import torch
 from transformers import AutoTokenizer, AutoModel
-import warnings
+
 from utils.search_doc_faiss import faiss_corpus
-from data.map import instruction_prompt_map
 import threading
 import queue
-import time
+
 import speech_recognition as sr
-import json
+
 from urllib import request, parse, error
 from typing import Dict
 
@@ -43,7 +41,9 @@ def load_and_run_model():
     print("模型加载中...")
     model = AutoModel.from_pretrained("THUDM/chatglm-6b-int4", trust_remote_code=True).half().cuda()
     tokenizer = AutoTokenizer.from_pretrained("THUDM/chatglm-6b-int4", trust_remote_code=True)
-    corpus = faiss_corpus()
+    model_sim =  AutoModel.from_pretrained("GanymedeNil/text2vec-large-chinese").to('cuda')
+    tokenizer_sim = AutoTokenizer.from_pretrained("GanymedeNil/text2vec-large-chinese")
+    corpus = faiss_corpus(model = model_sim, tokenizer=tokenizer_sim)
     print("模型加载完成")
 
     while True:
@@ -53,7 +53,10 @@ def load_and_run_model():
             try:
                 selected_idx, score = corpus.search(query=input_statement, verbose=True)
                 torch.cuda.empty_cache()
-                opt = eval(f"operation.Operation{selected_idx}")(input_statement)
+                if selected_idx == 5:
+                    opt = eval(f"operation.Operation{selected_idx}")(input_statement,model_sim,tokenizer_sim)
+                else:
+                    opt = eval(f"operation.Operation{selected_idx}")(input_statement)
                 result = opt.fit(model, tokenizer)
                 if switch:
                     output_queue.put((result, True))
@@ -64,7 +67,6 @@ def load_and_run_model():
             except Exception as e:
                 print('#' * 50)
                 print('error info', e)
-                running = False
                 break
         if mode:
             print("当前为聊天模式...")
@@ -107,13 +109,11 @@ def load_and_run_audio():
                 sys("我在听")
                 while True:
                     print("处于已唤醒状态")
-
                     try:
                         # 使用麦克风录制音频
                         with sr.Microphone(sample_rate=8000) as source:
                             r = sr.Recognizer()
                             audio_frame = r.listen(source, 3)
-
                         # 使用语音识别器解析音频
                         # result = r.recognize_google(audio, language="zh-CN")
                         result = recognition.main2(audio_frame.frame_data)

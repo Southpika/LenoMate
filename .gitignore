@@ -18,3 +18,5 @@ data/voice1.wav
 .idea/misc.xml
 .idea/tzh_workspace_v2.iml
 data/dolly_hug.csv
+
+data/data_for_train.csv
