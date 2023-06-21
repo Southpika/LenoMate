@@ -32,7 +32,7 @@ def get_parser():
     parser.add_argument('--record', default=500,type=int)
     parser.add_argument('--temp_path', default='data_ans_temp.csv')
     parser.add_argument('--final_path', default='data_ans.csv')
-    config = parser.parse_args([])
+    config = parser.parse_args()
     return config
 args = get_parser()
 
@@ -40,7 +40,7 @@ if __name__ == '__main__':
     df = pd.read_csv('data.csv',encoding='gbk')
     # tqdm.pandas(desc='Generating Answer...')
     df['ans'] = np.nan
-
+    # print(args.record)
     for i in tqdm(range(df.shape[0])):
         df.iloc[i,1] = get_ans(df.iloc[i,:])
         if i % args.record == (args.record-1):
