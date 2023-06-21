@@ -20,3 +20,4 @@ data/voice1.wav
 data/dolly_hug.csv
 
 data/data_for_train.csv
+utils/data.csv
