@@ -15,5 +15,5 @@ pyaudio
 chardet
 uuid
 SpeechRecognition
-pycaw
-comtypes
+pymysql
+cachelib
