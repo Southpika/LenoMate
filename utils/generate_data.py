@@ -29,7 +29,7 @@ def get_ans(data,verbose=False):
     return response['choices'][0]['message']['content']
 def get_parser():
     parser = argparse.ArgumentParser('Text Matching task')
-    parser.add_argument('--record', default=500)
+    parser.add_argument('--record', default=500,type=int)
     parser.add_argument('--temp_path', default='data_ans_temp.csv')
     parser.add_argument('--final_path', default='data_ans.csv')
     config = parser.parse_args([])
@@ -37,7 +37,7 @@ def get_parser():
 args = get_parser()
 
 if __name__ == '__main__':
-    df = pd.read_csv('data.csv')
+    df = pd.read_csv('data.csv',encoding='gbk')
     # tqdm.pandas(desc='Generating Answer...')
     df['ans'] = np.nan
 
