@@ -18,7 +18,7 @@ def get_ans(data,verbose=False):
                   {"role":"user","content":data['question']},
                   ],
             temperature=0.5,
-            max_tokens=300,
+            max_tokens=400,
             top_p=0.95,
             frequency_penalty=0,
             presence_penalty=0,
