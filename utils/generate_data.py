@@ -32,7 +32,7 @@ def get_parser():
     parser.add_argument('--record', default=500,type=int)
     parser.add_argument('--temp_path', default='data_ans_temp.csv')
     parser.add_argument('--final_path', default='data_ans.csv')
-    config = parser.parse_args([])
+    config = parser.parse_args()
     return config
 args = get_parser()
 
@@ -48,3 +48,4 @@ if __name__ == '__main__':
             print(f"已在{i}轮完成记录")
     df.to_csv(args.final_path)
     print('Finish Generating...')
+    # os.system('shutdown /s /t 0')
