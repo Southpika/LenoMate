@@ -40,7 +40,7 @@ if __name__ == '__main__':
     df = pd.read_csv('data.csv',encoding='gbk')
     # tqdm.pandas(desc='Generating Answer...')
     df['ans'] = np.nan
-
+    # print(args.record)
     for i in tqdm(range(df.shape[0])):
         df.iloc[i,1] = get_ans(df.iloc[i,:])
         if i % args.record == (args.record-1):
