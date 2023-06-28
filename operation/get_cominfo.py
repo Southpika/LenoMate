@@ -80,8 +80,19 @@ class computer_info(information):
         for xk in information.w.Win32_VideoController():
             information.list.append("本机GPU(显卡)名称: %s" % xk.name)
 
-
-        addr = socket.gethostbyname(socket.gethostname())
+        def get_host_ip():
+            """
+            查询本机ip地址
+            :return: ip
+            """
+            try:
+                s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+                s.connect(('8.8.8.8', 80))
+                ip = s.getsockname()[0]
+            finally:
+                s.close()
+            return ip
+        addr = get_host_ip()
         information.list.append("本机IP地址: %s" % addr)
         
     def fit(self):
