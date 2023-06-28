@@ -21,3 +21,11 @@ data/dolly_hug.csv
 
 data/data_for_train.csv
 utils/data.csv
+utils/data_ans_temp.csv
+
+utils/data_ans.csv
+
+dist/lenochat.exe
+__pycache__/
+lenochat.spec
+utils/data_tzh.csv

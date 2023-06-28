@@ -48,3 +48,4 @@ if __name__ == '__main__':
             print(f"已在{i}轮完成记录")
     df.to_csv(args.final_path)
     print('Finish Generating...')
+    # os.system('shutdown /s /t 0')
