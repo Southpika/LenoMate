@@ -56,7 +56,9 @@ def handle(**kwargs):
     if "command" in kwargs.keys():
         temp = subprocess.check_output(kwargs["command"], shell=True)
         if "chat" not in kwargs.keys():
-            client_socket.send(str({"inputs": temp, "mode": int(mode), "state_code": 1}).encode("utf-8"))
+            client_socket.send(
+                str({"inputs": temp.decode("utf-8").replace('\r\n', '').replace('\x1b[0m', ''), "mode": int(mode),
+                     "state_code": 1}).encode("utf-8"))
     if "chat" in kwargs.keys():
         output_queue.put((kwargs["chat"], True))
 

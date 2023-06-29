@@ -100,12 +100,14 @@
             background-color: #fff7d6;
             align-self: flex-end; /* 左右侧 */
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* 阴影立体效果 */
+            white-space: pre-line;
         }
 
         .bot-message {
             background-color: #8acafd96;
             align-self: flex-start;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            white-space: pre-line;
         }
 
         .tishi-message {
@@ -174,6 +176,7 @@
         if (!exist) {
             content = document.getElementById('userInput').value;
         }
+        content = content.replace(/"/g, '').replace(/\\n/g, '<br>')
 
         if (content.trim() !== '') {
             if (!bot) {
@@ -204,7 +207,8 @@
             if (xhr.readyState === XMLHttpRequest.DONE) {
                 if (xhr.status === 200) {
                     console.log(xhr.responseText);
-                    let botMessage = '<div class="message-container"><div class="tishi-message">' + xhr.responseText.replace(/"/g, '').replace(/\\n/g, '<br>') + '</div></div>';
+                    var temp = xhr.responseText.replace(/"/g, '').replace(/\\n/g, '<br>')
+                    let botMessage = '<div class="message-container"><div class="tishi-message">' + temp + '</div></div>';
                     document.getElementById("messageArea").innerHTML += botMessage;
                 } else {
                     console.error('请求失败: ' + xhr.status);
@@ -224,7 +228,7 @@
                 if (xhr.status === 200) {
                     console.log(xhr.responseText);
                     var obj = JSON.parse(xhr.responseText);
-                    sendMessage(obj["result"].replace(/"/g, ''), true, obj["bot"]);
+                    sendMessage(obj["result"], true, obj["bot"]);
                     getMessage2()
                 } else {
                     console.error('请求失败: ' + xhr.status);

@@ -30,3 +30,4 @@ __pycache__/
 lenochat.spec
 utils/data_tzh.csv
 /.idea/codeStyles/codeStyleConfig.xml
+/test.py
