@@ -40,7 +40,6 @@ class Operation0(Operation):
 
             
     def extract_info(self,prompt,model,tokenizer):
-        
         model.eval()
         with torch.no_grad():
             input_ids = tokenizer.encode(prompt, return_tensors='pt').to('cuda')
