@@ -17,3 +17,5 @@ uuid
 SpeechRecognition
 pymysql
 cachelib
+librosa
+numpy==1.23.0
