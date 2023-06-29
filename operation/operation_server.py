@@ -19,7 +19,7 @@ class Operation:
 ## 放入context给出数值
 class Operation0(Operation):
     def fit(self,model,tokenizer):
-        self.prompt = prompt.Prompt0(self.inputs,self.context).prompt
+        self.prompt = prompt.Prompt0(self.input_statement,self.context).prompt
         self._extract_info(self.prompt,model,tokenizer)
         self.brightness = self.num
         res = {
@@ -56,7 +56,7 @@ class Operation1(Operation):
                 temperature=0.9,
                 top_p = 0.95,
             )
-            answer = tokenizer.decode(out[0]).split('##回答')[1].strip(':').strip()
+            answer = tokenizer.decode(out[0]).split('##回答')[1].strip('：').strip()
             res = {
             'chat':answer,
             'state_code':0,
@@ -162,8 +162,9 @@ class Operation4(Operation):
                 # stopping_criteria = StoppingCriteriaList([stop_criteria])
                 # do_sample = True
             )
-            answer = tokenizer.decode(out[0]).split('##回答')[1].strip(':').strip()
-            return answer
+            answer = tokenizer.decode(out[0]).split('##回答')[1].strip('：').strip()
+
+            return {'chat':answer}
         
 class Operation5():
     def __init__(self,inputs,model_sim,tokenizer_sim) -> None:

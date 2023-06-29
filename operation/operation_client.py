@@ -31,8 +31,12 @@ class Operation1(Operation):
         pynvml.nvmlInit()
         handle = pynvml.nvmlDeviceGetHandleByIndex(0)
         info = pynvml.nvmlDeviceGetMemoryInfo(handle)
-        
-        context = f'''总显存: {info.total/1024**2:.2f} MB
+        from get_cominfo import computer_info
+        import pythoncom
+        computer = computer_info()
+        pythoncom.CoInitialize()
+        context = computer.fit()        
+        context += f'''总显存: {info.total/1024**2:.2f} MB
 空闲显存: {info.free/1024**2:.2f} MB
 已使用显存: {info.used/1024**2:.2f} MB'''
         return context
@@ -124,18 +128,25 @@ class Operation3(Operation):
     
 class Operation4(Operation):
     def __init__(self): 
-        from operation.get_cominfo import computer_info
+        from get_cominfo import computer_info
         import pythoncom
         computer = computer_info()
         pythoncom.CoInitialize()
         self.context = computer.fit()
 
     def fit(self):
+        pynvml.nvmlInit()
+        handle = pynvml.nvmlDeviceGetHandleByIndex(0)
+        info = pynvml.nvmlDeviceGetMemoryInfo(handle)
+        
+        self.context += f'''总显存: {info.total/1024**2:.2f} MB
+空闲显存: {info.free/1024**2:.2f} MB
+已使用显存: {info.used/1024**2:.2f} MB'''
         return self.context
         
 class Operation5():
     def __init__(self,inputs) -> None:
-        from operation.volumn_control import vol_ctrl
+        from volumn_control import vol_ctrl
         self.vol_ctrl = vol_ctrl()
         self.inputs = inputs
 
