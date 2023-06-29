@@ -10,18 +10,17 @@ from operation.open_app import search_tool
 import numpy as np
 
 class Operation:
+    def __init__(self,input_statement,context) -> None:
+        self.input_statement = input_statement
+        self.context = context
     def fit(self):
         raise NotImplementedError
 
 ## 放入context给出数值
 class Operation0(Operation):
-    def __init__(self,input_statement,context) -> None:
-        self.context = context
-        self.inputs = input_statement
-
     def fit(self,model,tokenizer):
         self.prompt = prompt.Prompt0(self.inputs,self.context).prompt
-        self.extract_info(self.prompt,model,tokenizer)
+        self._extract_info(self.prompt,model,tokenizer)
         self.brightness = self.num
         res = {
             'chat':self.answer,
@@ -30,37 +29,39 @@ class Operation0(Operation):
         }
         return res
             
-    def extract_info(self,prompt,model,tokenizer):
+    def _extract_info(self,prompt,model,tokenizer):
         model.eval()
         with torch.no_grad():
             input_ids = tokenizer.encode(prompt, return_tensors='pt').to('cuda')
             out = model.generate(
-                input_ids=input_ids,
-                max_length=200,
-                temperature=0.3,
-                top_p = 0.95,
-                # repetition_penalty = 1.15,
-                # stopping_criteria = StoppingCriteriaList([stop_criteria])
-                # do_sample = True
-            )
+                    input_ids=input_ids,
+                    max_length=200,
+                    temperature=0.9,
+                    top_p=0.95,
+                )
             self.answer = tokenizer.decode(out[0]).split('<bot>:')[1]
             print('[屏幕亮度调节功能]',self.answer)
             self.num = int(re.findall(r"\d+\.?\d*",self.answer)[-1])
 
 
 class Operation1(Operation):
-    def __init__(self,**inputs) -> None:
-        pass
-    def fit(self):
-        pynvml.nvmlInit()
-        handle = pynvml.nvmlDeviceGetHandleByIndex(0)
-        info = pynvml.nvmlDeviceGetMemoryInfo(handle)
-        
-        context = f'''总显存: {info.total/1024**2:.2f} MB
-空闲显存: {info.free/1024**2:.2f} MB
-已使用显存: {info.used/1024**2:.2f} MB'''
-        return context
-
+    def fit(self,model,tokenizer):        
+        self.prompt = prompt.Prompt1(self.input_statement,self.context).prompt
+        model.eval()
+        with torch.no_grad():
+            input_ids = tokenizer.encode(self.prompt, return_tensors='pt').to('cuda')
+            out = model.generate(
+                input_ids=input_ids,
+                max_length=300,
+                temperature=0.9,
+                top_p = 0.95,
+            )
+            answer = tokenizer.decode(out[0]).split('##回答')[1].strip(':').strip()
+            res = {
+            'chat':answer,
+            'state_code':0,
+            }
+            return res
 
 default_path = os.path.join(os.path.expanduser("~"), "Desktop") ## desktop_path
 def time_suffix():
@@ -147,16 +148,8 @@ class Operation3(Operation):
      
     
 class Operation4(Operation):
-    def __init__(self,inputs): 
-        from operation.get_cominfo import computer_info
-        import pythoncom
-        computer = computer_info()
-        pythoncom.CoInitialize()
-        self.context = computer.fit()
-        self.inputs = inputs
-
     def fit(self,model,tokenizer):
-        self.prompt = prompt.Prompt1(self.inputs,self.context).prompt
+        self.prompt = prompt.Prompt1(self.input_statement,self.context).prompt
         model.eval()
         with torch.no_grad():
             input_ids = tokenizer.encode(self.prompt, return_tensors='pt').to('cuda')
@@ -170,7 +163,6 @@ class Operation4(Operation):
                 # do_sample = True
             )
             answer = tokenizer.decode(out[0]).split('##回答')[1].strip(':').strip()
-
             return answer
         
 class Operation5():

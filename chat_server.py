@@ -32,8 +32,9 @@ def load_and_run_model():
 
     while True: 
         data_client = input_queue.get() # load data from client mode = 0是命令模式
-        input_statement = data_client['inputs']
+        
         if data_client['state_code'] == 0:
+            input_statement = data_client['inputs']
             if not data_client['mode']:
                 print("当前为命令模式...")
                 
@@ -110,8 +111,8 @@ def handle_client(client_socket, client_address):
                 # input_queue.put(input_queue_client.get()
                 send_data = output_queue.get()
                 output_queue_client.put(send_data)
-                client_socket.send(output_queue_client.get().encode('utf-8'))
-                print(f"回复{client_address[0]}:{client_address[1]}的消息：{data}")
+                client_socket.send(str(output_queue_client.get()).encode('utf-8'))
+                print(f"回复{client_address[0]}:{client_address[1]}的消息：{send_data}")
         except Exception as e:
             print(e)
             print(f"与{client_address[0]}:{client_address[1]}的连接已断开")
