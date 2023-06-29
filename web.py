@@ -40,8 +40,10 @@ mode = True  # 聊天为True
 def load_and_run_model():
     print("模型加载中...")
     # model = AutoModel.from_pretrained("THUDM/chatglm-6b-int4", trust_remote_code=True).half().cuda()
-    model = AutoModel.from_pretrained(r"C:\Users\Opti7080\Desktop\models--THUDM--chatglm-6b", trust_remote_code=True).half().cuda()
-    tokenizer = AutoTokenizer.from_pretrained("THUDM/chatglm-6b-int4", trust_remote_code=True)
+    
+    model = AutoModel.from_pretrained(r"C:\Users\89721\Desktop\models--THUDM--chatglm2-6b-int4", trust_remote_code=True).cuda()
+    # model = AutoModel.from_pretrained(r"C:\Users\Opti7080\Desktop\models--THUDM--chatglm-6b", trust_remote_code=True).half().cuda()
+    tokenizer = AutoTokenizer.from_pretrained(r"C:\Users\89721\Desktop\models--THUDM--chatglm2-6b-int4", trust_remote_code=True)
     model_sim =  AutoModel.from_pretrained("GanymedeNil/text2vec-large-chinese").to('cuda')
     tokenizer_sim = AutoTokenizer.from_pretrained("GanymedeNil/text2vec-large-chinese")
     corpus = faiss_corpus(model = model_sim, tokenizer=tokenizer_sim)
@@ -82,7 +84,7 @@ def load_and_run_model():
                     temperature=0.9,
                     top_p=0.95,
                 )
-            answer = tokenizer.decode(out[0]).split('<ChatGLM-6B>:')[1].strip('\n').strip()
+            answer = tokenizer.decode(out[0]).split('<ChatGLM-6B>：')[1].strip('\n').strip()
             if switch:
                 output_queue.put((answer, True))
                 sys(answer)
