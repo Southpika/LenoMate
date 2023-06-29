@@ -4,10 +4,9 @@ import time
 import os
 import argparse
 import torch
-import operation
-import operation.prompt as prompt
+import prompt as prompt
 import re
-from operation.open_app import search_tool
+from open_app import search_tool
 import numpy as np
 
 class Operation:
