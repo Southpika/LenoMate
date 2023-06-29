@@ -1,27 +1,18 @@
 # -*- coding: UTF-8 -*-
-from typing import Dict
-from fastapi import FastAPI, File, UploadFile, Form
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import HTMLResponse,JSONResponse
-
 import audio.play as play
 import audio.synthesis as synthesis
 import audio.recognition as recognition
-import operation.prompt as prompt
-import operation.operation as operation
 import torch
 from transformers import AutoTokenizer, AutoModel
-
 from utils.search_doc_faiss import faiss_corpus
 import threading
 import queue
-
 import speech_recognition as sr
-
-from urllib import request, parse, error
 from typing import Dict
 
 app = FastAPI()
