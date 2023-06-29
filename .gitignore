@@ -29,3 +29,4 @@ dist/lenochat.exe
 __pycache__/
 lenochat.spec
 utils/data_tzh.csv
+/.idea/codeStyles/codeStyleConfig.xml
