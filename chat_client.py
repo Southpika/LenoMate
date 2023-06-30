@@ -19,8 +19,6 @@ app = FastAPI()
 def start():
     with open("QA.html", encoding="utf-8") as file:
         html_content = file.read()
-    thred = threading.Thread(target=sys, args=("你好，我是LenoMate，可以叫我小诺，请问有什么可以帮您？",))
-    thred.start()
     return HTMLResponse(content=html_content, status_code=200)
 
 
@@ -44,12 +42,16 @@ def text2(data: Dict):
 @app.post("/audio")  # 显示返回消息
 def audio(data: Dict):
     result, bot = output_queue.get()
+    if bot:
+        thred = threading.Thread(target=sys, args=(result,))
+        thred.start()
     return JSONResponse(content={"result": result, "bot": bot})
 
 
 def sys(result):
     synthesis.main(result)
     play.play()
+    function_finished_flag.set()
 
 
 def handle(**kwargs):
@@ -57,7 +59,7 @@ def handle(**kwargs):
         temp = subprocess.check_output(kwargs["command"], shell=True)
         if "chat" not in kwargs.keys():
             client_socket.send(
-                str({"inputs": temp.decode("utf-8").replace('\r\n', '').replace('\x1b[0m', ''), "mode": int(mode),
+                str({"inputs": temp.decode("utf-8").replace("\r\n\x1b[0m", ''), "mode": int(mode),
                      "state_code": 1}).encode("utf-8"))
     if "chat" in kwargs.keys():
         output_queue.put((kwargs["chat"], True))
@@ -77,67 +79,68 @@ def receive_messages():
             break
 
 
-# def load_and_run_audio():
-#     while True:
-#         print("处于待唤醒状态")
-#         try:
-#             # 使用麦克风录制音频
-#             with sr.Microphone(sample_rate=8000) as source:
-#                 r = sr.Recognizer()
-#                 audio_frame = r.listen(source)
-#
-#             # 使用语音识别器解析音频
-#             # result = r.recognize_google(audio, language="zh-CN")
-#             result = recognition.main2(audio_frame.frame_data)
-#             print("识别结果：", result)
-#
-#             # 根据指令执行相应的操作
-#             if "小诺" in result or "想诺" in result:
-#                 # 执行您的程序代码
-#                 sys("我在听")
-#                 while True:
-#                     print("处于已唤醒状态")
-#                     try:
-#                         # 使用麦克风录制音频
-#                         with sr.Microphone(sample_rate=8000) as source:
-#                             r = sr.Recognizer()
-#                             audio_frame = r.listen(source, 3)
-#                         # 使用语音识别器解析音频
-#                         # result = r.recognize_google(audio, language="zh-CN")
-#                         result = recognition.main2(audio_frame.frame_data)
-#                         print("识别结果：", result)
-#
-#                         # 根据指令执行相应的操作
-#                         if not result.strip():
-#                             sys("你好像没有说话，试试说小诺小诺唤醒我")
-#                             break
-#                         else:
-#                             output_queue.put((result, False))
-#                             input_queue.put((result, False))
-#                             sys("请稍等")
-#                             temp = output_queue2.get()
-#                             output_queue.put((temp, True))
-#                             print(output_queue.queue)
-#                             sys(temp)
-#
-#
-#                     except sr.RequestError as e:
-#                         print("无法连接", str(e))
-#                         sys("你好像没有说话，试试说小诺小诺唤醒我")
-#                         break
-#                     except (sr.WaitTimeoutError, sr.UnknownValueError):
-#                         sys("你好像没有说话，试试说小诺小诺唤醒我")
-#                         break
-#
-#         except sr.RequestError as e:
-#             print("无法连接", str(e))
-#         except (sr.WaitTimeoutError, sr.UnknownValueError):
-#             print("无法识别语音")
+def load_and_run_audio():
+    global mode
+    while True:
+        print("处于待唤醒状态")
+        try:
+            # 使用麦克风录制音频
+            with sr.Microphone(sample_rate=8000) as source:
+                r = sr.Recognizer()
+                audio_frame = r.listen(source, phrase_time_limit=5)
+
+            # 使用语音识别器解析音频
+            # result = r.recognize_google(audio_frame, language="zh-CN")
+            result = recognition.main2(audio_frame.frame_data)
+            print("识别结果：", result)
+
+            # 根据指令执行相应的操作
+            if "小诺" in result or "想诺" in result:
+                # 执行您的程序代码
+                sys("我在听")
+                while True:
+                    print("处于已唤醒状态")
+                    try:
+                        # 使用麦克风录制音频
+                        with sr.Microphone(sample_rate=8000) as source:
+                            r = sr.Recognizer()
+                            audio_frame = r.listen(source, timeout=5)
+                        # 使用语音识别器解析音频
+                        # result = r.recognize_google(audio_frame, language="zh-CN")
+                        result = recognition.main2(audio_frame.frame_data)
+                        print("识别结果：", result)
+
+                        # 根据指令执行相应的操作
+                        if not result.strip():
+                            sys("你好像没有说话，试试说小诺小诺唤醒我")
+                            break
+                        else:
+                            output_queue.put((result, False))
+                            sys("请稍等")
+                            client_socket.send(
+                                str({"inputs": result, "mode": int(mode), "state_code": 0}).encode(
+                                    "utf-8"))
+                            function_finished_flag.clear()
+                            function_finished_flag.wait()
+
+                    except sr.RequestError as e:
+                        print("无法连接", str(e))
+                        sys("你好像没有说话，试试说小诺小诺唤醒我")
+                        break
+                    except (sr.WaitTimeoutError, sr.UnknownValueError):
+                        sys("你好像没有说话，试试说小诺小诺唤醒我")
+                        break
+
+        except sr.RequestError as e:
+            print("无法连接", str(e))
+        except (sr.WaitTimeoutError, sr.UnknownValueError):
+            print("无法识别语音")
 
 
 if __name__ == '__main__':
     # 聊天模式为True
     mode = True
+    function_finished_flag = threading.Event()
     # 创建一个显示队列
     output_queue = queue.Queue()
     # 创建套接字
@@ -147,9 +150,9 @@ if __name__ == '__main__':
     # 创建线程接收消息
     receive_thread = threading.Thread(target=receive_messages)
     receive_thread.start()
-    # # 创建一个线程，用于加载和运行语音识别和合成
-    # model_thread = threading.Thread(target=load_and_run_audio)
-    # # 启动线程
-    # model_thread.start()
+    # 创建一个线程，用于加载和运行语音识别和合成
+    model_thread = threading.Thread(target=load_and_run_audio)
+    # 启动线程
+    model_thread.start()
     # 启动前端
     uvicorn.run(app, host="127.0.0.1", port=8081)
