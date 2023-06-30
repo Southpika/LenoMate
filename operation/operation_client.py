@@ -88,27 +88,27 @@ class Operation3(Operation):
     def fit(self,model=None,tokenizer=None):
         from utils.search_doc_faiss import faiss_corpus
         from data.map import name_exe_map
-        # args_app = self.get_parser()
+        args_app = self.get_parser()
         corpus = faiss_corpus(args = args_app)
         selected_idx,score = corpus.search(query = self.input_statement,verbose=True)
         app_name = corpus.corpus[selected_idx]
         print(f'find app {app_name}')
         return self.tool.open_app(b = name_exe_map[app_name])
     
-    # def get_parser(self):
-    #     parser = argparse.ArgumentParser('Opening APP')
-    #
-    #     parser.add_argument('--new-embed', default=False,type=bool)
-    #     parser.add_argument('--document-embed', default='./data/document_embed.npy')
-    #     parser.add_argument('--k', default=1)
-    #     parser.add_argument('--device', default="cuda")
-    #     parser.add_argument('--model-name', default="GanymedeNil/text2vec-large-chinese")
-    #
-    #     parser.add_argument('--index_location', default='./data/app_map.index')
-    #     parser.add_argument('--document-corpus', default='./data/app.txt')
-    #     parser.add_argument('--search', default=2)
-    #     args = parser.parse_args()
-    #     return args
+    def get_parser(self):
+        parser = argparse.ArgumentParser('Opening APP')
+    
+        parser.add_argument('--new-embed', default=False,type=bool)
+        parser.add_argument('--document-embed', default='./data/document_embed.npy')
+        parser.add_argument('--k', default=1)
+        parser.add_argument('--device', default="cuda")
+        parser.add_argument('--model-name', default="GanymedeNil/text2vec-large-chinese")
+    
+        parser.add_argument('--index_location', default='./data/app_map.index')
+        parser.add_argument('--document-corpus', default='./data/app.txt')
+        parser.add_argument('--search', default=2)
+        args = parser.parse_args()
+        return args
      
     
 class Operation4(Operation):
@@ -130,10 +130,9 @@ class Operation4(Operation):
         return self.context
         
 class Operation5():
-    def __init__(self,inputs) -> None:
+    def __init__(self) -> None:
         from volumn_control import vol_ctrl
         self.vol_ctrl = vol_ctrl()
-        self.inputs = inputs
 
     def fit(self):
         self.vl = self.vol_ctrl.vl_real

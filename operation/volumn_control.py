@@ -4,6 +4,7 @@ from ctypes import cast, POINTER
 from comtypes import CLSCTX_ALL
 from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
 import time
+import argparse
 
 def find_closest_key(my_dict, num):
     closest_key = None
@@ -67,7 +68,14 @@ class vol_ctrl:
         if verbose:print('alter to ',num)
 
 if __name__ == '__main__':
-    vol_ctrl = vol_ctrl()
-    vol_ctrl.mute_all()
-    time.sleep(5)
-    vol_ctrl.alter(50)
+    vl_ctrl = vol_ctrl()
+    parser = argparse.ArgumentParser('Alter volume')
+    parser.add_argument('--vol', default=-50,type=int)
+    parser.add_argument('--mute', default=0,type=int)
+    args = parser.parse_args() 
+    if args.mute:
+        vl_ctrl.mute_all()
+    else:
+        vl_ctrl.mute_all(mute = False)
+    if args.vol > 0:
+        vl_ctrl.alter(args.vol)

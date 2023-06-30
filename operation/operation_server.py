@@ -52,7 +52,7 @@ class Operation1(Operation):
             input_ids = tokenizer.encode(self.prompt, return_tensors='pt').to('cuda')
             out = model.generate(
                 input_ids=input_ids,
-                max_length=300,
+                max_length=400,
                 temperature=0.9,
                 top_p = 0.95,
             )
@@ -116,30 +116,28 @@ class Operation2(Operation):
 # args_app = get_parser()  
 
 class Operation3(Operation):
-    def __init__(self,inputs):
-        self.tool = search_tool()
-        self.input_statement = inputs
-        
-        
     def fit(self,model=None,tokenizer=None):
         from utils.search_doc_faiss import faiss_corpus
         from data.map import name_exe_map
+        self.tool = search_tool()
         args_app = self.get_parser() 
         corpus = faiss_corpus(args = args_app)
         selected_idx,score = corpus.search(query = self.input_statement,verbose=True)
         app_name = corpus.corpus[selected_idx]
         print(f'find app {app_name}')
-        return self.tool.open_app(b = name_exe_map[app_name])
+        output = {
+            'command':f"python operation/open_app.py --a C --b {name_exe_map[app_name]}",
+            'chat':f"已为您打开{app_name}"
+        }
+        return output
     
     def get_parser(self):
         parser = argparse.ArgumentParser('Opening APP')
-        
         parser.add_argument('--new-embed', default=False,type=bool)
         parser.add_argument('--document-embed', default='./data/document_embed.npy')
         parser.add_argument('--k', default=1)
         parser.add_argument('--device', default="cuda")
         parser.add_argument('--model-name', default="GanymedeNil/text2vec-large-chinese")
-
         parser.add_argument('--index_location', default='./data/app_map.index')
         parser.add_argument('--document-corpus', default='./data/app.txt')
         parser.add_argument('--search', default=2)
@@ -158,38 +156,44 @@ class Operation4(Operation):
                 max_length=400,
                 temperature=0.3,
                 top_p = 0.95,
-                # repetition_penalty = 1.15,
                 # stopping_criteria = StoppingCriteriaList([stop_criteria])
-                # do_sample = True
             )
             answer = tokenizer.decode(out[0]).split('##回答')[1].strip('：').strip()
 
             return {'chat':answer}
-        
+      
 class Operation5():
-    def __init__(self,inputs,model_sim,tokenizer_sim) -> None:
-        from operation.volumn_control import vol_ctrl
-        self.vol_ctrl = vol_ctrl()
+    def __init__(self,inputs,context,model_sim,tokenizer_sim) -> None:
+        # from operation.volumn_control import vol_ctrl
+        # self.vol_ctrl = vol_ctrl()
         self.inputs = inputs
         self.model_sim = model_sim
         self.tokenizer_sim = tokenizer_sim
+        self.context = context
 
     def fit(self,model,tokenizer,remote = False):
         self.judge()
         if self.selected=='静音': 
-            self.vol_ctrl.mute_all()
-            return "已静音"
-        if self.selected=='取消静音': 
-            self.vol_ctrl.mute_all(mute=False)
-            return "已取消静音"
-        if not remote:
-            self.vl = self.vol_ctrl.vl_real
-            context = '电脑当前音量为'+str(self.vl)
-        if remote:
-            context = remote
-        self.prompt = prompt.Prompt4(context,self.inputs).prompt
-        self.extract_info(self.prompt,model,tokenizer)
-        self.vol = self.num
+            output = {
+                'command':"python operation/volumn_control.py --mute 0",
+                'chat':'已静音'
+            }
+            
+            return output
+        elif self.selected=='取消静音': 
+            output = {
+                'command':"python operation/volumn_control.py --mute 1",
+                'chat':'已静音'
+            }
+            
+        else:
+            self.prompt = prompt.Prompt4(self.context,self.inputs).prompt
+            self.extract_info(self.prompt,model,tokenizer)
+            output = {
+                'command':f"python operation/volumn_control.py --vol {self.num}",
+                'chat':self.answer
+            }
+        return output
         try:
             self.vol_ctrl.alter(self.num)
             return self.answer

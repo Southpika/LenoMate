@@ -1,7 +1,7 @@
 import os
 import json
 from tqdm import tqdm
-
+import argparse
 class search_tool:
     def __init__(self,map_loc='./operation/exe_location.json') :
         self.map_loacation = map_loc
@@ -42,10 +42,16 @@ class search_tool:
     
 
 if __name__ == "__main__":
-    a=input('请输入想要查找的磁盘：')+':/'
-    b=input('请输入想要查找的文件名和后缀：')
+    # a=input('请输入想要查找的磁盘：')+':/'
+    # b=input('请输入想要查找的文件名和后缀：')
+    parser = argparse.ArgumentParser('Search App')
+    parser.add_argument('--a', default='C',type=str)
+    parser.add_argument('--b',type=str)
+    args = parser.parse_args() 
+    a = args.a + ':/'
     test = search_tool()
-    test.open_app(a=a,b=b)
+    # print(a,args.b)
+    test.open_app(a=a,b=args.b)
 
 #   app_dir = r'D:\360download\花生壳\HskDDNS.exe'
 #   open_app(app_dir)
