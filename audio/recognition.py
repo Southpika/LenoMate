@@ -54,8 +54,11 @@ def main(path="./data/voice.wav"):
     res_f = request.urlopen(req)
     result = json.loads(res_f.read().decode('utf-8'))
     # print(result)
-    print("识别结果：", result['result'][0])
-    return result['result'][0]
+    if 'result' in result:
+        print("识别结果：", result['result'][0])
+    else:
+        print("识别结果：无")
+    return result['result'][0] if 'result' in result else None
 
 
 def main2(content):
