@@ -34,7 +34,7 @@
         /* 调整滚动条 */
         .container::-webkit-scrollbar {
             width: 5px;
-            height: 0px;
+            height: 0;
         }
 
         .container::-webkit-scrollbar-track {
@@ -147,8 +147,9 @@
             border-radius: 5px;
             cursor: pointer;
         }
+
         .el-upload__tip {
-            margin-left: 30px;
+            margin-left: 10px;
         }
     </style>
     <!-- import CSS -->
@@ -166,16 +167,14 @@
         <button style="background-color: #009d06" onclick="sendMessage2()">模式切换</button>
         <el-upload
                 class="upload-demo"
-                action="https://jsonplaceholder.typicode.com/posts/"
-                :on-preview="handlePreview"
+                action="/data"
                 :on-remove="handleRemove"
                 :before-remove="beforeRemove"
-                multiple
+                :on-success="handleSuccess"
                 :limit="1"
-                :on-exceed="handleExceed"
                 :file-list="fileList">
             <el-button size="small" type="primary">点击上传</el-button>
-            <div slot="tip" class="el-upload__tip">文件分析</div>
+            <div slot="tip" class="el-upload__tip">{{ fileList.length ? '分析模式已打开' : '分析模式已关闭' }}</div>
         </el-upload>
     </div>
 </div>
@@ -193,19 +192,28 @@
             };
         },
         methods: {
-            handleRemove(file, fileList) {
+            handleSuccess(response, file, fileList) {
+                this.fileList.push(file)
                 console.log(file, fileList);
             },
-            handlePreview(file) {
-                console.log(file);
+            handleRemove(file, fileList) {
+                fetch(`/data/${file.name}`, {
+                    method: 'DELETE',
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        this.fileList.pop()
+                        console.log(data.message);
+                    })
+                    .catch(error => {
+                        console.error(error);
+                    })
+                console.log(file, fileList);
             },
-            handleExceed(files, fileList) {
-                this.$message.warning(`当前限制选择 3 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`);
-            },
-            beforeRemove(file, fileList) {
+            beforeRemove(file) {
                 return this.$confirm(`确定移除 ${file.name}？`);
             }
-        }
+        },
     })
 </script>
 <script>
