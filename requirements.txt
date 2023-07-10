@@ -21,3 +21,5 @@ librosa
 numpy==1.23.0
 comtypes
 pycaw
+pptx
+pdfplumber

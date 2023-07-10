@@ -31,3 +31,4 @@ lenochat.spec
 utils/data_tzh.csv
 /.idea/codeStyles/codeStyleConfig.xml
 /test.py
+test_file/hi.csv
