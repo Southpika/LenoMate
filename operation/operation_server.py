@@ -10,7 +10,7 @@ from operation.open_app import search_tool
 import numpy as np
 
 class Operation:
-    def __init__(self,input_statement,context) -> None:
+    def __init__(self,input_statement,context=None) -> None:
         self.input_statement = input_statement
         self.context = context
     def fit(self):
@@ -175,15 +175,15 @@ class Operation5():
         self.judge()
         if self.selected=='静音': 
             output = {
-                'command':"python operation/volumn_control.py --mute 0",
+                'command':"python operation/volumn_control.py --mute 1",
                 'chat':'已静音'
             }
             
             return output
         elif self.selected=='取消静音': 
             output = {
-                'command':"python operation/volumn_control.py --mute 1",
-                'chat':'已静音'
+                'command':"python operation/volumn_control.py --mute 0",
+                'chat':'已取消静音'
             }
             
         else:

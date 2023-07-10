@@ -8,10 +8,10 @@ from utils.search_doc_faiss import faiss_corpus
 import torch
 import audio.play as play
 import audio.synthesis as synthesis
-
+from transformers import StoppingCriteriaList,StoppingCriteria
 import operation.prompt as prompt
 import operation.operation_server as operation
-
+from stop_criterion import StopWordsCriteria
 def sys(result):
     synthesis.main(result)
     play.play()
@@ -19,12 +19,18 @@ def sys(result):
 def load_and_run_model():
     global input_queue,output_queue
     print("模型加载中...")
-    model = AutoModel.from_pretrained(r"C:\Users\89721\Desktop\models--THUDM--chatglm2-6b-int4", trust_remote_code=True).cuda()
-    # model = AutoModel.from_pretrained(r"C:\Users\Opti7080\Desktop\models--THUDM--chatglm-6b", trust_remote_code=True).half().cuda()
-    tokenizer = AutoTokenizer.from_pretrained(r"C:\Users\89721\Desktop\models--THUDM--chatglm2-6b-int4", trust_remote_code=True)
+    # model = AutoModel.from_pretrained(r"C:\Users\89721\Desktop\models--THUDM--chatglm2-6b-int4", trust_remote_code=True).cuda()
+
+    # tokenizer = AutoTokenizer.from_pretrained(r"C:\Users\89721\Desktop\models--THUDM--chatglm2-6b-int4", trust_remote_code=True)
     # model = AutoModel.from_pretrained("THUDM/chatglm-6b-int4", trust_remote_code=True).half().cuda()
     # model = AutoModel.from_pretrained(r"C:\Users\Opti7080\Desktop\models--THUDM--chatglm-6b", trust_remote_code=True).half().cuda()
+    # model = AutoModel.from_pretrained(r"C:\Users\Opti7080\Desktop\models--THUDM--chatglm-6b", trust_remote_code=True).half().cuda()
     # tokenizer = AutoTokenizer.from_pretrained("THUDM/chatglm-6b-int4", trust_remote_code=True)
+    model = AutoModel.from_pretrained(r"C:\Users\89721\Desktop\model_chatglm2",trust_remote_code=True).quantize(8).cuda()
+    tokenizer = AutoTokenizer.from_pretrained(r"C:\Users\89721\Desktop\model_chatglm2",trust_remote_code=True)
+    stop_criteria = StopWordsCriteria(tokenizer, ['<User>'], stream_callback=None)
+    model.is_parallelizable = True
+    model.model_parallel = True
     model_sim =  AutoModel.from_pretrained("GanymedeNil/text2vec-large-chinese").to('cuda')
     tokenizer_sim = AutoTokenizer.from_pretrained("GanymedeNil/text2vec-large-chinese")
     corpus = faiss_corpus(model = model_sim, tokenizer=tokenizer_sim)
@@ -69,9 +75,10 @@ def load_and_run_model():
                     input_ids = tokenizer.encode(prompt_chat, return_tensors='pt').to('cuda')
                     out = model.generate(
                         input_ids=input_ids,
-                        max_length=300,
+                        max_length=1500,
                         temperature=0.9,
                         top_p=0.95,
+                        stopping_criteria = StoppingCriteriaList([stop_criteria])
                     )
                 answer = tokenizer.decode(out[0]).split('<LenoMate>:')[1].strip('\n').strip()
                 send_data ={'chat':answer}
