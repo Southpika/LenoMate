@@ -29,3 +29,5 @@ class StopWordsCriteria(StoppingCriteria):
             self._stream_callback(self._stream_buffer + text)
             self._stream_buffer = ''
         return False
+    
+# stop_criteria = StopWordsCriteria(tokenizer, ['<User>'], stream_callback=None)
