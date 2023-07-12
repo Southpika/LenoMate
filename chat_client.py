@@ -13,6 +13,7 @@ import speech_recognition as sr
 from typing import Dict
 import subprocess
 from fastapi.staticfiles import StaticFiles
+import operation.read_file as rd
 
 app = FastAPI()
 app.mount("/web", StaticFiles(directory="web"), name="web")
@@ -23,7 +24,11 @@ async def upload_file(file: UploadFile):
     # 执行你的文件处理逻辑，例如保存文件到磁盘或进行其他操作
     contents = await file.read()
     file_extension = os.path.splitext(file.filename)[1]
-    with open("tempfile" + file_extension, "wb") as f:
+    name = "./data/tempfile" + file_extension
+    global file_content
+    reader = rd.read_file('../' + name)
+    file_content = reader.fit(trucation=10)
+    with open(name, "wb") as f:
         f.write(contents)
     global filemode
     filemode = not filemode
@@ -33,7 +38,7 @@ async def upload_file(file: UploadFile):
 @app.delete("/data/{filename}")
 def delete_file(filename: str):
     file_extension = os.path.splitext(filename)[1]
-    name = "tempfile" + file_extension
+    name = "./data/tempfile" + file_extension
     if os.path.exists(name):
         os.remove(name)
         global filemode
@@ -54,7 +59,11 @@ def start():
 def text(data: Dict):
     thred = threading.Thread(target=sys, args=("请稍等",))
     thred.start()
-    client_socket.send(str({"inputs": data.get("userInput"), "mode": int(mode), "state_code": 0}).encode("utf-8"))
+    if filemode:
+        client_socket.send(
+            str({"inputs": data.get("userInput"), "state_code": 2, "content": file_content}).encode("utf-8"))
+    else:
+        client_socket.send(str({"inputs": data.get("userInput"), "mode": int(mode), "state_code": 0}).encode("utf-8"))
 
 
 @app.post("/text2")  # 切换按钮
@@ -167,17 +176,17 @@ def receive_messages():
 
 if __name__ == '__main__':
     # 聊天模式为True
-    mode, filemode = True, False
+    mode, filemode, file_content = True, False, ''
     function_finished_flag = threading.Event()
     # 创建一个显示队列
     output_queue = queue.Queue()
-    # # 创建套接字
-    # client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    # # 连接服务器
-    # client_socket.connect(('192.168.137.1', 8888))
-    # # 创建线程接收消息
-    # receive_thread = threading.Thread(target=receive_messages)
-    # receive_thread.start()
+    # 创建套接字
+    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    # 连接服务器
+    client_socket.connect(('192.168.137.1', 8888))
+    # 创建线程接收消息
+    receive_thread = threading.Thread(target=receive_messages)
+    receive_thread.start()
     # # 创建一个线程，用于加载和运行语音识别和合成
     # model_thread = threading.Thread(target=load_and_run_audio)
     # # 启动线程

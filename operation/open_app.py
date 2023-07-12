@@ -47,8 +47,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser('Search App')
     parser.add_argument('--a', default='C',type=str)
     parser.add_argument('--b',type=str)
-    args = parser.parse_args() 
-    a = args.a + ':/'
+    args = parser.parse_args()
+    a = args.a + ':/Users'
     test = search_tool()
     # print(a,args.b)
     test.open_app(a=a,b=args.b)
