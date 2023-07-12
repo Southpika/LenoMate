@@ -3,10 +3,10 @@ import pdfplumber
 
 class read_file():
     def __init__(self,location):
-        if 'ppt' in location:
+        if location.endswith('.pptx') or location.endswith('.ppt'):
             self.mode = 'ppt'
             self.slides = pptx.Presentation(location).slides
-        if 'pdf' in location:
+        if location.endswith('.pdf'):
             self.mode = 'pdf'
             self.path = location
     
