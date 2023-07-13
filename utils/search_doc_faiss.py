@@ -8,7 +8,7 @@ import os
 
 ## Predefined 
 def get_parser():
-    parser = argparse.ArgumentParser('Matching Task')
+    parser = argparse.ArgumentParser('Matching Task Default Settings')
     parser.add_argument('--document-corpus', default='./data/document_corpus.txt')
     parser.add_argument('--new-embed', default=False,type=bool)
     parser.add_argument('--document-embed', default='./data/document_embed.npy')
@@ -39,12 +39,13 @@ def mean_pooling(model_output, attention_mask, return_tensors=False):
     else:
         return output
 
-args = get_parser()
+# args = get_parser()
 
 class faiss_corpus:
-    def __init__(self,model=None,tokenizer=None,args=args):
+    def __init__(self,args,model=None,tokenizer=None,doc_corpus=None,idx_loc=''):
         print('[INFO]Loading Model')
         self.args = args
+        
         self.device = args.device
         if not (model and tokenizer):
             self.tokenizer = AutoTokenizer.from_pretrained(args.model_name)
@@ -54,10 +55,14 @@ class faiss_corpus:
             self.model = model
         ## Loading data 
         self.corpus = []
-        with open(args.document_corpus,'r',encoding='utf-8') as f:
-            for line in f:
-                self.corpus.append(line.strip('\n'))
-
+        
+        if idx_loc: args.index_location = idx_loc
+        if doc_corpus: self.corpus = doc_corpus
+        else:
+            with open(args.document_corpus,'r',encoding='utf-8') as f:
+                for line in f:
+                    self.corpus.append(line.strip('\n'))
+        print(self.args)
     def fit(self):
         """
         The first time to load corpus and set index

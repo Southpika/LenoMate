@@ -30,7 +30,7 @@ class read_file():
                         print('temp', temp_content)
 
                 if len(temp_content) > trucation:
-                    content += f"第{start}页："
+                    content += f"第{start}页：\n"
                     content += temp_content
                     content += '\n'
                     if verbose:
@@ -51,17 +51,15 @@ class read_file():
             pages = 0
             for item in test1:
                 if item.metadata.page_number != pages:
-
-                    content += f"\n第{pages+1}页\n"
+                    content += f"第{pages+1}页：\n"
                     pages += 1
                     if verbose:
                         print('---------------------')
-                        print(f"\n第{pages+1}页\n")
+                        print(f"\n第{pages+1}页：\n")
                 if len(item.text) > trucation:
                     content+=item.text
                     content+='\n' 
                     if verbose:
-                        
                         print(item.text)                  
             return content
 

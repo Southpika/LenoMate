@@ -12,6 +12,28 @@ from transformers import StoppingCriteriaList,StoppingCriteria
 import operation.prompt as prompt
 import operation.operation_server as operation
 from stop_criterion import StopWordsCriteria
+import argparse
+from peft import PeftModel
+
+def get_parser():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--document-corpus', default='./data/document_corpus.txt')
+    parser.add_argument('--k', default=1)
+    parser.add_argument('--device', default="cuda")
+    parser.add_argument('--index_location', default='./data/test.index')
+    parser.add_argument('--search', default=1)
+
+    parser.add_argument('--work-dir',default=r"./tzh_model/lenomate_hi")
+    parser.add_argument('--model-dir',default=r"C:\Users\89721\Desktop\model_chatglm2")
+    # parser.add_argument('--simmodel-dir',default=r"C:\Users\89721\Desktop\models--GanymedeNil--text2vec-large-chinese")
+    parser.add_argument('--simmodel-dir',default="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2")
+    
+    parser.add_argument('--temperature',default=0.95)
+    # parser.add_argument('--model-dir',default=r"/home/tzh/model_dir_cache/models--THUDM--chatglm-6b")
+    config = parser.parse_args()      
+    return config
+args = get_parser()
+
 def sys(result):
     synthesis.main(result)
     play.play()
@@ -19,21 +41,18 @@ def sys(result):
 def load_and_run_model():
     global input_queue,output_queue
     print("模型加载中...")
-    # model = AutoModel.from_pretrained(r"C:\Users\89721\Desktop\models--THUDM--chatglm2-6b-int4", trust_remote_code=True).cuda()
-
-    # tokenizer = AutoTokenizer.from_pretrained(r"C:\Users\89721\Desktop\models--THUDM--chatglm2-6b-int4", trust_remote_code=True)
     # model = AutoModel.from_pretrained("THUDM/chatglm-6b-int4", trust_remote_code=True).half().cuda()
-    # model = AutoModel.from_pretrained(r"C:\Users\Opti7080\Desktop\models--THUDM--chatglm-6b", trust_remote_code=True).half().cuda()
-    # model = AutoModel.from_pretrained(r"C:\Users\Opti7080\Desktop\models--THUDM--chatglm-6b", trust_remote_code=True).half().cuda()
     # tokenizer = AutoTokenizer.from_pretrained("THUDM/chatglm-6b-int4", trust_remote_code=True)
-    model = AutoModel.from_pretrained(r"C:\Users\89721\Desktop\model_chatglm2",trust_remote_code=True).quantize(8).cuda()
-    tokenizer = AutoTokenizer.from_pretrained(r"C:\Users\89721\Desktop\model_chatglm2",trust_remote_code=True)
-    stop_criteria = StopWordsCriteria(tokenizer, ['<User>'], stream_callback=None)
+    model = AutoModel.from_pretrained(args.model_dir, load_in_8bit=True, trust_remote_code=True, device_map='auto')
+    tokenizer = AutoTokenizer.from_pretrained(args.model_dir,trust_remote_code=True)
+    
+    model = PeftModel.from_pretrained(model, args.work_dir)
     model.is_parallelizable = True
     model.model_parallel = True
-    model_sim =  AutoModel.from_pretrained("GanymedeNil/text2vec-large-chinese").to('cuda')
-    tokenizer_sim = AutoTokenizer.from_pretrained("GanymedeNil/text2vec-large-chinese")
-    corpus = faiss_corpus(model = model_sim, tokenizer=tokenizer_sim)
+    model.eval()
+    model_sim =  AutoModel.from_pretrained(args.simmodel_dir).to('cuda')
+    tokenizer_sim = AutoTokenizer.from_pretrained(args.simmodel_dir)
+    corpus = faiss_corpus(args=args,model = model_sim, tokenizer=tokenizer_sim)
     print("模型加载完成")
 
     while True: 
@@ -41,6 +60,8 @@ def load_and_run_model():
         
         if data_client['state_code'] == 0:
             input_statement = data_client['inputs']
+            stop_criteria = StopWordsCriteria(tokenizer, ['<User>','<LenoMate>','<用户>','<Brother>'], stream_callback=None)
+            
             if not data_client['mode']:
                 print("当前为命令模式...")
                 
@@ -66,16 +87,17 @@ def load_and_run_model():
                     print('#' * 50)
                     print('error info', e)
                     continue
+
             elif data_client['mode']:
                 print("当前为聊天模式...")
                 prompt_chat = f"""<用户>：{input_statement}
-                <LenoMate>:"""
-                model.eval()
+<LenoMate>:"""
+                
                 with torch.no_grad():
                     input_ids = tokenizer.encode(prompt_chat, return_tensors='pt').to('cuda')
                     out = model.generate(
                         input_ids=input_ids,
-                        max_length=1500,
+                        max_length=1000,
                         temperature=0.9,
                         top_p=0.95,
                         stopping_criteria = StoppingCriteriaList([stop_criteria])
@@ -83,7 +105,7 @@ def load_and_run_model():
                 answer = tokenizer.decode(out[0]).split('<LenoMate>:')[1].strip('\n').strip()
                 send_data ={'chat':answer}
                 output_queue.put(str(send_data))
-        if data_client['state_code'] == 1:
+        elif data_client['state_code'] == 1:
             context = data_client['inputs']
             torch.cuda.empty_cache()
             if selected_idx == 5:
@@ -94,6 +116,34 @@ def load_and_run_model():
 
             output_queue.put(result)
             print("模型输出：", result)
+        elif data_client['state_code'] == 2:
+            query = data_client['inputs']
+            
+            content = data_client['content']
+            type_doc = data_client['type_doc']
+            prompt_chat = f"""基于以下{type_doc}的内容，简洁和专业的来回答用户关于此{type_doc}的问题。
+## {type_doc}内容:
+{content}
+## 问题:
+{query}
+## 回答：
+"""
+            stop_criteria_ppt = StopWordsCriteria(tokenizer, ['##'], stream_callback=None)
+            print('[分析功能]模型运行中...')
+            with torch.no_grad():
+                input_ids = tokenizer.encode(prompt_chat, return_tensors='pt').to('cuda')
+                out = model.generate(
+                    input_ids=input_ids,
+                    max_length=8000,
+                    temperature=0.9,
+                    top_p=0.95,
+                    stopping_criteria = StoppingCriteriaList([stop_criteria_ppt])
+                )
+            print(tokenizer.decode(out[0]))
+            answer = tokenizer.decode(out[0]).split('## 回答：')[1]
+            send_data ={'chat':answer}
+            output_queue.put(str(send_data))
+            
             
 
 
@@ -127,18 +177,15 @@ def handle_client(client_socket, client_address):
             break
 
 
-# 创建一个输入队列
+
 input_queue,output_queue = queue.Queue(),queue.Queue()
-# 创建一个线程，用于加载和运行模型
 model_thread = threading.Thread(target=load_and_run_model)
 model_thread.daemon = True
-# 启动线程
 model_thread.start()
 
 
 
 def chat_server(ip='192.168.137.1'):
-# 创建套接字
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     # 监听端口
     server_socket.bind((ip, 8888))
