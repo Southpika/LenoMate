@@ -33,3 +33,4 @@ utils/data_tzh.csv
 /test.py
 test_file/hi.csv
 .DS_Store
+data/pdf_search.index
