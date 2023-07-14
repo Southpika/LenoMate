@@ -67,5 +67,5 @@ class read_file():
 if __name__ == '__main__':
     location = input('location:')
     read_file = read_file(location)
-    temp = read_file.fit(trucation=10)
+    temp = read_file.fit(trucation=0,verbose=True)
     print(temp)

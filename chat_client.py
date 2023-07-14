@@ -24,14 +24,15 @@ async def upload_file(file: UploadFile):
     # 执行你的文件处理逻辑，例如保存文件到磁盘或进行其他操作
     contents = await file.read()
     file_extension = os.path.splitext(file.filename)[1]
+    global file_type
+    file_type = file_extension
     name = "./data/tempfile" + file_extension
-    global file_content
-    reader = rd.read_file('../' + name)
-    file_content = reader.fit(trucation=10)
     with open(name, "wb") as f:
         f.write(contents)
-    global filemode
+    global file_content, filemode
     filemode = not filemode
+    reader = rd.read_file(name)
+    file_content = reader.fit(trucation=10)
     return {"filename": file.filename}
 
 
@@ -60,8 +61,10 @@ def text(data: Dict):
     thred = threading.Thread(target=sys, args=("请稍等",))
     thred.start()
     if filemode:
+        type_doc = 'PDF' if file_type == '.pdf' else 'PPT'
         client_socket.send(
-            str({"inputs": data.get("userInput"), "state_code": 2, "content": file_content}).encode("utf-8"))
+            str({"inputs": data.get("userInput"), "state_code": 2, "content": file_content,
+                 "type_doc": type_doc}).encode("utf-8"))
     else:
         client_socket.send(str({"inputs": data.get("userInput"), "mode": int(mode), "state_code": 0}).encode("utf-8"))
 
@@ -176,7 +179,7 @@ def receive_messages():
 
 if __name__ == '__main__':
     # 聊天模式为True
-    mode, filemode, file_content = True, False, ''
+    mode, filemode, file_content, file_type = True, False, '', ''
     function_finished_flag = threading.Event()
     # 创建一个显示队列
     output_queue = queue.Queue()
