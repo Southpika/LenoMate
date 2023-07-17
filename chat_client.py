@@ -85,7 +85,7 @@ def audio(data: Dict):
     if bot:
         thred = threading.Thread(target=sys, args=(result,))
         thred.start()
-    return JSONResponse(content={"result": result, "bot": bot})
+    return JSONResponse(content={"result": result.strip('\n'), "bot": bot})
 
 
 def sys(result):
