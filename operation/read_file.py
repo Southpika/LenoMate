@@ -2,6 +2,28 @@ import pptx
 import pdfplumber
 from unstructured.partition.pdf import partition_pdf
 
+def ppt_table_to_markdown(table):
+    rows = table.rows
+    num_rows = len(rows)
+    num_columns = len(rows[0].cells)
+
+    markdown_table = []
+    first_line = True
+    
+    for row in rows:
+        if first_line:
+            header_row = [cell.text.strip() for cell in rows[0].cells]
+            markdown_table.append('| ' + ' | '.join(header_row) + ' |')
+            markdown_table.append('| ' + ' | '.join(['---'] * num_columns) + ' |')
+            first_line = False
+        row_data = [cell.text.strip() for cell in row.cells]
+        markdown_table.append('| ' + ' | '.join(row_data) + ' |')
+
+    return '\n'.join(markdown_table)
+
+
+
+
 class read_file():
     def __init__(self, location):
         if location.endswith('.pptx') or location.endswith('.ppt'):
@@ -20,15 +42,21 @@ class read_file():
                 start += 1
                 temp_content = ''
                 for shape in slide.shapes:
-                    if not shape.has_text_frame:
-                        continue
-                    text_frame = shape.text_frame
+                    if  shape.has_text_frame:
+                        
+                        text_frame = shape.text_frame
 
-                    for paragraph in text_frame.paragraphs:
-                        temp_content += paragraph.text + ' '
+                        for paragraph in text_frame.paragraphs:
+                            temp_content += paragraph.text + ' '
+
+                    if shape.has_table:
+                        table = shape.table
+                        markdown_table = ppt_table_to_markdown(table)
+                        temp_content += markdown_table
+                    # print(markdown_table)
+                    # print('---') 
                     if verbose:
                         print('temp', temp_content)
-
                 if len(temp_content) > trucation:
                     content += f"第{start}页：\n"
                     content += temp_content
