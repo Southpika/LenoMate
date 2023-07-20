@@ -1,6 +1,6 @@
 import pptx
 import pdfplumber
-from unstructured.partition.pdf import partition_pdf
+# from unstructured.partition.pdf import partition_pdf
 
 def ppt_table_to_markdown(table):
     rows = table.rows
@@ -65,30 +65,31 @@ class read_file():
                         print('---------------------')
             return content
         elif self.mode == 'pdf':
-        #     with pdfplumber.open(self.path) as pdf:
-        #         content = ''
-        #         for i in range(len(pdf.pages)):
-        #             # 读取PDF文档第i+1页
-        #             page = pdf.pages[i]
-        #             # page.extract_text()函数即读取文本内容，下面这步是去掉文档最下面的页码
-        #             page_content = '\n'.join(page.extract_text().split('\n')[:-1])
-        #             content = content + page_content
+            with pdfplumber.open(self.path) as pdf:
+                content = ''
+                for i in range(len(pdf.pages)):
+                    # 读取PDF文档第i+1页
+                    page = pdf.pages[i]
+                    # page.extract_text()函数即读取文本内容，下面这步是去掉文档最下面的页码
+                    page_content = '\n'.join(page.extract_text().split('\n')[:-1])
+                    content += f"第{i}页：\n"
+                    content = content + page_content
             
-            test1 = partition_pdf(filename=self.path)
-            content = ''
-            pages = 0
-            for item in test1:
-                if item.metadata.page_number != pages:
-                    content += f"第{pages+1}页：\n"
-                    pages += 1
-                    if verbose:
-                        print('---------------------')
-                        print(f"\n第{pages+1}页：\n")
-                if len(item.text) > trucation:
-                    content+=item.text
-                    content+='\n' 
-                    if verbose:
-                        print(item.text)                  
+            # test1 = partition_pdf(filename=self.path)
+            # content = ''
+            # pages = 0
+            # for item in test1:
+            #     if item.metadata.page_number != pages:
+            #         content += f"第{pages+1}页：\n"
+            #         pages += 1
+            #         if verbose:
+            #             print('---------------------')
+            #             print(f"\n第{pages+1}页：\n")
+            #     if len(item.text) > trucation:
+            #         content+=item.text
+            #         content+='\n'
+            #         if verbose:
+            #             print(item.text)
             return content
 
 
