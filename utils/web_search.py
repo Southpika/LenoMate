@@ -122,5 +122,5 @@ class web_searcher:
         return [reference_list[:self.web_num],return_content[:self.web_num]]
 
 if __name__ == '__main__':
-    web_tool = web_searcher()
-    web_tool.search_main(input('你想要查什么'))
+    web_tool = web_searcher(5)
+    print(web_tool.search_main(input('你想要查什么:\n')))

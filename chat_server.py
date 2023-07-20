@@ -14,7 +14,8 @@ import operation.operation_server as operation
 from stop_criterion import StopWordsCriteria
 import argparse
 from peft import PeftModel
-
+import re
+from utils.web_search import web_searcher
 def get_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument('--document-corpus', default='./data/document_corpus.txt')
@@ -38,6 +39,7 @@ def sys(result):
     synthesis.main(result)
     play.play()
 
+# code 0 聊天  1 中间变量传输 2 文件 3 网页 
 def load_and_run_model():
     global input_queue,output_queue
     print("模型加载中...")
@@ -53,11 +55,12 @@ def load_and_run_model():
     model_sim =  AutoModel.from_pretrained(args.simmodel_dir).to('cuda')
     tokenizer_sim = AutoTokenizer.from_pretrained(args.simmodel_dir)
     corpus = faiss_corpus(args=args,model = model_sim, tokenizer=tokenizer_sim)
+    web_search = web_searcher(web_num=5)
     print("模型加载完成")
-
+    pattern = r'<[^>]+>[:：]?'
     while True: 
         data_client = input_queue.get() # load data from client mode = 0是命令模式
-        
+        torch.cuda.empty_cache()
         if data_client['state_code'] == 0:
             input_statement = data_client['inputs']
             stop_criteria = StopWordsCriteria(tokenizer, ['<User>','<LenoMate>','<用户>','<Brother>'], stream_callback=None)
@@ -75,7 +78,7 @@ def load_and_run_model():
                         output_queue.put(str(client_data))
                         
                     else:
-                        torch.cuda.empty_cache()
+                        
                         if selected_idx == 5:
                             opt = eval(f"operation.Operation{selected_idx}")(input_statement,model_sim,tokenizer_sim)
                         else:
@@ -103,6 +106,8 @@ def load_and_run_model():
                         stopping_criteria = StoppingCriteriaList([stop_criteria])
                     )
                 answer = tokenizer.decode(out[0]).split('<LenoMate>:')[1].strip('\n').strip()
+                
+                answer= re.sub(pattern,"",answer)
                 send_data ={'chat':answer}
                 output_queue.put(str(send_data))
         elif data_client['state_code'] == 1:
@@ -143,7 +148,36 @@ def load_and_run_model():
             answer = tokenizer.decode(out[0]).split('## 回答：')[1]
             send_data ={'chat':answer}
             output_queue.put(str(send_data))
+        elif data_client['state_code'] == 3:
+            query = data_client['inputs']
             
+            web_contents = web_search.search_main(query)
+            content = ''
+            for item in web_contents[1]:
+                content += item
+                content += '\n'
+            prompt_chat = f"""基于以下的内容，简洁和专业的来回答用户的问题。
+## 内容:
+{content}
+## 问题:
+{query}
+## 回答：
+"""
+            stop_criteria_ppt = StopWordsCriteria(tokenizer, ['##'], stream_callback=None)
+            print('[分析功能]模型运行中...')
+            with torch.no_grad():
+                input_ids = tokenizer.encode(prompt_chat, return_tensors='pt').to('cuda')
+                out = model.generate(
+                    input_ids=input_ids,
+                    max_length=8000,
+                    temperature=0.9,
+                    top_p=0.95,
+                    stopping_criteria = StoppingCriteriaList([stop_criteria_ppt])
+                )
+            print(tokenizer.decode(out[0]))
+            answer = tokenizer.decode(out[0]).split('## 回答：')[1]
+            send_data ={'chat':answer}
+            output_queue.put(str(send_data))            
             
 
 
@@ -158,7 +192,7 @@ def handle_client(client_socket, client_address):
     while True:
         try:
             # 接收客户端消息
-            data = client_socket.recv(10240).decode('utf-8')
+            data = client_socket.recv(102400).decode('utf-8')
             if data:
                 print(f"收到{client_address[0]}:{client_address[1]}的消息：{data}")
                 # 广播消息给所有连接的客户端
