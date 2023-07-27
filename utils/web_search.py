@@ -3,6 +3,7 @@ from urllib.parse import quote
 from bs4 import BeautifulSoup
 from selenium import webdriver
 
+
 def search_web(keyword):
 	options = webdriver.ChromeOptions()
 	options.add_argument('headless')
@@ -32,6 +33,17 @@ def search_web(keyword):
 				title = item_prelist["titletext"]
 				relist.append([title, url])
 	return relist
+
+def search_wx(url):
+	headers = {
+		"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36 Edg/111.0.1661.44",
+	}
+	r = requests.get(url, headers=headers)
+	html = r.text
+	soup = BeautifulSoup(html, 'html.parser')
+	item_list = soup.find(class_='rich_media_wrp')
+	item_title = re.sub(r'(<[^>]+>|\s)','',str(item_list))
+	return item_title
 
 def search_zhihu_que(url):
     headers = {
@@ -92,6 +104,17 @@ def ext_zhihu(url):
     else:
         return url
 
+def search_tencent_news(url):
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36 Edg/111.0.1661.44",
+    }
+    # url = 'https:///rain/a/20230720A05EIW00'
+    r = requests.get(url, headers=headers)
+    html_s = r.text
+    soup_s = BeautifulSoup(html_s, 'html.parser')
+    content = soup_s.find(class_='content-article')
+    
+    return re.sub(r'(<[^>]+>|\s)','',str(content))
 class web_searcher:
     def __init__(self,web_num) -> None:
         self.web_num = web_num
@@ -118,6 +141,12 @@ class web_searcher:
                 reference_list.append(items[1])
             if "zhuanlan.zhihu.com" in items[1] or '知乎专栏' in feature:
                 return_content.append(str(search_zhihu_zhuanlan(items[1]))[0:1000])
+                reference_list.append(items[1])
+            if 'new.qq.com' in items[1]:
+                return_content.append(str(search_tencent_news(items[1]))[0:1000])
+                reference_list.append(items[1])
+            if "mp.weixin.qq.com" in items[1] and '微信公众号' in feature:
+                return_content.append(str(search_wx(items[1]))[0:1000])
                 reference_list.append(items[1])
         return [reference_list[:self.web_num],return_content[:self.web_num]]
 
