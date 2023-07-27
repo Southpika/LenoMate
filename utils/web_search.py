@@ -108,16 +108,16 @@ class web_searcher:
         reference_list = []
         for items in self.web_list:
             if "zhihu.com/question/" in items[1] or '知乎回复' in feature:
-                return_content.append(str(search_zhihu_que(ext_zhihu(items[1])))[0:500]) #int(get_config().get("web").get('web_max_length'))
+                return_content.append(str(search_zhihu_que(ext_zhihu(items[1])))[0:1000]) #int(get_config().get("web").get('web_max_length'))
                 reference_list.append(items[1])
             if "baike.sogou.com" in items[1] or '百科' in feature:
-                return_content.append(str(search_baike_sougou(items[1]))[0:500])
+                return_content.append(str(search_baike_sougou(items[1]))[0:1000])
                 reference_list.append(items[1])
             if "zhidao.baidu.com" in items[1] or '百度知道' in feature:
-                return_content.append(str(search_baidu_zhidao(items[1]))[0:200])
+                return_content.append(str(search_baidu_zhidao(items[1]))[0:1000])
                 reference_list.append(items[1])
             if "zhuanlan.zhihu.com" in items[1] or '知乎专栏' in feature:
-                return_content.append(str(search_zhihu_zhuanlan(items[1]))[0:500])
+                return_content.append(str(search_zhihu_zhuanlan(items[1]))[0:1000])
                 reference_list.append(items[1])
         return [reference_list[:self.web_num],return_content[:self.web_num]]
 

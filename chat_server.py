@@ -39,7 +39,7 @@ def sys(result):
     synthesis.main(result)
     play.play()
 
-# code 0 聊天  1 中间变量传输 2 文件 3 网页 
+# code 0 聊天  1 中间变量传输 2 文件 3 网页 4功能
 def load_and_run_model():
     global input_queue,output_queue
     print("模型加载中...")
@@ -59,57 +59,58 @@ def load_and_run_model():
     print("模型加载完成")
     pattern = r'<[^>]+>[:：]?'
     while True: 
-        data_client = input_queue.get() # load data from client mode = 0是命令模式
+        data_client = input_queue.get() 
         torch.cuda.empty_cache()
-        if data_client['state_code'] == 0:
+        if data_client['state_code'] == 4:
             input_statement = data_client['inputs']
-            stop_criteria = StopWordsCriteria(tokenizer, ['<User>','<LenoMate>','<用户>','<Brother>'], stream_callback=None)
+            # if not data_client['mode']:
+            print("当前为命令模式...")
             
-            if not data_client['mode']:
-                print("当前为命令模式...")
-                
-                try:
-                    selected_idx, score = corpus.search(query=input_statement, verbose=True)
-                    if selected_idx in [0,1,4,5]:
-                        command = f"python operation/operation_client.py --select-idx {selected_idx}"
-                        client_data = {}
-                        client_data['command']=command
-                        client_data['state_code']=1
-                        output_queue.put(str(client_data))
-                        
+            try:
+                selected_idx, score = corpus.search(query=input_statement, verbose=True)
+                if selected_idx in [0,1,4,5]:
+                    command = f"python operation/operation_client.py --select-idx {selected_idx}"
+                    client_data = {}
+                    client_data['command']=command
+                    client_data['state_code']=1
+                    output_queue.put(str(client_data))
+                    
+                else:
+                    
+                    if selected_idx == 5:
+                        opt = eval(f"operation.Operation{selected_idx}")(input_statement,model_sim,tokenizer_sim)
                     else:
-                        
-                        if selected_idx == 5:
-                            opt = eval(f"operation.Operation{selected_idx}")(input_statement,model_sim,tokenizer_sim)
-                        else:
-                            opt = eval(f"operation.Operation{selected_idx}")(input_statement)
-                        result = opt.fit(model, tokenizer)
-                        output_queue.put((result, True))
-                        print("模型输出：", result)
-                except Exception as e:
-                    print('#' * 50)
-                    print('error info', e)
-                    continue
+                        opt = eval(f"operation.Operation{selected_idx}")(input_statement)
+                    result = opt.fit(model, tokenizer)
+                    output_queue.put((result, True))
+                    print("模型输出：", result)
+            except Exception as e:
+                print('#' * 50)
+                print('error info', e)
+                continue
 
-            elif data_client['mode']:
-                print("当前为聊天模式...")
-                prompt_chat = f"""<用户>：{input_statement}
+        # elif data_client['mode']:
+        elif data_client['state_code'] == 0:
+            input_statement = data_client['inputs']
+            print("当前为聊天模式...")
+            stop_criteria = StopWordsCriteria(tokenizer, ['<User>','<LenoMate>','<用户>','<Brother>'], stream_callback=None)
+            prompt_chat = f"""<用户>：{input_statement}
 <LenoMate>:"""
-                
-                with torch.no_grad():
-                    input_ids = tokenizer.encode(prompt_chat, return_tensors='pt').to('cuda')
-                    out = model.generate(
-                        input_ids=input_ids,
-                        max_length=1000,
-                        temperature=0.9,
-                        top_p=0.95,
-                        stopping_criteria = StoppingCriteriaList([stop_criteria])
-                    )
-                answer = tokenizer.decode(out[0]).split('<LenoMate>:')[1].strip('\n').strip()
-                
-                answer= re.sub(pattern,"",answer)
-                send_data ={'chat':answer}
-                output_queue.put(str(send_data))
+            
+            with torch.no_grad():
+                input_ids = tokenizer.encode(prompt_chat, return_tensors='pt').to('cuda')
+                out = model.generate(
+                    input_ids=input_ids,
+                    max_length=1000,
+                    temperature=0.9,
+                    top_p=0.95,
+                    stopping_criteria = StoppingCriteriaList([stop_criteria])
+                )
+            answer = tokenizer.decode(out[0]).split('<LenoMate>:')[1].strip('\n').strip()
+            
+            answer= re.sub(pattern,"",answer)
+            send_data ={'chat':answer}
+            output_queue.put(str(send_data))
         elif data_client['state_code'] == 1:
             context = data_client['inputs']
             torch.cuda.empty_cache()
@@ -156,7 +157,8 @@ def load_and_run_model():
             for item in web_contents[1]:
                 content += item
                 content += '\n'
-            prompt_chat = f"""基于以下的内容，简洁和专业的来回答用户的问题。
+            print('[网页搜索]',content)
+            prompt_chat = f"""基于以下的内容，详细和专业的来回答用户的问题。
 ## 内容:
 {content}
 ## 问题:
@@ -164,7 +166,7 @@ def load_and_run_model():
 ## 回答：
 """
             stop_criteria_ppt = StopWordsCriteria(tokenizer, ['##'], stream_callback=None)
-            print('[分析功能]模型运行中...')
+            print('[网页搜索]模型运行中...')
             with torch.no_grad():
                 input_ids = tokenizer.encode(prompt_chat, return_tensors='pt').to('cuda')
                 out = model.generate(

@@ -148,7 +148,7 @@ class Operation3(Operation):
         
     def fit(self,model=None,tokenizer=None):
         from utils.search_doc_faiss import faiss_corpus
-        from data.map import name_exe_map
+        from ..data.map import name_exe_map
         corpus = faiss_corpus(args = args_app)
         selected_idx,score = corpus.search(query = self.input_statement,verbose=True)
         app_name = corpus.corpus[selected_idx]
