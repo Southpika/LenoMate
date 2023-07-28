@@ -34,10 +34,8 @@ def search_web(keyword):
 				relist.append([title, url])
 	return relist
 
-def search_wx(url):
-	headers = {
-		"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36 Edg/111.0.1661.44",
-	}
+def search_wx(url,headers):
+
 	r = requests.get(url, headers=headers)
 	html = r.text
 	soup = BeautifulSoup(html, 'html.parser')
@@ -45,10 +43,20 @@ def search_wx(url):
 	item_title = re.sub(r'(<[^>]+>|\s)','',str(item_list))
 	return item_title
 
-def search_zhihu_que(url):
-    headers = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36 Edg/111.0.1661.44",
-    }
+def search_baike_baidu(url,headers):
+    r = requests.get(url, headers=headers)
+    html = r.text
+    soup = BeautifulSoup(html, 'html.parser')
+    content = ''
+    meta_tag = soup.find('meta',{'name':'description'})
+    if meta_tag:
+        content += meta_tag.get('content')
+    # meta_tag = soup.find('meta',{'name':'keywords'})
+    # if meta_tag:
+    #     content += meta_tag.get('content')
+    return content
+
+def search_zhihu_que(url,headers):
     r = requests.get(url, headers=headers)
     html = r.text
     soup = BeautifulSoup(html, 'html.parser')
@@ -60,10 +68,13 @@ def search_zhihu_que(url):
         relist.append(item_title)
     return relist
 
-def search_baidu_zhidao(url):
-    headers = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36 Edg/111.0.1661.44",
-    }
+def search_csdn(url,headers):
+    r = requests.get(url, headers=headers)
+    html = r.text
+    soup = BeautifulSoup(html, 'html.parser')
+    return re.sub(r'(<[^>]+>|\s)','',str(soup.find('article')))
+
+def search_baidu_zhidao(url,headers):
     r = requests.get(url, headers=headers)
     r.encoding = 'utf-8'
     html = str(r.text)
@@ -72,10 +83,7 @@ def search_baidu_zhidao(url):
     item_title = re.sub(r'(<[^>]+>|\s)','',str(item_list))
     return item_title
 
-def search_baike_sougou(url):
-    headers = {
-		"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36 Edg/111.0.1661.44",
-	}
+def search_baike_sougou(url,headers):
     r = requests.get(url, headers=headers)
     html_s = r.text
     soup_s = BeautifulSoup(html_s, 'html.parser')
@@ -83,10 +91,7 @@ def search_baike_sougou(url):
     content = re.sub(r'(<[^>]+>|\s)','',str(content))
     return content
 
-def search_zhihu_zhuanlan(url):
-    headers = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36 Edg/111.0.1661.44",
-    }
+def search_zhihu_zhuanlan(url,headers):
     r = requests.get(url, headers=headers)
     html = r.text
     soup = BeautifulSoup(html, 'html.parser')
@@ -104,10 +109,7 @@ def ext_zhihu(url):
     else:
         return url
 
-def search_tencent_news(url):
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36 Edg/111.0.1661.44",
-    }
+def search_tencent_news(url,headers):
     # url = 'https:///rain/a/20230720A05EIW00'
     r = requests.get(url, headers=headers)
     html_s = r.text
@@ -115,9 +117,13 @@ def search_tencent_news(url):
     content = soup_s.find(class_='content-article')
     
     return re.sub(r'(<[^>]+>|\s)','',str(content))
+
 class web_searcher:
     def __init__(self,web_num) -> None:
         self.web_num = web_num
+        self.headers ={
+		                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+	                    }
     
     def search_main(self,query ,feature: list = []):
         web_list = search_web(query)
@@ -131,23 +137,30 @@ class web_searcher:
         reference_list = []
         for items in self.web_list:
             if "zhihu.com/question/" in items[1] or '知乎回复' in feature:
-                return_content.append(str(search_zhihu_que(ext_zhihu(items[1])))[0:1000]) #int(get_config().get("web").get('web_max_length'))
+                return_content.append(str(search_zhihu_que(ext_zhihu(items[1]),self.headers))[0:1000]) #int(get_config().get("web").get('web_max_length'))
                 reference_list.append(items[1])
             if "baike.sogou.com" in items[1] or '百科' in feature:
-                return_content.append(str(search_baike_sougou(items[1]))[0:1000])
+                return_content.append(str(search_baike_sougou(items[1],self.headers))[0:1000])
                 reference_list.append(items[1])
             if "zhidao.baidu.com" in items[1] or '百度知道' in feature:
-                return_content.append(str(search_baidu_zhidao(items[1]))[0:1000])
+                return_content.append(str(search_baidu_zhidao(items[1],self.headers))[0:1000])
                 reference_list.append(items[1])
             if "zhuanlan.zhihu.com" in items[1] or '知乎专栏' in feature:
-                return_content.append(str(search_zhihu_zhuanlan(items[1]))[0:1000])
+                return_content.append(str(search_zhihu_zhuanlan(items[1],self.headers))[0:1000])
                 reference_list.append(items[1])
             if 'new.qq.com' in items[1]:
-                return_content.append(str(search_tencent_news(items[1]))[0:1000])
+                return_content.append(str(search_tencent_news(items[1],self.headers))[0:1000])
                 reference_list.append(items[1])
-            if "mp.weixin.qq.com" in items[1] and '微信公众号' in feature:
-                return_content.append(str(search_wx(items[1]))[0:1000])
+            if "mp.weixin.qq.com" in items[1] or '微信公众号' in feature:
+                return_content.append(str(search_wx(items[1],self.headers))[0:1000])
                 reference_list.append(items[1])
+            if "baike.baidu.com" in items[1] or '百度百科' in feature:
+                return_content.append(str(search_baike_baidu(items[1],self.headers))[0:1000])
+                reference_list.append(items[1])
+            if "blog.csdn.net" in items[1] or 'CSDN' in feature:
+                return_content.append(str(search_csdn(items[1],self.headers))[0:1000])
+                reference_list.append(items[1])                
+                
         return [reference_list[:self.web_num],return_content[:self.web_num]]
 
 if __name__ == '__main__':
