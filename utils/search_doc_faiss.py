@@ -62,7 +62,7 @@ class faiss_corpus:
             with open(args.document_corpus,'r',encoding='utf-8') as f:
                 for line in f:
                     self.corpus.append(line.strip('\n'))
-        print(self.args)
+        # print(self.args)
     def fit(self):
         """
         The first time to load corpus and set index
