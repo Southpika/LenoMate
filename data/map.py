@@ -59,5 +59,20 @@ name_exe_map = {
     "WPS Office":"ksolaunch.exe"
 }
 
+constellation_map = {
+    '白羊座':'aries',
+    '金牛座':'taurus',
+    '双子座':'gemini',
+    '巨蟹座':'cancer',
+    '狮子座':'leo',
+    '处女座':'virgo',
+    '天秤座':'libra',
+    '天蝎座':'scorpio',
+    '射手座':'sagittarius',
+    '摩羯座':'capricorn',
+    '水瓶座':'aquarius',
+    '双鱼座':'pisces',
+}
+
 
 

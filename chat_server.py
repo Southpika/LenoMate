@@ -16,6 +16,8 @@ import argparse
 from peft import PeftModel
 import re
 from utils.web_search import web_searcher
+from operation import fortune
+
 def get_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument('--document-corpus', default='./data/document_corpus.txt')
@@ -189,8 +191,12 @@ def handle_client(client_socket, client_address):
     input_queue_client = queue.Queue()
     output_queue_client = queue.Queue()
     print(f"已与{client_address[0]}:{client_address[1]}建立连接")
-    temp_data = "{'chat':'你好，我是LenoMate，请问有什么可以帮您','command':'START chrome.exe http://localhost:8081/'}"
-    client_socket.send(temp_data.encode('utf-8'))
+    ast = fortune.query()
+    ast_query = ast.constellation()
+    query_data = '你好，我是LenoMate，请问有什么可以帮您'
+    if ast_query: query_data += '\n您的今日运势为:\n'+ast_query
+    hello = {'chat':query_data,'command':'START chrome.exe http://localhost:8081/'}
+    client_socket.send(str(hello).encode('utf-8'))
     while True:
         try:
             # 接收客户端消息
