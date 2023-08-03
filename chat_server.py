@@ -195,7 +195,7 @@ def handle_client(client_socket, client_address):
     ast_query = ast.constellation()
     query_data = '你好，我是LenoMate'
     if ast_query: query_data += '\n您的今日运势为:\n'+ast_query + '请问有什么可以帮您'
-    hello = {'chat':query_data,'command':'START chrome.exe http://localhost:8081/'}
+    hello = {'chat':query_data,'command':'START msegde.exe http://localhost:8081/'}
     client_socket.send(str(hello).encode('utf-8'))
     while True:
         try:
