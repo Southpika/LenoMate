@@ -29,8 +29,8 @@ async def upload_file(file: UploadFile):
     name = "./data/tempfile" + file_extension
     with open(name, "wb") as f:
         f.write(contents)
-    global file_content, filemode
-    filemode = not filemode
+    global file_content, mode
+    mode = 2
     reader = rd.read_file(name)
     file_content = reader.fit(trucation=10)
     return {"filename": file.filename}
@@ -42,8 +42,8 @@ def delete_file(filename: str):
     name = "./data/tempfile" + file_extension
     if os.path.exists(name):
         os.remove(name)
-        global filemode
-        filemode = not filemode
+        global mode
+        mode = 0
         return {"message": f"文件 '{filename}' 已成功删除"}
     else:
         raise HTTPException(status_code=404, detail=f"文件 '{filename}' 不存在")
@@ -60,20 +60,20 @@ def start():
 def text(data: Dict):
     thred = threading.Thread(target=sys, args=("请稍等",))
     thred.start()
-    if filemode:
+    message = {"inputs": data.get("userInput"), "state_code": mode}
+    if mode == 2:
         type_doc = 'PDF' if file_type == '.pdf' else 'PPT'
-        client_socket.send(
-            str({"inputs": data.get("userInput"), "state_code": 2, "content": file_content,
-                 "type_doc": type_doc}).encode("utf-8"))
-    else:
-        client_socket.send(str({"inputs": data.get("userInput"), "mode": int(mode), "state_code": 0}).encode("utf-8"))
+        message["type_doc"] = type_doc
+        message["content"] = file_content
+    client_socket.send(str(message).encode("utf-8"))
 
 
 @app.post("/text2")  # 切换按钮
 def text2(data: Dict):
     global mode
-    mode = not mode
-    res = "当前为聊天模式" if mode else "当前为功能模式"
+    mode = data["switch"]
+    print(mode)
+    res = memo[mode]
     thred = threading.Thread(target=sys, args=(res,))
     thred.start()
     return res
@@ -99,8 +99,7 @@ def handle(**kwargs):
         temp = subprocess.check_output(kwargs["command"], shell=True)
         if "chat" not in kwargs.keys():
             client_socket.send(
-                str({"inputs": temp.decode("utf-8").replace("\r\n\x1b[0m", ''), "mode": int(mode),
-                     "state_code": 1}).encode("utf-8"))
+                str({"inputs": temp.decode("gbk").replace("\r\n\x1b[0m", ''), "state_code": 1}).encode("utf-8"))
     if "chat" in kwargs.keys():
         output_queue.put((kwargs["chat"], True))
 
@@ -119,67 +118,75 @@ def receive_messages():
             break
 
 
-# def load_and_run_audio():
-#     global mode
-#     while True:
-#         print("处于待唤醒状态")
-#         try:
-#             # 使用麦克风录制音频
-#             with sr.Microphone(sample_rate=8000) as source:
-#                 r = sr.Recognizer()
-#                 audio_frame = r.listen(source, phrase_time_limit=5)
-#
-#             # 使用语音识别器解析音频
-#             # result = r.recognize_google(audio_frame, language="zh-CN")
-#             result = recognition.main2(audio_frame.frame_data)
-#             print("识别结果：", result)
-#
-#             # 根据指令执行相应的操作
-#             if "小诺" in result or "想诺" in result:
-#                 # 执行您的程序代码
-#                 sys("我在听")
-#                 while True:
-#                     print("处于已唤醒状态")
-#                     try:
-#                         # 使用麦克风录制音频
-#                         with sr.Microphone(sample_rate=8000) as source:
-#                             r = sr.Recognizer()
-#                             audio_frame = r.listen(source, timeout=5)
-#                         # 使用语音识别器解析音频
-#                         # result = r.recognize_google(audio_frame, language="zh-CN")
-#                         result = recognition.main2(audio_frame.frame_data)
-#                         print("识别结果：", result)
-#
-#                         # 根据指令执行相应的操作
-#                         if not result.strip():
-#                             sys("你好像没有说话，试试说小诺小诺唤醒我")
-#                             break
-#                         else:
-#                             output_queue.put((result, False))
-#                             sys("请稍等")
-#                             client_socket.send(
-#                                 str({"inputs": result, "mode": int(mode), "state_code": 0}).encode(
-#                                     "utf-8"))
-#                             function_finished_flag.clear()
-#                             function_finished_flag.wait()
-#
-#                     except sr.RequestError as e:
-#                         print("无法连接", str(e))
-#                         sys("你好像没有说话，试试说小诺小诺唤醒我")
-#                         break
-#                     except (sr.WaitTimeoutError, sr.UnknownValueError):
-#                         sys("你好像没有说话，试试说小诺小诺唤醒我")
-#                         break
-#
-#         except sr.RequestError as e:
-#             print("无法连接", str(e))
-#         except (sr.WaitTimeoutError, sr.UnknownValueError):
-#             print("无法识别语音")
+def load_and_run_audio():
+    while True:
+        print("处于待唤醒状态")
+        try:
+            # 使用麦克风录制音频
+            with sr.Microphone(sample_rate=8000) as source:
+                r = sr.Recognizer()
+                audio_frame = r.listen(source, phrase_time_limit=5)
+
+            # 使用语音识别器解析音频
+            # result = r.recognize_google(audio_frame, language="zh-CN")
+            result = recognition.main2(audio_frame.frame_data)
+            print("识别结果：", result)
+
+            # 根据指令执行相应的操作
+            if "小诺" in result or "想诺" in result:
+                # 执行您的程序代码
+                sys("我在听")
+                while True:
+                    print("处于已唤醒状态")
+                    try:
+                        # 使用麦克风录制音频
+                        with sr.Microphone(sample_rate=8000) as source:
+                            r = sr.Recognizer()
+                            audio_frame = r.listen(source, timeout=5)
+                        # 使用语音识别器解析音频
+                        # result = r.recognize_google(audio_frame, language="zh-CN")
+                        result = recognition.main2(audio_frame.frame_data)
+                        print("识别结果：", result)
+
+                        # 根据指令执行相应的操作
+                        if not result.strip():
+                            sys("你好像没有说话，试试说小诺小诺唤醒我")
+                            break
+                        else:
+                            output_queue.put((result, False))
+                            sys("请稍等")
+                            message = {"inputs": result, "state_code": mode}
+                            if mode == 2:
+                                type_doc = 'PDF' if file_type == '.pdf' else 'PPT'
+                                message["type_doc"] = type_doc
+                                message["content"] = file_content
+                            client_socket.send(str(message).encode("utf-8"))
+                            function_finished_flag.clear()
+                            function_finished_flag.wait()
+                    except sr.RequestError as e:
+                        print("无法连接", str(e))
+                        sys("你好像没有说话，试试说小诺小诺唤醒我")
+                        break
+                    except (sr.WaitTimeoutError, sr.UnknownValueError):
+                        sys("你好像没有说话，试试说小诺小诺唤醒我")
+                        break
+
+        except sr.RequestError as e:
+            print("无法连接", str(e))
+        except (sr.WaitTimeoutError, sr.UnknownValueError):
+            print("无法识别语音")
 
 
 if __name__ == '__main__':
-    # 聊天模式为True
-    mode, filemode, file_content, file_type = True, False, '', ''
+    # 聊天模式为0
+    memo = {
+        0: "当前为聊天模式",
+        1: "当前为回传模式",
+        2: "当前为分析模式",
+        3: "当前为联网模式",
+        4: "当前为功能模式"
+    }
+    mode, file_content, file_type = 0, '', ''
     function_finished_flag = threading.Event()
     # 创建一个显示队列
     output_queue = queue.Queue()

@@ -160,22 +160,47 @@
     <div class="message-container">
         <div class="tishi-message">当前为聊天模式</div>
     </div>
+
     <div id="messageArea"></div>
     <div class="input-container">
         <input type="text" id="userInput" placeholder="请输入问题" onkeydown="handleKeyPress(event)">
-<!--        <button onclick="sendMessage()">发送</button>-->
-        <button style="background-color: #009d06" onclick="sendMessage2()">模式切换</button>
-        <el-upload
-                class="upload-demo"
-                action="/data"
-                :on-remove="handleRemove"
-                :before-remove="beforeRemove"
-                :on-success="handleSuccess"
-                :limit="1"
-                :file-list="fileList">
+        <div style="margin: auto 5px">
+            <el-switch
+                    @change="sendMessage2($event)"
+                    class="switch-demo"
+                    v-model="value3"
+                    active-color="#13ce66"
+                    inactive-color="#ff4949"
+                    :active-value="3"
+                    :inactive-value="0">
+            </el-switch>
+            <div style="font-size:12px">联网模式</div>
+        </div>
+        <div style="margin: auto 5px">
+            <el-switch
+                    @change="sendMessage2($event)"
+                    class="switch-demo1"
+                    v-model="value4"
+                    active-color="#13ce66"
+                    inactive-color="#ff4949"
+                    :active-value="4"
+                    :inactive-value="0">
+            </el-switch>
+            <div style="font-size:12px">功能模式</div>
+        </div>
+        <span>
+            <el-upload
+                    class="upload-demo"
+                    action="/data"
+                    :on-remove="handleRemove"
+                    :before-remove="beforeRemove"
+                    :on-success="handleSuccess"
+                    :limit="1"
+                    :file-list="fileList">
             <el-button size="small" type="primary">点击上传</el-button>
-            <div slot="tip" class="el-upload__tip">{{ fileList.length ? '分析模式已打开' : '分析模式已关闭' }}</div>
-        </el-upload>
+                <!--                <div slot="tip" class="el-upload__tip">{{ fileList.length ? '分析模式已打开' : '分析模式已关闭' }}</div>-->
+            </el-upload>
+        </span>
     </div>
 </div>
 </body>
@@ -215,6 +240,66 @@
             }
         },
     })
+    new Vue({
+        el: ".switch-demo",
+        data: function () {
+            return {
+                value3: false
+            };
+        },
+        methods: {
+            sendMessage2(number = 0) {
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', 'http://localhost:8081/text2', true);
+                xhr.setRequestHeader('Content-Type', 'application/json');
+                xhr.send(JSON.stringify({switch: number}));
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState === XMLHttpRequest.DONE) {
+                        if (xhr.status === 200) {
+                            console.log(xhr.responseText);
+                            var temp = xhr.responseText.replace(/"/g, '').replace(/\\n/g, '<br>')
+                            let botMessage = '<div class="message-container"><div class="tishi-message">' + temp + '</div></div>';
+                            document.getElementById("messageArea").innerHTML += botMessage;
+                        } else {
+                            console.error('请求失败: ' + xhr.status);
+                        }
+                    }
+                };
+                xhr.send(JSON.stringify({userInput: "content"}));
+                console.log('已执行sendMessage2');
+            }
+        },
+    })
+    new Vue({
+        el: ".switch-demo1",
+        data: function () {
+            return {
+                value4: false
+            };
+        },
+        methods: {
+            sendMessage2(number = 0) {
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', 'http://localhost:8081/text2', true);
+                xhr.setRequestHeader('Content-Type', 'application/json');
+                xhr.send(JSON.stringify({switch: number}));
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState === XMLHttpRequest.DONE) {
+                        if (xhr.status === 200) {
+                            console.log(xhr.responseText);
+                            var temp = xhr.responseText.replace(/"/g, '').replace(/\\n/g, '<br>')
+                            let botMessage = '<div class="message-container"><div class="tishi-message">' + temp + '</div></div>';
+                            document.getElementById("messageArea").innerHTML += botMessage;
+                        } else {
+                            console.error('请求失败: ' + xhr.status);
+                        }
+                    }
+                };
+                xhr.send(JSON.stringify({userInput: "content"}));
+                console.log('已执行sendMessage2');
+            }
+        },
+    })
 </script>
 <script>
     function handleKeyPress(event) {
@@ -250,26 +335,6 @@
             }
         }
         console.log('已执行sendMessage');
-    }
-
-    function sendMessage2() {
-        var xhr = new XMLHttpRequest();
-        xhr.open('POST', 'http://localhost:8081/text2', true);
-        xhr.setRequestHeader('Content-Type', 'application/json');
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState === XMLHttpRequest.DONE) {
-                if (xhr.status === 200) {
-                    console.log(xhr.responseText);
-                    var temp = xhr.responseText.replace(/"/g, '').replace(/\\n/g, '<br>')
-                    let botMessage = '<div class="message-container"><div class="tishi-message">' + temp + '</div></div>';
-                    document.getElementById("messageArea").innerHTML += botMessage;
-                } else {
-                    console.error('请求失败: ' + xhr.status);
-                }
-            }
-        };
-        xhr.send(JSON.stringify({userInput: "content"}));
-        console.log('已执行sendMessage2');
     }
 
     function getMessage() {

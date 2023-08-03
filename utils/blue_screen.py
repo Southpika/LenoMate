@@ -1,5 +1,5 @@
 import json
-import web_search
+# import web_search
 import os
 import os
 from datetime import datetime,date
@@ -33,6 +33,7 @@ class bs_check_client:
         
     def is_file_created_today_with(self,folder_path):
         today = date.today()
+
         latest_file = None
         latest_creation_time = 0
 
@@ -41,6 +42,7 @@ class bs_check_client:
                 file_path = os.path.join(folder_path, file)
                 creation_time = os.path.getctime(file_path)
                 creation_date = datetime.fromtimestamp(creation_time).date()
+                print(today,creation_date)
 
                 if creation_date == today and creation_time > latest_creation_time:
                     latest_creation_time = creation_time
@@ -73,5 +75,9 @@ class bs_check_client:
 
 
 if __name__ == '__main__':
-    bs_check = bs_check()
-    print(bs_check.analyze("/Users/tanzhehao/Library/Containers/com.tencent.xinWeChat/Data/Library/Application Support/com.tencent.xinWeChat/2.0b4.0.9/f9c1b78085446ad69eef3d9e6fb0e1fb/Message/MessageTemp/46af0f2fda75f7eda47be5c4a1887151/File/output.txt"))
+    # bs_check = bs_check()
+    # print(bs_check.analyze("/Users/tanzhehao/Library/Containers/com.tencent.xinWeChat/Data/Library/Application Support/com.tencent.xinWeChat/2.0b4.0.9/f9c1b78085446ad69eef3d9e6fb0e1fb/Message/MessageTemp/46af0f2fda75f7eda47be5c4a1887151/File/output.txt"))
+    bs_check_c = bs_check_client()
+    bs_check_c.is_file_created_today_with(r'C:\Users\Tzu-cheng Chang\Desktop\GLM')
+    test = bs_check()
+    print(test.analyze('blue_sceen.txt'))
