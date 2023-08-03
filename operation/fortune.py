@@ -14,8 +14,9 @@ class query:
         tianapi = conn.getresponse()
         result = tianapi.read()
         data = result.decode('utf-8')
-        if data['code'] == 200:
-            dict_data = json.loads(data)
+        dict_data = json.loads(data)
+        if dict_data['code'] == 200:
+            
             res = ''
             for item in dict_data['result']['list']:
                 res += item['type']+':'+item['content']+'\n'
