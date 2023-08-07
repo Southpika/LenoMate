@@ -16,7 +16,7 @@ import argparse
 from peft import PeftModel
 import re
 from utils.web_search import web_searcher
-from operation import hello
+from operation.hello import bot_hello 
 import chat_mode
 
 def get_parser():
@@ -112,8 +112,8 @@ def handle_client(client_socket, client_address):
     input_queue_client = queue.Queue()
     output_queue_client = queue.Queue()
     print(f"已与{client_address[0]}:{client_address[1]}建立连接")
-    
-    client_socket.send(str(hello.bot_hello(ast_query = True)).encode('utf-8'))
+    hello_state = bot_hello()
+    client_socket.send(str(hello_state.hello(ast = True)).encode('utf-8'))
     while True:
         try:
             # 接收客户端消息

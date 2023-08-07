@@ -109,6 +109,30 @@ class chat_bot:
             prompt_chat (str): The input of Users
         """
         print("当前为命令模式...")
+
+    def mode5(self,data):
+        """
+        mode5: 蓝屏分析模式
+        Args:
+            data (dict): 需要用到的属性
+                inputs:用户问题
+        """
+        print("当前蓝屏分析模式...")
+        context = data['inputs']
+        
+        prompt_chat = f"""基于以下BUG分析文档的内容，详细和专业的来回答用户关于此文档的问题。
+## 内容:
+{context}
+## 问题:
+请帮我总结分析一下这次的蓝屏信息。
+## 回答：
+"""
+        output = self.infer(prompt_chat,max_length=8000,stop_words= ['##'])
+        answer = self.tokenizer.decode(output[0]).split('## 回答：')[1]
+        
+        answer = '发现您今天发生了蓝屏' + answer
+        return {'chat':answer}
+        
         
 
         

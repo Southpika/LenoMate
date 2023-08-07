@@ -5,34 +5,35 @@ from selenium import webdriver
 
 
 def search_web(keyword):
-	options = webdriver.ChromeOptions()
-	options.add_argument('headless')
-	options.add_experimental_option('excludeSwitches', ['enable-logging'])
-	driver = webdriver.Chrome(options=options)
-	driver.get(quote("https://cn.bing.com/search?q="+str(keyword),safe='/:?=.'))
-	for i in range(0, 20000, 350):
-		time.sleep(0.02)
-		driver.execute_script('window.scrollTo(0, %s)' % i)
-	html = driver.execute_script("return document.documentElement.outerHTML")
-	driver.close()
-	soup = BeautifulSoup(html, 'html.parser')
-	item_list = soup.find_all(class_='b_algo')
-	relist = []
-	for items in item_list:
-		item_prelist = items.find('h2')
-		item_title = re.sub(r'(<[^>]+>|\s)','',str(item_prelist))
-		href_s = item_prelist.find("a", href=True)
-		href = href_s["href"]
-		relist.append([item_title, href])
-	item_list = soup.find_all(class_ ='ans_nws ans_nws_fdbk')
-	for items in item_list:
-		for i in range(1,10):
-			item_prelist = items.find(class_ = f"nws_cwrp nws_itm_cjk item{i}", url=True, titletext=True)
-			if item_prelist is not None:
-				url = item_prelist["url"].replace('\ue000','').replace('\ue001','')
-				title = item_prelist["titletext"]
-				relist.append([title, url])
-	return relist
+    options = webdriver.EdgeOptions()
+    # options = webdriver.ChromeOptions()
+    options.add_argument('headless')
+    options.add_experimental_option('excludeSwitches', ['enable-logging'])
+    driver = webdriver.Edge(options=options)
+    driver.get(quote("https://cn.bing.com/search?q="+str(keyword),safe='/:?=.'))
+    for i in range(0, 20000, 350):
+        time.sleep(0.02)
+        driver.execute_script('window.scrollTo(0, %s)' % i)
+    html = driver.execute_script("return document.documentElement.outerHTML")
+    driver.close()
+    soup = BeautifulSoup(html, 'html.parser')
+    item_list = soup.find_all(class_='b_algo')
+    relist = []
+    for items in item_list:
+        item_prelist = items.find('h2')
+        item_title = re.sub(r'(<[^>]+>|\s)','',str(item_prelist))
+        href_s = item_prelist.find("a", href=True)
+        href = href_s["href"]
+        relist.append([item_title, href])
+    item_list = soup.find_all(class_ ='ans_nws ans_nws_fdbk')
+    for items in item_list:
+        for i in range(1,10):
+            item_prelist = items.find(class_ = f"nws_cwrp nws_itm_cjk item{i}", url=True, titletext=True)
+            if item_prelist is not None:
+                url = item_prelist["url"].replace('\ue000','').replace('\ue001','')
+                title = item_prelist["titletext"]
+                relist.append([title, url])
+    return relist
 
 def search_wx(url,headers):
 
