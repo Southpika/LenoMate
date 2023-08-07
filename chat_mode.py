@@ -41,7 +41,8 @@ class chat_bot:
             output = self.infer(prompt_chat=prompt_chat, max_length=6000)
             
         else:
-            prompt_chat = f"<用户>:{input_statement}\n<LenoMate>:"        
+            prompt_chat = f"<用户>:{input_statement}\n<LenoMate>:"   
+            # print(prompt_chat)     
             output = self.infer(prompt_chat=prompt_chat, max_length=1000)
         answer = self.tokenizer.decode(output[0]).split('<LenoMate>:')[-1].strip('\n').strip()
         answer = re.sub(self.pattern,"",answer)
