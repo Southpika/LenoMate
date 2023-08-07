@@ -17,6 +17,7 @@ from peft import PeftModel
 import re
 from utils.web_search import web_searcher
 from operation import fortune
+import chat_mode
 
 def get_parser():
     parser = argparse.ArgumentParser()
@@ -78,7 +79,7 @@ def load_and_run_model():
                     output_queue.put(str(client_data))
                     
                 else:
-                    
+                
                     if selected_idx == 5:
                         opt = eval(f"operation.Operation{selected_idx}")(input_statement,model_sim,tokenizer_sim)
                     else:
