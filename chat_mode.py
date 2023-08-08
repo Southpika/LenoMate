@@ -3,6 +3,9 @@ from stop_criterion import StopWordsCriteria
 from transformers import StoppingCriteriaList,StoppingCriteria
 import re
 from utils.web_search import web_searcher
+from utils.search_doc_faiss import faiss_corpus
+import operation.prompt as prompt
+import operation.operation_server as operation
 
 class chat_bot:
     def __init__(self,model,tokenizer) -> None:
@@ -133,6 +136,68 @@ class chat_bot:
         
         answer = '发现您今天发生了蓝屏' + answer
         return {'chat':answer}
+
+class operation_bot(chat_bot):
+    def __init__(self,model,tokenizer,model_sim,tokenizer_sim,corpus) -> None:
+        super.__init__()
+        self.model = model
+        self.tokenizer = tokenizer
+        self.model_sim = model_sim
+        self.tokenizer_sim = tokenizer_sim
+        self.corpus = corpus
+    
+    def fit(self,data):
+        input_statement = data['inputs']
+        print("当前为命令模式...")
+        try:
+            selected_idx, score = self.corpus.search(query=input_statement, verbose=True)
+            if selected_idx in [0,1,4,5]:
+                command = f"python operation/operation_client.py --select-idx {selected_idx}"
+                client_data = {}
+                client_data['command']=command
+                client_data['state_code']=1
+                return client_data
+                
+            else:
+                if selected_idx == 5:
+                    opt = eval(f"operation.Operation{selected_idx}")(input_statement,self.model_sim,self.tokenizer_sim)
+                else:
+                    opt = eval(f"operation.Operation{selected_idx}")(input_statement)
+                result = opt.fit(self.model, self.tokenizer)
+                print("模型输出：", result)
+                return (result, True)
+                
+        except Exception as e:
+            print('#' * 50)
+            print('error info', e)
+   
+
+        
+        if data_client['state_code'] == 4:
+            input_statement = data_client['inputs']
+            # if not data_client['mode']:
+            print("当前为命令模式...")
+            try:
+                selected_idx, score = corpus.search(query=input_statement, verbose=True)
+                if selected_idx in [0,1,4,5]:
+                    command = f"python operation/operation_client.py --select-idx {selected_idx}"
+                    client_data = {}
+                    client_data['command']=command
+                    client_data['state_code']=1
+                    output_queue.put(str(client_data))
+                    
+                else:
+                    if selected_idx == 5:
+                        opt = eval(f"operation.Operation{selected_idx}")(input_statement,model_sim,tokenizer_sim)
+                    else:
+                        opt = eval(f"operation.Operation{selected_idx}")(input_statement)
+                    result = opt.fit(model, tokenizer)
+                    output_queue.put((result, True))
+                    print("模型输出：", result)
+            except Exception as e:
+                print('#' * 50)
+                print('error info', e)
+                continue        
         
         
 
