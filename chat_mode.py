@@ -149,28 +149,29 @@ class operation_bot(chat_bot):
     def fit(self,data):
         input_statement = data['inputs']
         print("当前为命令模式...")
-        try:
-            selected_idx, score = self.corpus.search(query=input_statement, verbose=True)
-            if selected_idx in [0,1,4,5]:
-                command = f"python operation/operation_client.py --select-idx {selected_idx}"
-                client_data = {}
-                client_data['command']=command
-                client_data['state_code']=1
-                return client_data
-                
-            else:
-                if selected_idx == 5:
-                    opt = eval(f"operation.Operation{selected_idx}")(input_statement,self.model_sim,self.tokenizer_sim)
+        if data['state_code'] == 4:
+            try:
+                selected_idx, score = self.corpus.search(query=input_statement, verbose=True)
+                if selected_idx in [0,1,4,5]:
+                    command = f"python operation/operation_client.py --select-idx {selected_idx}"
+                    client_data = {}
+                    client_data['command']=command
+                    client_data['state_code']=1
+                    return client_data
+                    
                 else:
-                    opt = eval(f"operation.Operation{selected_idx}")(input_statement)
-                result = opt.fit(self.model, self.tokenizer)
-                print("模型输出：", result)
-                return (result, True)
-                
-        except Exception as e:
-            print('#' * 50)
-            print('error info', e)
-   
+                    if selected_idx == 5:
+                        opt = eval(f"operation.Operation{selected_idx}")(input_statement,self.model_sim,self.tokenizer_sim)
+                    else:
+                        opt = eval(f"operation.Operation{selected_idx}")(input_statement)
+                    result = opt.fit(self.model, self.tokenizer)
+                    print("模型输出：", result)
+                    return (result, True)
+                    
+            except Exception as e:
+                print('#' * 50)
+                print('error info', e)
+    
 
         
         if data_client['state_code'] == 4:
