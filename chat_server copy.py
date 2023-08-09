@@ -30,7 +30,9 @@ def get_parser():
     parser.add_argument('--work-dir',default=r"./tzh_model/lenomate_hi")
     parser.add_argument('--model-dir',default=r"C:\Users\89721\Desktop\model_chatglm2")
     # parser.add_argument('--simmodel-dir',default=r"C:\Users\89721\Desktop\models--GanymedeNil--text2vec-large-chinese")
-    parser.add_argument('--simmodel-dir',default="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2")
+    parser.add_argument('--simmodel-dir',default="GanymedeNil/text2vec-large-chinese")
+    
+    # parser.add_argument('--simmodel-dir',default="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2")
     
     parser.add_argument('--temperature',default=0.95)
     # parser.add_argument('--model-dir',default=r"/home/tzh/model_dir_cache/models--THUDM--chatglm-6b")
@@ -55,6 +57,7 @@ def load_and_run_model():
     model.eval()
     model_sim =  AutoModel.from_pretrained(args.simmodel_dir).to('cuda')
     tokenizer_sim = AutoTokenizer.from_pretrained(args.simmodel_dir)
+    # tokenizer_sim.eos_token = 
     corpus = faiss_corpus(args=args,model = model_sim, tokenizer=tokenizer_sim)
     bot = chat_mode.chat_bot(model,tokenizer)    
     print("模型加载完成")
@@ -67,27 +70,28 @@ def load_and_run_model():
             input_statement = data_client['inputs']
             # if not data_client['mode']:
             print("当前为命令模式...")
-            try:
-                selected_idx, score = corpus.search(query=input_statement, verbose=True)
-                if selected_idx in [0,1,4,5]:
-                    command = f"python operation/operation_client.py --select-idx {selected_idx}"
-                    client_data = {}
-                    client_data['command']=command
-                    client_data['state_code']=1
-                    output_queue.put(str(client_data))
-                    
+            # try:
+            selected_idx, score = corpus.search(query=input_statement, verbose=True)
+            if selected_idx in [0,1,4,5]:
+                command = f"operation.operation_client.Operation{selected_idx}().fit()"
+                client_data = {}
+                client_data['command']=command
+                client_data['state_code']=1
+                output_queue.put(str(client_data))
+                
+            else:
+
+                opt = eval(f"operation.Operation{selected_idx}")(input_statement)
+                if selected_idx == 3:
+                    result = opt.fit(model_sim,tokenizer_sim)
                 else:
-                    if selected_idx == 5:
-                        opt = eval(f"operation.Operation{selected_idx}")(input_statement,model_sim,tokenizer_sim)
-                    else:
-                        opt = eval(f"operation.Operation{selected_idx}")(input_statement)
                     result = opt.fit(model, tokenizer)
-                    output_queue.put((result, True))
-                    print("模型输出：", result)
-            except Exception as e:
-                print('#' * 50)
-                print('error info', e)
-                continue
+                output_queue.put(str(result))
+                print("模型输出：", result)
+            # except Exception as e:
+            #     print('#' * 50)
+            #     print('Error info:', e)
+            #     continue
             
         elif data_client['state_code'] == 1:
             context = data_client['inputs']
@@ -113,7 +117,7 @@ def handle_client(client_socket, client_address):
     output_queue_client = queue.Queue()
     print(f"已与{client_address[0]}:{client_address[1]}建立连接")
     hello_state = bot_hello()
-    client_socket.send(str(hello_state.hello(ast = True)).encode('utf-8'))
+    client_socket.send(str(hello_state.hello(ast = False)).encode('utf-8'))
     while True:
         try:
             # 接收客户端消息

@@ -25,7 +25,7 @@ class Operation0(Operation):
         res = {
             'chat':self.answer,
             'state_code':0,
-            'command':f"python operation\screen_brightness.py --bright {self.num}"
+            'command':f"operation.screen_brightness.operation({self.num}).fit()"
         }
         return res
             
@@ -87,8 +87,8 @@ class Operation2(Operation):
                 # stopping_criteria = StoppingCriteriaList([stop_criteria])
                 # do_sample = True
             )
-            print('operation3 output',tokenizer.decode(out[0]).split('##总结:'))
-            answer = tokenizer.decode(out[0]).split('##总结:')[1].strip()
+            print('operation3 output',tokenizer.decode(out[0]).split('##总结：'))
+            answer = tokenizer.decode(out[0]).split('##总结：')[1].strip()
             
             self.summary = answer.strip('。')
 
@@ -97,7 +97,12 @@ class Operation2(Operation):
         with open(file_name,'w',encoding='utf-8') as f:
             f.write(self.inputs)
         f.close()
-        return f'已完成记录，保存在桌面，文件名称为{file_name}'
+        output = {
+            'command':f"operation.create_notebook.operation(inputs='{self.inputs}',summary='{self.summary}').fit()",
+            'chat':f"已完成记录，保存在桌面，文件名称为{file_name}"
+        }
+        return output
+
     
 # def get_parser():
 #     parser = argparse.ArgumentParser('Opening APP')
@@ -121,12 +126,14 @@ class Operation3(Operation):
         from data.map import name_exe_map
         self.tool = search_tool()
         args_app = self.get_parser() 
-        corpus = faiss_corpus(args = args_app)
+
+        corpus = faiss_corpus(args = args_app,model=model,tokenizer=tokenizer)
         selected_idx,score = corpus.search(query = self.input_statement,verbose=True)
         app_name = corpus.corpus[selected_idx]
         print(f'find app {app_name}')
+        a = 'C:/Users'
         output = {
-            'command':f"python operation/open_app.py --a C --b {name_exe_map[app_name]}",
+            'command':f"operation.open_app.search_tool().open_app(a='C:/Users',b='{name_exe_map[app_name]}')",
             'chat':f"已为您打开{app_name}"
         }
         return output
@@ -175,14 +182,14 @@ class Operation5():
         self.judge()
         if self.selected=='静音': 
             output = {
-                'command':"python operation/volumn_control.py --mute 1",
+                'command':"operation.volumn_control.vol_ctrl().mute_all()",
                 'chat':'已静音'
             }
             
             return output
         elif self.selected=='取消静音': 
             output = {
-                'command':"python operation/volumn_control.py --mute 0",
+                'command':"operation.volumn_control.vol_ctrl().mute_all(mute = False)",
                 'chat':'已取消静音'
             }
             
@@ -190,7 +197,7 @@ class Operation5():
             self.prompt = prompt.Prompt4(self.context,self.inputs).prompt
             self.extract_info(self.prompt,model,tokenizer)
             output = {
-                'command':f"python operation/volumn_control.py --vol {self.num}",
+                'command':f"operation.volumn_control.vol_ctrl().alter({self.num})",
                 'chat':self.answer
             }
         return output
