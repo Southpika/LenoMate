@@ -24,9 +24,9 @@ class Operation0(Operation):
         self._extract_info(self.prompt, model, tokenizer)
         self.brightness = self.num
         res = {
-            'chat': self.answer,
-            'state_code': 0,
-            'command': f"python operation\screen_brightness.py --bright {self.num}"
+            'chat':self.answer,
+            'state_code':0,
+            'command':f"operation.screen_brightness.operation({self.num}).fit()"
         }
         return res
 
@@ -92,9 +92,15 @@ class Operation2(Operation):
                 # stopping_criteria = StoppingCriteriaList([stop_criteria])
                 # do_sample = True
             )
+<<<<<<< HEAD
             print('operation3 output', tokenizer.decode(out[0]).split('##总结:'))
             answer = tokenizer.decode(out[0]).split('##总结:')[1].strip()
 
+=======
+            print('operation3 output',tokenizer.decode(out[0]).split('##总结：'))
+            answer = tokenizer.decode(out[0]).split('##总结：')[1].strip()
+            
+>>>>>>> 1df7b2fdcdaccd7e08305cfd0cf2474c83d862a4
             self.summary = answer.strip('。')
 
         file_name = 'LenoMate_' + self.summary + '_' + time_suffix() + '.txt'
@@ -102,9 +108,19 @@ class Operation2(Operation):
         with open(file_name, 'w', encoding='utf-8') as f:
             f.write(self.inputs)
         f.close()
+<<<<<<< HEAD
         return f'已完成记录，保存在桌面，文件名称为{file_name}'
 
 
+=======
+        output = {
+            'command':f"operation.create_notebook.operation(inputs='{self.inputs}',summary='{self.summary}').fit()",
+            'chat':f"已完成记录，保存在桌面，文件名称为{file_name}"
+        }
+        return output
+
+    
+>>>>>>> 1df7b2fdcdaccd7e08305cfd0cf2474c83d862a4
 # def get_parser():
 #     parser = argparse.ArgumentParser('Opening APP')
 
@@ -126,14 +142,27 @@ class Operation3(Operation):
         from utils.search_doc_faiss import faiss_corpus
         from data.map import name_exe_map
         self.tool = search_tool()
+<<<<<<< HEAD
         args_app = self.get_parser()
         corpus = faiss_corpus(args=args_app)
         selected_idx, score = corpus.search(query=self.input_statement, verbose=True)
+=======
+        args_app = self.get_parser() 
+
+        corpus = faiss_corpus(args = args_app,model=model,tokenizer=tokenizer)
+        selected_idx,score = corpus.search(query = self.input_statement,verbose=True)
+>>>>>>> 1df7b2fdcdaccd7e08305cfd0cf2474c83d862a4
         app_name = corpus.corpus[selected_idx]
         print(f'find app {app_name}')
+        a = 'C:/Users'
         output = {
+<<<<<<< HEAD
             'command': f"python operation/open_app.py --a C --b {name_exe_map[app_name]}",
             'chat': f"已为您打开{app_name}"
+=======
+            'command':f"operation.open_app.search_tool().open_app(a='C:/Users',b='{name_exe_map[app_name]}')",
+            'chat':f"已为您打开{app_name}"
+>>>>>>> 1df7b2fdcdaccd7e08305cfd0cf2474c83d862a4
         }
         return output
 
@@ -182,23 +211,38 @@ class Operation5():
         self.judge()
         if self.selected == '静音':
             output = {
+<<<<<<< HEAD
                 'command': "python operation/volumn_control.py --mute 1",
                 'chat': '已静音'
+=======
+                'command':"operation.volumn_control.vol_ctrl().mute_all()",
+                'chat':'已静音'
+>>>>>>> 1df7b2fdcdaccd7e08305cfd0cf2474c83d862a4
             }
 
             return output
         elif self.selected == '取消静音':
             output = {
+<<<<<<< HEAD
                 'command': "python operation/volumn_control.py --mute 0",
                 'chat': '已取消静音'
+=======
+                'command':"operation.volumn_control.vol_ctrl().mute_all(mute = False)",
+                'chat':'已取消静音'
+>>>>>>> 1df7b2fdcdaccd7e08305cfd0cf2474c83d862a4
             }
 
         else:
             self.prompt = prompt.Prompt4(self.context, self.inputs).prompt
             self.extract_info(self.prompt, model, tokenizer)
             output = {
+<<<<<<< HEAD
                 'command': f"python operation/volumn_control.py --vol {self.num}",
                 'chat': self.answer
+=======
+                'command':f"operation.volumn_control.vol_ctrl().alter({self.num})",
+                'chat':self.answer
+>>>>>>> 1df7b2fdcdaccd7e08305cfd0cf2474c83d862a4
             }
         return output
         try:

@@ -45,7 +45,7 @@ class faiss_corpus:
     def __init__(self,args,model=None,tokenizer=None,doc_corpus=None,idx_loc=''):
         print('[INFO]Loading Model')
         self.args = args
-        
+        print(args)
         self.device = args.device
         if not (model and tokenizer):
             self.tokenizer = AutoTokenizer.from_pretrained(args.model_name)
