@@ -137,9 +137,8 @@ class chat_bot:
         answer = '发现您今天发生了蓝屏' + answer
         return {'chat':answer}
 
-class operation_bot(chat_bot):
+class operation_bot():
     def __init__(self,model,tokenizer,model_sim,tokenizer_sim,corpus) -> None:
-        super.__init__()
         self.model = model
         self.tokenizer = tokenizer
         self.model_sim = model_sim
@@ -149,57 +148,39 @@ class operation_bot(chat_bot):
     def fit(self,data):
         input_statement = data['inputs']
         print("当前为命令模式...")
+                
         if data['state_code'] == 4:
-            try:
-                selected_idx, score = self.corpus.search(query=input_statement, verbose=True)
-                if selected_idx in [0,1,4,5]:
-                    command = f"python operation/operation_client.py --select-idx {selected_idx}"
-                    client_data = {}
-                    client_data['command']=command
-                    client_data['state_code']=1
-                    return client_data
-                    
+            input_statement = data['inputs']
+            # if not data_client['mode']:
+            # try:
+            selected_idx, score = self.corpus.search(query=input_statement, verbose=True)
+            if selected_idx in [0,1,4,5]:
+                command = f"operation.operation_client.Operation{selected_idx}().fit()"
+                client_data = {}
+                client_data['command']=command
+                client_data['state_code']=1
+                return client_data         
+            else:
+                opt = eval(f"operation.Operation{selected_idx}")(input_statement)
+                if selected_idx == 3:
+                    result = opt.fit(self.model_sim,self.tokenizer_sim)
                 else:
-                    if selected_idx == 5:
-                        opt = eval(f"operation.Operation{selected_idx}")(input_statement,self.model_sim,self.tokenizer_sim)
-                    else:
-                        opt = eval(f"operation.Operation{selected_idx}")(input_statement)
-                    result = opt.fit(self.model, self.tokenizer)
-                    print("模型输出：", result)
-                    return (result, True)
-                    
-            except Exception as e:
-                print('#' * 50)
-                print('error info', e)
-    
+                    result = opt.fit(self.model, self.tokenizer) 
+                return result
+            
+        elif data['state_code'] == 1:
+            context = data['inputs']
+            torch.cuda.empty_cache()
+            if selected_idx == 5:
+                opt = eval(f"operation.Operation{selected_idx}")(input_statement,context,self.model_sim,self.tokenizer_sim)
+            else:
+                opt = eval(f"operation.Operation{selected_idx}")(input_statement,context)
+            result = opt.fit(self.model, self.tokenizer)
+            return result
+            
+                
 
-        
-        # if data_client['state_code'] == 4:
-        #     input_statement = data_client['inputs']
-        #     # if not data_client['mode']:
-        #     print("当前为命令模式...")
-        #     try:
-        #         selected_idx, score = corpus.search(query=input_statement, verbose=True)
-        #         if selected_idx in [0,1,4,5]:
-        #             command = f"python operation/operation_client.py --select-idx {selected_idx}"
-        #             client_data = {}
-        #             client_data['command']=command
-        #             client_data['state_code']=1
-        #             output_queue.put(str(client_data))
-                    
-        #         else:
-        #             if selected_idx == 5:
-        #                 opt = eval(f"operation.Operation{selected_idx}")(input_statement,model_sim,tokenizer_sim)
-        #             else:
-        #                 opt = eval(f"operation.Operation{selected_idx}")(input_statement)
-        #             result = opt.fit(model, tokenizer)
-        #             output_queue.put((result, True))
-        #             print("模型输出：", result)
-        #     except Exception as e:
-        #         print('#' * 50)
-        #         print('error info', e)
-        #         continue        
-        
+
         
 
         

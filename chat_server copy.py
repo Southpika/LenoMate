@@ -60,52 +60,17 @@ def load_and_run_model():
     # tokenizer_sim.eos_token = 
     corpus = faiss_corpus(args=args,model = model_sim, tokenizer=tokenizer_sim)
     bot = chat_mode.chat_bot(model,tokenizer)    
+    opr = chat_mode.operation_bot(model,tokenizer,model_sim,tokenizer_sim,corpus)
     print("模型加载完成")
 
     while True: 
         data_client = input_queue.get() 
-
-        
-        if data_client['state_code'] == 4:
-            input_statement = data_client['inputs']
-            # if not data_client['mode']:
-            print("当前为命令模式...")
-            # try:
-            selected_idx, score = corpus.search(query=input_statement, verbose=True)
-            if selected_idx in [0,1,4,5]:
-                command = f"operation.operation_client.Operation{selected_idx}().fit()"
-                client_data = {}
-                client_data['command']=command
-                client_data['state_code']=1
-                output_queue.put(str(client_data))
-                
-            else:
-
-                opt = eval(f"operation.Operation{selected_idx}")(input_statement)
-                if selected_idx == 3:
-                    result = opt.fit(model_sim,tokenizer_sim)
-                else:
-                    result = opt.fit(model, tokenizer)
-                output_queue.put(str(result))
-                print("模型输出：", result)
-            # except Exception as e:
-            #     print('#' * 50)
-            #     print('Error info:', e)
-            #     continue
-            
-        elif data_client['state_code'] == 1:
-            context = data_client['inputs']
-            torch.cuda.empty_cache()
-            if selected_idx == 5:
-                opt = eval(f"operation.Operation{selected_idx}")(input_statement,context,model_sim,tokenizer_sim)
-            else:
-                opt = eval(f"operation.Operation{selected_idx}")(input_statement,context)
-            result = opt.fit(model, tokenizer)
-
-            output_queue.put(result)
+        torch.cuda.empty_cache()
+        if data_client['state_code'] == 4 or data_client['state_code'] == 1:
+            result = opr.fit(data_client)
+            output_queue.put(str(result))
             print("模型输出：", result)
         else:
-            torch.cuda.empty_cache()
             answer_dict = eval(f"bot.mode{data_client['state_code']}")(data_client)
             output_queue.put(str(answer_dict))
            
