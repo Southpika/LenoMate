@@ -22,6 +22,7 @@ style.configure("Custom.Horizontal.TScale",
                 troughcolor="#DCEFFB",
                 )
 
+
 # 函数：调节屏幕亮度
 def set_brightness(brightness):
     brightness = int(float(brightness))
@@ -29,8 +30,10 @@ def set_brightness(brightness):
     current_brightness = sbc.get_brightness()
     brightness_label.config(text=f"当前亮度：{current_brightness}%", style="TLabel")
 
+
 # 创建亮度控制滑块
-brightness_slider = ttk.Scale(window, from_=0, to=100, orient="horizontal", command=set_brightness, style="Custom.Horizontal.TScale",length=800)
+brightness_slider = ttk.Scale(window, from_=0, to=100, orient="horizontal", command=set_brightness,
+                              style="Custom.Horizontal.TScale", length=800)
 brightness_slider.set(sbc.get_brightness())
 brightness_slider.pack(pady=30, padx=20)
 
@@ -39,7 +42,6 @@ current_brightness = sbc.get_brightness()
 brightness_label = ttk.Label(window, text=f"当前亮度：{current_brightness}%", style="TLabel")
 # brightness_label.config(background="#A4D3EE")
 brightness_label.pack()
-
 
 # 运行 GUI 主循环
 window.mainloop()

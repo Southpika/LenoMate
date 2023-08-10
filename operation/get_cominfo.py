@@ -2,6 +2,7 @@ import uuid
 import socket
 import wmi
 
+
 # class computer_info:
 #     def get_mac_address(self):
 #         #获取物理MAC
@@ -15,7 +16,7 @@ import wmi
 #         #获取本机ip
 #         self.addr = socket.gethostbyname(socket.gethostname())
 #         return self.name,self.addr
-    
+
 
 #     def pysic(self):
 #         c = wmi.WMI()
@@ -23,7 +24,7 @@ import wmi
 #         self.cpu = c.Win32_Processor()[0].ProcessorId.strip()
 #         self.board_id = c.Win32_BaseBoard()[0].SerialNumber
 #         self.bios_id = c.Win32_BIOS()[0].SerialNumber.strip()
-    
+
 #     def fit(self):
 #         self.get_mac_address()
 #         self.get_computer_name_ip()
@@ -38,8 +39,9 @@ import wmi
 
 
 class information:
-    w = wmi.WMI() # 获取配置信息
+    w = wmi.WMI()  # 获取配置信息
     list = []
+
 
 class computer_info(information):
     def __init__(self):
@@ -47,36 +49,33 @@ class computer_info(information):
 
     # 获取配置信息
     def info(self):
-    
+
         for BIOSs in information.w.Win32_ComputerSystem():
             information.list.append("本机电脑名称: %s" % BIOSs.Caption)
             information.list.append("本机使用者: %s" % BIOSs.UserName)
-            
-        
+
         address = hex(uuid.getnode())[2:]
-        address =  ":".join([address[e:e+2] for e in range(0,11,2)])
+        address = ":".join([address[e:e + 2] for e in range(0, 11, 2)])
         information.list.append("本机MAC地址: %s" % address)
-        
+
         for BIOS in information.w.Win32_BIOS():
             # information.list.append("使用日期: %s" % BIOS.Description)
             information.list.append("本机主板型号: %s" % BIOS.SerialNumber)
-            
+
         for processor in information.w.Win32_Processor():
             information.list.append("本机CPU型号: %s" % processor.Name.strip())
-            
+
         for memModule in information.w.Win32_PhysicalMemory():
-            
             totalMemSize = int(memModule.Capacity)
             information.list.append("本机内存厂商: %s" % memModule.Manufacturer)
             information.list.append("本机内存型号: %s" % memModule.PartNumber.strip())
-            information.list.append("本机内存大小: %.2fGB" % (totalMemSize / 1024**3))
-            
+            information.list.append("本机内存大小: %.2fGB" % (totalMemSize / 1024 ** 3))
+
         for disk in information.w.Win32_DiskDrive(InterfaceType="IDE"):
-            
             diskSize = int(disk.size)
             information.list.append("本机磁盘名称: %s" % disk.Caption)
-            information.list.append("本机磁盘大小: %.2fGB" % (diskSize / 1024**3))
-            
+            information.list.append("本机磁盘大小: %.2fGB" % (diskSize / 1024 ** 3))
+
         for xk in information.w.Win32_VideoController():
             information.list.append("本机GPU(显卡)名称: %s" % xk.name)
 
@@ -92,16 +91,18 @@ class computer_info(information):
             finally:
                 s.close()
             return ip
+
         addr = get_host_ip()
         information.list.append("本机IP地址: %s" % addr)
-        
+
     def fit(self):
         return '\n'.join(information.list)
+
 
 if __name__ == '__main__':
     computer = computer_info()
     print(computer.fit())
-    print('*'*50)
+    print('*' * 50)
     # infor = information()
     # INFOs = INFO()
     # print(INFOs.fit())

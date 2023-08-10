@@ -1,19 +1,21 @@
 # -*- coding: UTF-8 -*-
 import os
 import socket
+import queue
+import threading
+from typing import Dict
 import uvicorn
+import pythoncom
 from fastapi import FastAPI, UploadFile, HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
+import speech_recognition as sr
 import audio.play as play
 import audio.synthesis as synthesis
 import audio.recognition as recognition
-import threading
-import queue
-import speech_recognition as sr
-from typing import Dict
-import subprocess
-from fastapi.staticfiles import StaticFiles
+import utils.blue_screen as bs
 import operation.read_file as rd
+import operation
 
 app = FastAPI()
 app.mount("/web", StaticFiles(directory="web"), name="web")
@@ -94,12 +96,25 @@ def sys(result):
     function_finished_flag.set()
 
 
+def evaluate(content):
+    global eval_content
+    pythoncom.CoInitialize()
+    eval_content = eval(content)
+    pythoncom.CoUninitialize()
+
+
 def handle(**kwargs):
     if "command" in kwargs.keys():
-        temp = subprocess.check_output(kwargs["command"], shell=True)
+        # temp = subprocess.check_output(kwargs["command"], shell=True)
+        # temp = eval(kwargs["command"])
+        eval_thred = threading.Thread(target=evaluate, args=(kwargs["command"],))
+        eval_thred.start()
+        eval_thred.join()
+        global eval_content
         if "chat" not in kwargs.keys():
             client_socket.send(
-                str({"inputs": temp.decode("gbk").replace("\r\n\x1b[0m", ''), "state_code": 1}).encode("utf-8"))
+                # str({"inputs": temp.decode("gbk").replace("\r\n\x1b[0m", ''), "state_code": 1}).encode("utf-8"))
+                str({"inputs": eval_content, "state_code": 1}).encode("utf-8"))
     if "chat" in kwargs.keys():
         output_queue.put((kwargs["chat"], True))
 
@@ -177,6 +192,14 @@ def load_and_run_audio():
             print("无法识别语音")
 
 
+def dmp_analysis():
+    bs_check_c = bs.bs_check_client()
+    if bs_check_c.is_file_created_today_with(r'C:\Users\Tzu-cheng Chang\Desktop\GLM'):
+        test = bs.bs_check()
+        client_socket.send(str({"inputs": test.analyze('blue_sceen.txt'), 'state_code': 5}).encode('utf-8'))
+
+
+input("任意键退出")
 if __name__ == '__main__':
     # 聊天模式为0
     memo = {
@@ -184,9 +207,10 @@ if __name__ == '__main__':
         1: "当前为回传模式",
         2: "当前为分析模式",
         3: "当前为联网模式",
-        4: "当前为功能模式"
+        4: "当前为功能模式",
+        5: "当前为蓝屏模式"
     }
-    mode, file_content, file_type = 0, '', ''
+    mode, file_content, file_type, eval_content = 0, '', '', ''
     function_finished_flag = threading.Event()
     # 创建一个显示队列
     output_queue = queue.Queue()
@@ -195,11 +219,10 @@ if __name__ == '__main__':
     # 连接服务器
     client_socket.connect(('192.168.137.1', 8888))
     # 创建线程接收消息
-    receive_thread = threading.Thread(target=receive_messages)
-    receive_thread.start()
-    # # 创建一个线程，用于加载和运行语音识别和合成
-    # model_thread = threading.Thread(target=load_and_run_audio)
-    # # 启动线程
-    # model_thread.start()
+    threading.Thread(target=receive_messages).start()
+    threading.Thread(target=dmp_analysis).start()
+    # 创建一个线程，用于加载和运行语音识别和合成
+    threading.Thread(target=load_and_run_audio).start()
     # 启动前端
     uvicorn.run(app, host="127.0.0.1", port=8081)
+    input("任意键退出")

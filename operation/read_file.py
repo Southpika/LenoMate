@@ -1,5 +1,7 @@
 import pptx
 import pdfplumber
+
+
 # from unstructured.partition.pdf import partition_pdf
 
 def ppt_table_to_markdown(table):
@@ -9,7 +11,7 @@ def ppt_table_to_markdown(table):
 
     markdown_table = []
     first_line = True
-    
+
     for row in rows:
         if first_line:
             header_row = [cell.text.strip() for cell in rows[0].cells]
@@ -20,8 +22,6 @@ def ppt_table_to_markdown(table):
         markdown_table.append('| ' + ' | '.join(row_data) + ' |')
 
     return '\n'.join(markdown_table)
-
-
 
 
 class read_file():
@@ -42,8 +42,8 @@ class read_file():
                 start += 1
                 temp_content = ''
                 for shape in slide.shapes:
-                    if  shape.has_text_frame:
-                        
+                    if shape.has_text_frame:
+
                         text_frame = shape.text_frame
 
                         for paragraph in text_frame.paragraphs:
@@ -74,7 +74,7 @@ class read_file():
                     page_content = '\n'.join(page.extract_text().split('\n')[:-1])
                     content += f"\n第{i}页：\n"
                     content = content + page_content
-            
+
             # test1 = partition_pdf(filename=self.path)
             # content = ''
             # pages = 0
@@ -96,5 +96,5 @@ class read_file():
 if __name__ == '__main__':
     location = input('location:')
     read_file = read_file(location)
-    temp = read_file.fit(trucation=0,verbose=True)
+    temp = read_file.fit(trucation=0, verbose=True)
     print(temp)

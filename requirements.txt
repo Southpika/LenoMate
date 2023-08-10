@@ -24,3 +24,4 @@ pycaw
 python-pptx
 pdfplumber
 unstructured
+pywin32

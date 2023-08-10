@@ -10,17 +10,21 @@ KBC_KEY_DATA = 0x60
 
 g_winio = None
 
+
 def get_winio():
     global g_winio
 
     if g_winio is None:
-            g_winio = pywinio.WinIO()
-            def __clear_winio():
-                    global g_winio
-                    g_winio = None
-            atexit.register(__clear_winio)
+        g_winio = pywinio.WinIO()
+
+        def __clear_winio():
+            global g_winio
+            g_winio = None
+
+        atexit.register(__clear_winio)
 
     return g_winio
+
 
 def wait_for_buffer_empty():
     '''
@@ -31,7 +35,8 @@ def wait_for_buffer_empty():
 
     dwRegVal = 0x02
     while (dwRegVal & 0x02):
-            dwRegVal = winio.get_port_byte(KBC_KEY_CMD)
+        dwRegVal = winio.get_port_byte(KBC_KEY_CMD)
+
 
 def key_down(scancode):
     winio = get_winio()
@@ -41,18 +46,21 @@ def key_down(scancode):
     wait_for_buffer_empty();
     winio.set_port_byte(KBC_KEY_DATA, scancode)
 
+
 def key_up(scancode):
     winio = get_winio()
 
     wait_for_buffer_empty();
-    winio.set_port_byte( KBC_KEY_CMD, 0xd2);
+    winio.set_port_byte(KBC_KEY_CMD, 0xd2);
     wait_for_buffer_empty();
-    winio.set_port_byte( KBC_KEY_DATA, scancode | 0x80);
+    winio.set_port_byte(KBC_KEY_DATA, scancode | 0x80);
 
-def key_press(scancode, press_time = 0.2):
-    key_down( scancode )
-    time.sleep( press_time )
-    key_up( scancode )
+
+def key_press(scancode, press_time=0.2):
+    key_down(scancode)
+    time.sleep(press_time)
+    key_up(scancode)
+
 
 VK_CODE = {
     '1': 0x02,
@@ -107,10 +115,11 @@ VK_CODE = {
     ';': 0x27,
     "'": 0x28,
     '`': 0x29,
-    ',':0x33,
+    ',': 0x33,
     '.': 0x34,
     '/': 0x35,
 }
+
 
 def key_input(str):
     for c in str:
@@ -121,6 +130,7 @@ def key_input(str):
             time.sleep(0.5)
             key_press(VK_CODE[c.lower()])
             key_press(0x3A)
+
 
 time.sleep(5)
 key_press(0x1C)
