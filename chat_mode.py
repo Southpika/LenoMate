@@ -153,16 +153,16 @@ class operation_bot():
             input_statement = data['inputs']
             # if not data_client['mode']:
             # try:
-            selected_idx, score = self.corpus.search(query=input_statement, verbose=True)
-            if selected_idx in [0,1,4,5]:
-                command = f"operation.operation_client.Operation{selected_idx}().fit()"
+            self.selected_idx, score = self.corpus.search(query=input_statement, verbose=True)
+            if self.selected_idx in [0,1,4,5]:
+                command = f"operation.operation_client.Operation{self.selected_idx}().fit()"
                 client_data = {}
                 client_data['command']=command
                 client_data['state_code']=1
                 return client_data         
             else:
-                opt = eval(f"operation.Operation{selected_idx}")(input_statement)
-                if selected_idx == 3:
+                opt = eval(f"operation.Operation{self.selected_idx}")(input_statement)
+                if self.selected_idx == 3:
                     result = opt.fit(self.model_sim,self.tokenizer_sim)
                 else:
                     result = opt.fit(self.model, self.tokenizer) 
@@ -171,10 +171,10 @@ class operation_bot():
         elif data['state_code'] == 1:
             context = data['inputs']
             torch.cuda.empty_cache()
-            if selected_idx == 5:
-                opt = eval(f"operation.Operation{selected_idx}")(input_statement,context,self.model_sim,self.tokenizer_sim)
+            if self.selected_idx == 5:
+                opt = eval(f"operation.Operation{self.selected_idx}")(input_statement,context,self.model_sim,self.tokenizer_sim)
             else:
-                opt = eval(f"operation.Operation{selected_idx}")(input_statement,context)
+                opt = eval(f"operation.Operation{self.selected_idx}")(input_statement,context)
             result = opt.fit(self.model, self.tokenizer)
             return result
             
