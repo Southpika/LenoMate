@@ -58,8 +58,7 @@ def main(path="./data/voice.wav"):
         print("识别结果：", result['result'][0])
     else:
         print("识别结果：无")
-    return result['result'][0] if 'result' in result else None
-
+    return result['result'][0] if 'result' in result else ''
 
 def main2(content):
     # 1、获取 access_token
@@ -92,7 +91,7 @@ def main2(content):
     result = json.loads(res_f.read().decode('utf-8'))
     # # print(result)
     # print("识别结果：", result['result'][0])
-    return result['result'][0]
+    return result['result'][0] if 'result' in result else ''
 
 
 if __name__ == '__main__':

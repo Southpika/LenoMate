@@ -1,0 +1,341 @@
+html {
+    overflow: hidden;
+}
+
+.container-furid {
+    height: 100vh;
+}
+
+.left {
+    background-color: #1E2E42;
+    height: 100vh;
+}
+
+.middle {
+    background-color: #1E2E42;
+    height: 100vh;
+    position: relative;
+}
+
+.content {
+    width: 100%;
+    height: 90%;
+    position: absolute;
+    left: 0;
+    padding: 4% 2%;
+    /* background-color: red; */
+    overflow: hidden;
+    /* 滚动条 */
+    overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.uls {
+    /* background-color: yellow; */
+    padding-right: 3%;
+}
+
+.content::-webkit-scrollbar {
+    display: none;
+}
+
+.uls li {
+    margin-bottom: 2%;
+    list-style: none;
+    display: flex;
+    /* justify-content: space-between; */
+    /* background-color: red; */
+}
+
+.uls li .user-svg {
+    width: 4%;
+}
+
+.uls li .user-svg>img {
+    width: 100%;
+}
+
+.uls li .logo {
+    width: 4%;
+}
+
+.uls li .logo>img {
+    width: 90%;
+}
+
+.uls .chat .text {
+    width: 100%;
+    word-wrap: break-word;
+    background-color: #253854;
+    padding: 1% 1.5%;
+    color: white;
+    border-bottom-left-radius: 20px;
+    border-bottom-right-radius: 10px;
+    border-top-right-radius: 10px;
+    text-align: justify;
+    text-justify: inter-ideograph;
+}
+
+.uls .user {
+    position: relative;
+    left: 4%;
+}
+
+.uls .user .text {
+    width: 100%;
+    word-wrap: break-word;
+    background-color: #344F77;
+    padding: 1% 1.5%;
+    color: white;
+    border-bottom-right-radius: 20px;
+    border-bottom-left-radius: 10px;
+    border-top-left-radius: 10px;
+    text-align: justify;
+    text-justify: inter-ideograph;
+}
+
+.ipt {
+    width: 93%;
+    height: 5%;
+    position: absolute;
+    min-height: 5%;
+    bottom: 3%;
+    left: 0;
+    padding: 0 5px;
+    display: flex;
+    justify-content: space-between;
+    margin-left: 7%;
+    word-wrap: break-word;
+}
+
+.fields {
+    width: 80%;
+    height: 100%;
+    background-color: #2C4466;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 5px;
+}
+
+.fields>textarea {
+    width: 93%;
+    height: inherit;
+    /* height: 50%; */
+    border: none;
+    outline: none;
+    background: none;
+    color: white;
+    padding-left: 5px;
+    word-wrap: break-word;
+    resize: none;
+    overflow: hidden;
+    white-space: pre-wrap;
+    min-height: 30px;
+    overflow: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    white-space: nowrap;
+}
+
+.textFields::-webkit-scrollbar {
+    display: none;
+}
+
+.fields .affirm {
+    /* width: 4%; */
+    padding-right: 4%;
+    cursor: pointer;
+    height: 100%;
+    position: relative;
+}
+
+.affirm img {
+    position: absolute;
+    bottom: 0%;
+    padding-bottom: 35%;
+    /*  */
+}
+
+.icon {
+    width: 20%;
+    height: 100%;
+    padding: 0 5%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    max-width: 200px;
+    min-width: 200px;
+}
+
+.icon-box {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    padding: 1% 5%;
+    max-width: 200px;
+    min-width: 150px;
+}
+
+
+.microphone {
+    background-color: #2C4466;
+    padding: 0% 5%;
+    border-radius: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+
+.file {
+    background-color: #2C4466;
+    padding: 4% 7%;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+.msg {
+    background-color: #2C4466;
+    padding: 2% 8%;
+    border-radius: 20px;
+    cursor: pointer;
+}
+
+.msg img {
+    width: 80% !important;
+}
+
+.right {
+    background-color: #1E2E42;
+    height: 100vh;
+}
+
+
+@media screen and (min-width: 3840px) , screen and (min-width: 1449px) {
+    .fields {
+        width: 75.5%;
+        height: 100%;
+        background-color: #2C4466;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-radius: 5px;
+    }
+
+    .icon {
+        width: 30%;
+        height: 100%;
+        padding: 0 3%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: relative;
+        max-width: 300px;
+        min-width: 300px;
+    }
+    .icon-box{
+       height: 100%;
+       width: 100%;
+       max-width: 360px;
+       min-width: 360px;
+    }
+
+    .microphone {
+        background-color: #2C4466;
+        padding: 0% 7%;
+        /* transform: scale(2); */
+        border-radius: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+    }
+    .microphone img{
+        transform: scale(2.1);
+    }
+    .file{
+        background-color: #2C4466;
+        padding: 0% 8%;
+        border-radius: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        margin: 0 20px;
+    }
+    .file img{
+        transform: scale(2.1);
+    }
+
+    .msg {
+        background-color: #2C4466;
+        padding: 2% 20%;
+        border-radius: 50px;
+        cursor: pointer;
+        position: relative;
+    }
+    
+    .msg img {
+        width: 80% !important;
+    }
+
+    .msg svg:nth-of-type(1){
+        position: absolute;
+        left: 20%;
+        top: 32%;
+        transform: scale(2.0);
+    }
+    .msg svg:nth-of-type(2){
+        position: absolute;
+        left: 50%;
+        top: 30%;
+        transform: scale(2);
+    }
+
+    .msg svg:nth-of-type(3){
+        position: absolute;
+        right: 18%;
+        top: 28%;
+        transform: scale(2.0);
+    }
+    .fields .affirm {
+        padding-right: 4%;
+        cursor: pointer;
+        height: 100%;
+        position: relative;
+        transform: scale(2.0);
+        /* background-color: red; */
+        bottom: 25%;
+        left: 1%;
+    }
+    .fields>textarea {
+        width: 92%;
+        /* height: inherit; */
+        height: 70%;
+        border: none;
+        outline: none;
+        background: none;
+        color: white;
+        padding-left: 5px;
+        word-wrap: break-word;
+        resize: none;
+        overflow: hidden;
+        white-space: pre-wrap;
+        min-height: 20px;
+        overflow: auto;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        white-space: nowrap;
+        font-size: 20px;
+    }
+}

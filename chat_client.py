@@ -18,6 +18,7 @@ import operation.read_file as rd
 import operation
 
 app = FastAPI()
+app.mount("/static", StaticFiles(directory="static"), name="static")
 app.mount("/web", StaticFiles(directory="web"), name="web")
 
 
@@ -35,7 +36,9 @@ async def upload_file(file: UploadFile):
     mode = 2
     reader = rd.read_file(name)
     file_content = reader.fit(trucation=10)
-    return {"filename": file.filename}
+    threading.Thread(target=sys, args=("文件已上传，文件分析模式开启",)).start()
+    return JSONResponse(
+        content={"filename": file.filename, "message": f"文件'{file.filename}'已成功上传，文件分析模式开启"})
 
 
 @app.delete("/data/{filename}")
@@ -46,14 +49,15 @@ def delete_file(filename: str):
         os.remove(name)
         global mode
         mode = 0
-        return {"message": f"文件 '{filename}' 已成功删除"}
+        threading.Thread(target=sys, args=("文件已删除，文件分析模式关闭",)).start()
+        return JSONResponse(content={"message": f"文件 '{filename}' 已成功删除，文件分析模式关闭"})
     else:
         raise HTTPException(status_code=404, detail=f"文件 '{filename}' 不存在")
 
 
 @app.get("/")  # 显示首页
 def start():
-    with open("QA.html", encoding="utf-8") as file:
+    with open("index.html", encoding="utf-8") as file:
         html_content = file.read()
     return HTMLResponse(content=html_content, status_code=200)
 
@@ -76,8 +80,7 @@ def text2(data: Dict):
     mode = data["switch"]
     print(mode)
     res = memo[mode]
-    thred = threading.Thread(target=sys, args=(res,))
-    thred.start()
+    threading.Thread(target=sys, args=(res,)).start()
     return res
 
 
@@ -85,8 +88,7 @@ def text2(data: Dict):
 def audio(data: Dict):
     result, bot = output_queue.get()
     if bot:
-        thred = threading.Thread(target=sys, args=(result,))
-        thred.start()
+        threading.Thread(target=sys, args=(result,)).start()
     return JSONResponse(content={"result": result.strip('\n'), "bot": bot})
 
 
@@ -194,13 +196,15 @@ def load_and_run_audio():
 
 def dmp_analysis():
     bs_check_c = bs.bs_check_client()
-    if bs_check_c.is_file_created_today_with(r'C:\Users\Tzu-cheng Chang\Desktop\GLM'):
+    if bs_check_c.is_file_created_today_with(dmp_addr):
         test = bs.bs_check()
         client_socket.send(str({"inputs": test.analyze('blue_sceen.txt'), 'state_code': 5}).encode('utf-8'))
 
 
-input("任意键退出")
 if __name__ == '__main__':
+    server_addr = input('请设置服务器地址，如“192.168.137.1”：')
+    dmp_addr = input('请设置dmp文件地址，如“C:/Users/Tzu-cheng Chang/Desktop/GLM”：')
+    is_audio = input('是否开启语音功能， 如“是”或“否”：')
     # 聊天模式为0
     memo = {
         0: "当前为聊天模式",
@@ -217,12 +221,12 @@ if __name__ == '__main__':
     # 创建套接字
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     # 连接服务器
-    client_socket.connect(('192.168.137.1', 8888))
+    client_socket.connect((server_addr, 8888))
     # 创建线程接收消息
     threading.Thread(target=receive_messages).start()
     threading.Thread(target=dmp_analysis).start()
     # 创建一个线程，用于加载和运行语音识别和合成
-    threading.Thread(target=load_and_run_audio).start()
+    if is_audio == '是':
+        threading.Thread(target=load_and_run_audio).start()
     # 启动前端
     uvicorn.run(app, host="127.0.0.1", port=8081)
-    input("任意键退出")
