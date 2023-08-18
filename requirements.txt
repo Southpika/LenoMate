@@ -25,3 +25,5 @@ python-pptx
 pdfplumber
 unstructured
 pywin32
+bs4
+selenium

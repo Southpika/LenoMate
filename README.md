@@ -25,3 +25,5 @@ LenoMate是一款智能桌面助手，可以帮助用户操作电脑或者进行
 # windows的bitsandbytes使用如下仓库
 
 https://github.com/jllllll/bitsandbytes-windows-webui
+
+pyinstaller -D "chat_server copy.py"

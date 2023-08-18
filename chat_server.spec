@@ -5,7 +5,7 @@ block_cipher = None
 
 
 a = Analysis(
-    ['chat_server copy.py'],
+    ['chat_server.py'],
     pathex=[],
     binaries=[],
     datas=[],
@@ -26,7 +26,7 @@ exe = EXE(
     a.scripts,
     [],
     exclude_binaries=True,
-    name='chat_server copy',
+    name='chat_server',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
@@ -46,5 +46,5 @@ coll = COLLECT(
     strip=False,
     upx=True,
     upx_exclude=[],
-    name='chat_server copy',
+    name='chat_server',
 )
