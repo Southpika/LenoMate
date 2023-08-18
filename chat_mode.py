@@ -146,14 +146,14 @@ class operation_bot():
         self.corpus = corpus
     
     def fit(self,data):
-        input_statement = data['inputs']
+        # self.input_statement = data['inputs']
         print("当前为命令模式...")
                 
         if data['state_code'] == 4:
-            input_statement = data['inputs']
+            self.input_statement = data['inputs']
             # if not data_client['mode']:
             # try:
-            self.selected_idx, score = self.corpus.search(query=input_statement, verbose=True)
+            self.selected_idx, score = self.corpus.search(query=self.input_statement, verbose=True)
             if self.selected_idx in [0,1,4,5]:
                 command = f"operation.operation_client.Operation{self.selected_idx}().fit()"
                 client_data = {}
@@ -161,7 +161,7 @@ class operation_bot():
                 client_data['state_code']=1
                 return client_data         
             else:
-                opt = eval(f"operation.Operation{self.selected_idx}")(input_statement)
+                opt = eval(f"operation.Operation{self.selected_idx}")(self.input_statement)
                 if self.selected_idx == 3:
                     result = opt.fit(self.model_sim,self.tokenizer_sim)
                 else:
@@ -170,11 +170,12 @@ class operation_bot():
             
         elif data['state_code'] == 1:
             context = data['inputs']
+            
             torch.cuda.empty_cache()
             if self.selected_idx == 5:
-                opt = eval(f"operation.Operation{self.selected_idx}")(input_statement,context,self.model_sim,self.tokenizer_sim)
+                opt = eval(f"operation.Operation{self.selected_idx}")(self.input_statement,context,self.model_sim,self.tokenizer_sim)
             else:
-                opt = eval(f"operation.Operation{self.selected_idx}")(input_statement,context)
+                opt = eval(f"operation.Operation{self.selected_idx}")(self.input_statement,context)
             result = opt.fit(self.model, self.tokenizer)
             return result
             
