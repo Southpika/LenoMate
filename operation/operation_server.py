@@ -16,19 +16,36 @@ class Operation:
     def fit(self):
         raise NotImplementedError
 
-
-## 放入context给出数值
+def contains_numbers(sentence):
+    # 使用正则表达式匹配阿拉伯数字和中文数字
+    arabic_pattern = r'\d'
+    chinese_pattern = r'[一二三四五六七八九十百千万亿零]+'
+    
+    if re.search(arabic_pattern, sentence) or re.search(chinese_pattern, sentence):
+        return True
+    else:
+        return False  
+    
 class Operation0(Operation):
     def fit(self, model, tokenizer):
-        self.prompt = prompt.Prompt0(self.input_statement, self.context).prompt
-        self._extract_info(self.prompt, model, tokenizer)
-        self.brightness = self.num
+        key_words = ['到','为']
+        if contains_numbers(self.input_statement):
+            for key_word in key_words:
+                if key_word in self.input_statement:
+                    self.num = int(re.findall(r"\d+\.?\d*", self.input_statement)[-1])
+                    self.answer = f"{self.context[2:]},已调至{self.num}"
+                    break
+            
+        else:   
+            self.prompt = prompt.Prompt0(self.input_statement, self.context).prompt
+            self._extract_info(self.prompt, model, tokenizer)
+            self.brightness = self.num
         res = {
             'chat':self.answer,
             'state_code':0,
             'command':f"operation.screen_brightness.operation({self.num}).fit()"
         }
-        print(self.prompt)
+        print(f"[亮度调节]:{self.answer}")
         return res
 
     def _extract_info(self, prompt, model, tokenizer):
@@ -98,16 +115,16 @@ class Operation2(Operation):
             
             self.summary = answer.strip('。')
 
-        file_name = 'LenoMate_' + self.summary + '_' + time_suffix() + '.txt'
-        file_name = os.path.join(default_path, file_name)
-        # with open(file_name, 'w', encoding='utf-8') as f:
+        file_name = 'LenoMate_'+self.summary+'_'+time_suffix()+'.txt'
+        file_name = os.path.join(default_path,file_name)
+        # with open(file_name,'w',encoding='utf-8') as f:
         #     f.write(self.inputs)
         # f.close()
-        # output = {
-        #     'command':f"operation.create_notebook.operation(inputs='{self.inputs}',summary='{self.summary}').fit()",
-        #     'chat':f"已完成记录，保存在桌面，文件名称为{file_name}"
-        # }
-        # return output
+        output = {
+            'command':f"operation.create_notebook.operation(inputs='{self.inputs}',summary='{self.summary}').fit()",
+            'chat':f"已完成记录，保存在桌面，文件名称为{file_name}"
+        }
+        return output
 
     
 # def get_parser():
@@ -173,7 +190,7 @@ class Operation4(Operation):
             )
             answer = tokenizer.decode(out[0]).split('##回答')[1].strip('：').strip()
 
-            return {'chat': answer}
+        return {'chat': answer}
 
 
 class Operation5():
@@ -208,7 +225,7 @@ class Operation5():
                 'chat':self.answer
             }
             print(self.prompt)
-        return output
+            return output
         try:
             self.vol_ctrl.alter(self.num)
             return self.answer
