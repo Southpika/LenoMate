@@ -150,7 +150,7 @@ def load_and_run_audio():
             print("识别结果：", result)
 
             # 根据指令执行相应的操作
-            if "小诺" in result or "想诺" in result:
+            if "小诺" in result or "想弄" in result or "小鹿" in result or "小洛" in result:
                 # 执行您的程序代码
                 sys("我在听")
                 while True:
@@ -159,7 +159,7 @@ def load_and_run_audio():
                         # 使用麦克风录制音频
                         with sr.Microphone(sample_rate=8000) as source:
                             r = sr.Recognizer()
-                            audio_frame = r.listen(source, timeout=5)
+                            audio_frame = r.listen(source, timeout=3)
                         # 使用语音识别器解析音频
                         # result = r.recognize_google(audio_frame, language="zh-CN")
                         result = recognition.main2(audio_frame.frame_data)
@@ -202,9 +202,15 @@ def dmp_analysis():
 
 
 if __name__ == '__main__':
-    server_addr = input('请设置服务器地址，如“192.168.137.1”：')
-    dmp_addr = input('请设置dmp文件地址，如“C:/Users/Tzu-cheng Chang/Desktop/GLM”：')
-    is_audio = input('是否开启语音功能， 如“是”或“否”：')
+    server_addr = input('请设置服务器地址，默认为“192.168.137.1”：')
+    if not server_addr:
+        server_addr = "192.168.137.1"
+    dmp_addr = input('请设置dmp文件地址，默认为“C:/Users/Tzu-cheng Chang/Desktop/GLM”：')
+    if not dmp_addr:
+        dmp_addr = "C:/Users/Tzu-cheng Chang/Desktop/GLM"
+    is_audio = input('是否开启语音功能， 默认为“否”：')
+    if not is_audio:
+        is_audio = "否"
     # 聊天模式为0
     memo = {
         0: "当前为聊天模式",
@@ -226,7 +232,7 @@ if __name__ == '__main__':
     threading.Thread(target=receive_messages).start()
     threading.Thread(target=dmp_analysis).start()
     # 创建一个线程，用于加载和运行语音识别和合成
-    if is_audio == '是':
+    if is_audio == "是":
         threading.Thread(target=load_and_run_audio).start()
     # 启动前端
     uvicorn.run(app, host="127.0.0.1", port=8081)

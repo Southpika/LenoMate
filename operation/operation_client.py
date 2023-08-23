@@ -22,7 +22,7 @@ class Operation0(Operation):
 
     def fit(self):
         bright = sbc.get_brightness()[0]
-        context = '电脑当前屏幕亮度为' + str(bright)
+        context = '电脑当前屏幕亮度为' + str(bright) + '%'
         return context
 
 
@@ -109,7 +109,7 @@ class Operation5():
 
     def fit(self):
         self.vl = self.vol_ctrl.vl_real
-        context = '电脑当前音量为' + str(self.vl)
+        context = '电脑当前音量为' + str(self.vl) + '%'
         return context
 
 
