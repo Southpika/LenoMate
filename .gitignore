@@ -94,3 +94,6 @@ model/models--GanymedeNil--text2vec-large-chinese/snapshots/eb0ba6f8f02dcf960514
 .idea/vcs.xml
 .idea/inspectionProfiles/profiles_settings.xml
 .idea/inspectionProfiles/Project_Default.xml
+
+test_file
+test_file/hi_eng.csv
