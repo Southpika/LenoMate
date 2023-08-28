@@ -172,7 +172,7 @@ class operation_bot():
             context = data['inputs']
             
             torch.cuda.empty_cache()
-            if self.selected_idx == 5:
+            if self.selected_idx in [5,0]:
                 opt = eval(f"operation.Operation{self.selected_idx}")(self.input_statement,context,self.model_sim,self.tokenizer_sim)
             else:
                 opt = eval(f"operation.Operation{self.selected_idx}")(self.input_statement,context)

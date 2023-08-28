@@ -24,22 +24,71 @@ def contains_numbers(sentence):
     if re.search(arabic_pattern, sentence) or re.search(chinese_pattern, sentence):
         return True
     else:
-        return False  
+        return False
+
+def contains_pattern(sentence,key_words,context,num):
+    for key_word in key_words:
+        if key_word in sentence:
+            print(f"不含key word{key_word}")
+            return f"{context[2:]},已调至{num}%"
+    return None
+       
+
+def l2_normalization(data):
+    if data.ndim == 1:
+        return data / np.linalg.norm(data).reshape(-1, 1)
+    else:
+        return data / np.linalg.norm(data, axis=1).reshape(-1, 1)
+    
+def avg_pooling(model_output, attention_mask):
+    token_embeddings = model_output[0]  # First element of model_output contains all token embeddings
+    input_mask_expanded = attention_mask.unsqueeze(-1).expand(token_embeddings.size()).float()
+    output = torch.sum(token_embeddings * input_mask_expanded, 1) / torch.clamp(input_mask_expanded.sum(1),
+                                                                                min=1e-9)
+    return l2_normalization(output.cpu().numpy())
+
+def add_or_minus(inputs,model_sim,tokenizer_sim):
+
+        corpus = ['增加','减少']
+        model_sim.eval()
+        input_data = tokenizer_sim(inputs, return_tensors="pt")
+        corp = tokenizer_sim(corpus, return_tensors="pt", padding=True)
+        with torch.no_grad():
+            corpus_embeddings = model_sim(**corp.to('cuda'))
+            input_embeddings = model_sim(**input_data.to('cuda'))
+        corpus_embeddings = avg_pooling(corpus_embeddings, attention_mask=corp['attention_mask'])
+        input_embeddings = avg_pooling(input_embeddings, attention_mask=input_data['attention_mask'])
+        selected = corpus[(corpus_embeddings @ input_embeddings.T).argmax(axis=0)[0]]
+        print(f"[增加减少]功能匹配为'{selected}'")
+        return selected    
+    
     
 class Operation0(Operation):
+    def __init__(self, inputs, context, model_sim, tokenizer_sim) -> None:
+        self.input_statement = inputs
+        self.model_sim = model_sim
+        self.tokenizer_sim = tokenizer_sim
+        self.context = context
+        
     def fit(self, model, tokenizer):
         key_words = ['到','为']
         if contains_numbers(self.input_statement):
-            for key_word in key_words:
-                if key_word in self.input_statement:
-                    self.num = int(re.findall(r"\d+\.?\d*", self.input_statement)[-1])
-                    self.answer = f"{self.context[2:]},已调至{self.num}"
-                    break
+            self.num = int(re.findall(r"\d+\.?\d*", self.input_statement)[-1])
+            self.answer = contains_pattern(self.input_statement,key_words,self.context,self.num)
+            if not self.answer:
+            
+                opr = add_or_minus(self.input_statement,self.model_sim,self.tokenizer_sim)
+                if opr == '增加':
+                    self.num = self.num + int(re.findall(r"\d+\.?\d*", self.context)[-1])
+                if opr == '减少':
+                    self.num = int(re.findall(r"\d+\.?\d*", self.context)[-1])  - self.num 
+                self.answer = f"{self.context[2:]},已调至{self.num}%"
+                              
             
         else:   
             self.prompt = prompt.Prompt0(self.input_statement, self.context).prompt
             self._extract_info(self.prompt, model, tokenizer)
-            self.brightness = self.num
+
         res = {
             'chat':self.answer,
             'state_code':0,
@@ -58,7 +107,7 @@ class Operation0(Operation):
                 temperature=0,
                 top_p=0.95,
             )
-            self.answer = tokenizer.decode(out[0]).split('##回答')[1]
+            self.answer = tokenizer.decode(out[0]).split('##回答：')[1]
             print('[屏幕亮度调节功能]', self.answer)
             self.num = int(re.findall(r"\d+\.?\d*", self.answer)[-1])
 
@@ -197,7 +246,7 @@ class Operation5():
     def __init__(self, inputs, context, model_sim, tokenizer_sim) -> None:
         # from operation.volumn_control import vol_ctrl
         # self.vol_ctrl = vol_ctrl()
-        self.inputs = inputs
+        self.input_statement = inputs
         self.model_sim = model_sim
         self.tokenizer_sim = tokenizer_sim
         self.context = context
@@ -218,14 +267,33 @@ class Operation5():
             }
 
         else:
-            self.prompt = prompt.Prompt4(self.context, self.inputs).prompt
-            self.extract_info(self.prompt, model, tokenizer)
-            output = {
+
+            key_words = ['到','为']
+            if contains_numbers(self.input_statement):
+                self.num = int(re.findall(r"\d+\.?\d*", self.input_statement)[-1])
+                self.answer = contains_pattern(self.input_statement,key_words,self.context,self.num)
+                if not self.answer:
+                
+                    opr = add_or_minus(self.input_statement,self.model_sim,self.tokenizer_sim)
+                    if opr == '增加':
+                        self.num = self.num + int(re.findall(r"\d+\.?\d*", self.context)[-1])
+                    if opr == '减少':
+                        self.num =  int(re.findall(r"\d+\.?\d*", self.context)[-1])  - self.num 
+                    self.answer = f"{self.context[2:]},已调至{self.num}%"
+                                
+                
+            else:   
+                self.prompt = prompt.Prompt4(self.context, self.input_statement).prompt
+                self.extract_info(self.prompt, model, tokenizer)
+
+            res = {
                 'command':f"operation.volumn_control.vol_ctrl().alter({self.num})",
                 'chat':self.answer
             }
-            print(self.prompt)
-            return output
+            print(f"[音量调节]:{self.answer}")
+            return res
+            
+            
         try:
             self.vol_ctrl.alter(self.num)
             return self.answer
@@ -238,7 +306,7 @@ class Operation5():
         _no_mute = '取消静音'
         corpus = [_mute, _normal, _no_mute]
         self.model_sim.eval()
-        input_data = self.tokenizer_sim(self.inputs, return_tensors="pt")
+        input_data = self.tokenizer_sim(self.input_statement, return_tensors="pt")
         corp = self.tokenizer_sim(corpus, return_tensors="pt", padding=True)
         with torch.no_grad():
             corpus_embeddings = self.model_sim(**corp.to('cuda'))
@@ -253,13 +321,9 @@ class Operation5():
         input_mask_expanded = attention_mask.unsqueeze(-1).expand(token_embeddings.size()).float()
         output = torch.sum(token_embeddings * input_mask_expanded, 1) / torch.clamp(input_mask_expanded.sum(1),
                                                                                     min=1e-9)
-        return self._l2_normalization(output.cpu().numpy())
+        return l2_normalization(output.cpu().numpy())
 
-    def _l2_normalization(self, data):
-        if data.ndim == 1:
-            return data / np.linalg.norm(data).reshape(-1, 1)
-        else:
-            return data / np.linalg.norm(data, axis=1).reshape(-1, 1)
+
 
     def extract_info(self, prompt, model, tokenizer):
         model.eval()
