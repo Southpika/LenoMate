@@ -1,3 +1,4 @@
+# client
 screen_brightness_control
 pynvml
 fastapi
@@ -10,7 +11,8 @@ pycaw
 python-pptx
 pdfplumber
 pywin32
-# torch --index-url https://download.pytorch.org/whl/cu118
+# server
+torch --index-url https://download.pytorch.org/whl/cu118
 peft
 bitsandbytes
 scipy
