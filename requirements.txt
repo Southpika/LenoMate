@@ -11,6 +11,7 @@ pycaw
 python-pptx
 pdfplumber
 pywin32
+azure-cognitiveservices-speech
 # server
 torch --index-url https://download.pytorch.org/whl/cu118
 peft

@@ -9,10 +9,8 @@ import pythoncom
 from fastapi import FastAPI, UploadFile, HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
-import speech_recognition as sr
-import audio.play as play
-import audio.synthesis as synthesis
-import audio.recognition as recognition
+import audio.speech_synthesis as synthesis
+import audio.speech_recognition as recognition
 import utils.blue_screen as bs
 import operation.read_file as rd
 import operation
@@ -93,8 +91,7 @@ def audio(data: Dict):
 
 
 def sys(result):
-    synthesis.main(result)
-    play.play()
+    synthesis.speech_synthesis(result)
     function_finished_flag.set()
 
 
@@ -139,15 +136,16 @@ def load_and_run_audio():
     while True:
         print("处于待唤醒状态")
         try:
-            # 使用麦克风录制音频
-            with sr.Microphone(sample_rate=8000) as source:
-                r = sr.Recognizer()
-                audio_frame = r.listen(source, phrase_time_limit=5)
-
-            # 使用语音识别器解析音频
-            # result = r.recognize_google(audio_frame, language="zh-CN")
-            result = recognition.main2(audio_frame.frame_data)
-            print("识别结果：", result)
+            # # 使用麦克风录制音频
+            # with sr.Microphone(sample_rate=8000) as source:
+            #     r = sr.Recognizer()
+            #     audio_frame = r.listen(source, phrase_time_limit=5)
+            #
+            # # 使用语音识别器解析音频
+            # # result = r.recognize_google(audio_frame, language="zh-CN")
+            # result = recognition.main2(audio_frame.frame_data)
+            # print("识别结果：", result)
+            result = recognition.recognize_from_microphone()
 
             # 根据指令执行相应的操作
             if "小诺" in result or "想弄" in result or "小鹿" in result or "小洛" in result:
@@ -156,14 +154,15 @@ def load_and_run_audio():
                 while True:
                     print("处于已唤醒状态")
                     try:
-                        # 使用麦克风录制音频
-                        with sr.Microphone(sample_rate=8000) as source:
-                            r = sr.Recognizer()
-                            audio_frame = r.listen(source, timeout=3)
-                        # 使用语音识别器解析音频
-                        # result = r.recognize_google(audio_frame, language="zh-CN")
-                        result = recognition.main2(audio_frame.frame_data)
-                        print("识别结果：", result)
+                        # # 使用麦克风录制音频
+                        # with sr.Microphone(sample_rate=8000) as source:
+                        #     r = sr.Recognizer()
+                        #     audio_frame = r.listen(source, timeout=3)
+                        # # 使用语音识别器解析音频
+                        # # result = r.recognize_google(audio_frame, language="zh-CN")
+                        # result = recognition.main2(audio_frame.frame_data)
+                        # print("识别结果：", result)
+                        result = recognition.recognize_from_microphone()
 
                         # 根据指令执行相应的操作
                         if not result.strip():
@@ -180,17 +179,11 @@ def load_and_run_audio():
                             client_socket.send(str(message).encode("utf-8"))
                             function_finished_flag.clear()
                             function_finished_flag.wait()
-                    except sr.RequestError as e:
-                        print("无法连接", str(e))
-                        sys("你好像没有说话，试试说小诺小诺唤醒我")
-                        break
-                    except (sr.WaitTimeoutError, sr.UnknownValueError):
+                    except:
                         sys("你好像没有说话，试试说小诺小诺唤醒我")
                         break
 
-        except sr.RequestError as e:
-            print("无法连接", str(e))
-        except (sr.WaitTimeoutError, sr.UnknownValueError):
+        except:
             print("无法识别语音")
 
 
