@@ -20,9 +20,10 @@ def get_parser():
     parser.add_argument('--search', default=1)
 
     parser.add_argument('--work-dir',default=r"./tzh_model/lenomate_hi")
-    parser.add_argument('--model-dir',default=r"model\model_chatglm2")
-    parser.add_argument('--simmodel-dir',default=r"model\models--GanymedeNil--text2vec-large-chinese")
-    # parser.add_argument('--simmodel-dir',default="GanymedeNil/text2vec-large-chinese")
+    # parser.add_argument('--model-dir',default=r"model\model_chatglm2")
+    parser.add_argument('--model-dir',default=r"D:\tzh\model_chatglm2")
+    # parser.add_argument('--simmodel-dir',default=r"model\models--GanymedeNil--text2vec-large-chinese")
+    parser.add_argument('--simmodel-dir',default="GanymedeNil/text2vec-large-chinese")
     
     # parser.add_argument('--simmodel-dir',default="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2")
     
@@ -32,13 +33,14 @@ def get_parser():
     return config
 args = get_parser()
 args.model_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)),args.model_dir)
-args.simmodel_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)),args.simmodel_dir)
-# code 0 聊天  1 中间变量传输 2 文件 3 网页 4功能
+# args.simmodel_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)),args.simmodel_dir)
+# code 0 聊天  1 中间变量传输 2 文件 3 网页 4功能 5 蓝屏 6绘画
 def load_and_run_model():
     global input_queue,output_queue
     print("模型加载中...")
 
-    model = AutoModel.from_pretrained(args.model_dir, load_in_8bit=True, trust_remote_code=True, device_map='auto')
+    # model = AutoModel.from_pretrained(args.model_dir, load_in_8bit=True, trust_remote_code=True, device_map='auto')
+    model = AutoModel.from_pretrained(args.model_dir,  trust_remote_code=True).cuda()
     tokenizer = AutoTokenizer.from_pretrained(args.model_dir,trust_remote_code=True)
     model = PeftModel.from_pretrained(model, args.work_dir)
     model.is_parallelizable = True
@@ -59,6 +61,7 @@ def load_and_run_model():
             result = opr.fit(data_client)
             output_queue.put(str(result))
             print("模型输出：", result)
+
         else:
             answer_dict = eval(f"bot.mode{data_client['state_code']}")(data_client)
             output_queue.put(str(answer_dict))
@@ -122,6 +125,6 @@ if __name__ == '__main__':
     hostname = socket.gethostname()
     # 获取本机ip
     ip = socket.gethostbyname(hostname)
-    chat_server(ip=ip)
+    chat_server()
     # print(os.path.abspath(__file__))
     # print(os.path.join(os.path.dirname(os.path.abspath(__file__)),args.model_dir))

@@ -1,89 +1,60 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
-
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LenoMate</title>
-    <link rel="shortcut icon" type="image/svg+xml" href="static/logo.svg">
-    <link rel="stylesheet" href="static/css/bootstrap.min.css">
-    <link rel="stylesheet" href="static/css/index.css">
+    <link rel="icon" href="svg/titile_logo.svg">
+    <link rel="stylesheet" href="svg/style.css">
+    <script src="svg/java.js"></script>
 </head>
-
 <body>
-<div class="container-fluid">
-    <div class="row">
-        <div class="left col-md-2 col-0 d-none d-md-block"></div>
-        <div class="middle col-md-8 col-12">
-            <div class="content">
-                <ul class="uls">
-                    <!--                    <li class="chat">-->
-                    <!--                        <div class="logo"><img src="./logo.svg" alt=""></div>-->
-                    <!--                        <div class="text">你好，我是LenoMate，请问有什么可以帮您</div>-->
-                    <!--                    </li>-->
-                    <!--                    <li class="user">-->
-                    <!--                        <div class="text">-->
-                    <!--                            你是谁-->
-                    <!--                        </div>-->
-                    <!--                        <div class="user-svg"><img src="./static/images/user.svg" alt=""></div>-->
-                    <!--                    </li>-->
-                    <!--                    <li class="chat">-->
-                    <!--                        <div class="logo"><img src="./logo.svg" alt=""></div>-->
-                    <!--                        <div class="text">我是LenoMate，联想的语音助手。我的使命是解决客户问题并提供卓越的服务体验，让每个客户都能感受到联想的独特魅力。Building-->
-                    <!--                            Bridges, One Byte at a Time，我将为您搭建桥梁，让沟通更加顺畅。-->
-                    <!--                        </div>-->
-                    <!--                    </li>-->
-                </ul>
-            </div>
-            <div class="ipt">
-                <div class="fields">
-                    <label for="textFields"></label><textarea cols="30" rows="10" id="textFields"
-                                                              class="textFields form-control"></textarea>
-                    <div class="affirm">
-                        <img src="static/images/affirm.svg" alt="" class="affirm-svg">
-                    </div>
+<div class="container">
+    <div class="top">
+        <div class="logo">
+            <img src="svg/Lenomate_logo.svg" alt="LenoMate Logo" height=100%>
+        </div>
+        <div class="title">
+            <img src="svg/Lenomate_title.svg" alt="LenoMate Title" height=100%>
+        </div>
+        <div class="fill" ></div>
+        <div class="setting">
+            <img src="svg/Setting.svg" alt="Setting Icon" height=100%>
+        </div>
+        <div class="cancel">
+            <img src="svg/Cancel.svg" alt="Cancel Icon" height=100%>
+        </div>
+    </div>
+    <div class="mid">
+        <div class="chat-container" id="chatContainer">
+
+        </div>
+    </div>
+    <div class="bottom">
+        <div class="texting">
+            <div class="texting_mode">
+                <div id="texting_mode_status" class="texting_mode_status">对话模式</div>
+                <button id="texting_mode_choose" class="texting_mode_choose" >
+                    <img class="texting_mode_choose_onlinelogo" src="svg\chat_icon.svg" alt="SVG Image" >
+                    <div class="texting_mode_status2">对话</div>
+                    <img class="texting_mode_choose_up" src="svg\mode_choose_up.svg" alt="SVG Image">
+                </button>
+                <div id="dropdown-content" class="dropdown-content">
+                    <a id="chat">聊天模式</a>
+                    <a id="net">联网模式</a>
+                    <a id="analyze">功能模式</a>
+                    <a id="paint">壁纸模式</a>
                 </div>
-                <div class="icon">
-                    <div class="icon-box">
-                        <div class="microphone">
-                            <img src="static/images/microphone.svg" alt="">
-                        </div>
-                        <!--                        <div class="file">-->
-                        <!--                            <img src="./static/images/file.svg" alt="" class="file-svg">-->
-                        <!--                        </div>-->
-                        <div class="file">
-                            <svg width="20" height="20" viewBox="0 0 16 16" fill="none"
-                                 xmlns="http://www.w3.org/2000/svg">
-                                <path d="M6 0H2C0.9 0 0 0.9 0 2V14C0 15.1 0.9 16 2 16H14C15.1 16 16 15.1 16 14V6L10 0C9.5 0.5 8.5 0.5 8 0ZM8 2L14 8H10C9.45 8 9 8.45 9 9V13H7V9C7 8.45 6.55 8 6 8H2V2H8ZM4 11H12V12H4V11ZM4 9H12V10H4V9ZM4 7H12V8H4V7Z"
-                                      fill="#1B2841" class="file-svg"/>
-                            </svg>
-                        </div>
-                        <div class="msg">
-                            <svg width="20" height="20" viewBox="0 0 16 15" fill="none"
-                                 xmlns="http://www.w3.org/2000/svg">
-                                <path d="M8 14C12.418 14 16 10.866 16 7C16 3.134 12.418 0 8 0C3.582 0 0 3.134 0 7C0 8.76 0.743 10.37 1.97 11.6C1.873 12.616 1.553 13.73 1.199 14.566C1.12 14.752 1.273 14.96 1.472 14.928C3.728 14.558 5.069 13.99 5.652 13.694C6.41791 13.8983 7.20732 14.0012 8 14Z"
-                                      fill="#1B2841" class="msg-svg"/>
-                            </svg>
-                            <svg width="2" height="26" viewBox="0 0 2 26" fill="none"
-                                 xmlns="http://www.w3.org/2000/svg">
-                                <path d="M1 1L0.999999 25" stroke="#E0F0FB" stroke-opacity="0.5"
-                                      stroke-linecap="round"/>
-                            </svg>
-                            <svg width="20" height="30" viewBox="0 0 15 15" fill="none"
-                                 xmlns="http://www.w3.org/2000/svg">
-                                <path d="M10.77 9C10.83 8.505 10.875 8.01 10.875 7.5C10.875 6.99 10.83 6.495 10.77 6H13.305C13.425 6.48 13.5 6.9825 13.5 7.5C13.5 8.0175 13.425 8.52 13.305 9M9.4425 13.17C9.8925 12.3375 10.2375 11.4375 10.4775 10.5H12.69C11.9634 11.7512 10.8106 12.699 9.4425 13.17ZM9.255 9H5.745C5.67 8.505 5.625 8.01 5.625 7.5C5.625 6.99 5.67 6.4875 5.745 6H9.255C9.3225 6.4875 9.375 6.99 9.375 7.5C9.375 8.01 9.3225 8.505 9.255 9ZM7.5 13.47C6.8775 12.57 6.375 11.5725 6.0675 10.5H8.9325C8.625 11.5725 8.1225 12.57 7.5 13.47ZM4.5 4.5H2.31C3.02914 3.24541 4.1811 2.29611 5.55 1.83C5.1 2.6625 4.7625 3.5625 4.5 4.5ZM2.31 10.5H4.5C4.7625 11.4375 5.1 12.3375 5.55 13.17C4.18397 12.6987 3.03363 11.7508 2.31 10.5ZM1.695 9C1.575 8.52 1.5 8.0175 1.5 7.5C1.5 6.9825 1.575 6.48 1.695 6H4.23C4.17 6.495 4.125 6.99 4.125 7.5C4.125 8.01 4.17 8.505 4.23 9M7.5 1.5225C8.1225 2.4225 8.625 3.4275 8.9325 4.5H6.0675C6.375 3.4275 6.8775 2.4225 7.5 1.5225ZM12.69 4.5H10.4775C10.2428 3.57109 9.89518 2.67442 9.4425 1.83C10.8225 2.3025 11.97 3.255 12.69 4.5ZM7.5 0C3.3525 0 0 3.375 0 7.5C0 9.48912 0.790176 11.3968 2.1967 12.8033C2.89314 13.4997 3.71993 14.0522 4.62987 14.4291C5.53982 14.806 6.51509 15 7.5 15C9.48912 15 11.3968 14.2098 12.8033 12.8033C14.2098 11.3968 15 9.48912 15 7.5C15 6.51509 14.806 5.53982 14.4291 4.62987C14.0522 3.71993 13.4997 2.89314 12.8033 2.1967C12.1069 1.50026 11.2801 0.947814 10.3701 0.570904C9.46018 0.193993 8.48491 0 7.5 0Z"
-                                      fill="#1B2841" class="earth-svg"/>
-                            </svg>
-                        </div>
-                    </div>
+            </div>
+            <div class="texting_type">
+                <textarea class="typing" id="typing" placeholder="在这里输入文字"></textarea>
+                <div class="toolbar">
+                    <img class="file" src="svg/file.svg" alt="LenoMate Logo" height=100%>
+                    <div class="fill" ></div>
+                    <img src="svg/send.svg" class="send" id="send" alt="LenoMate Logo">
                 </div>
             </div>
         </div>
-        <div class="right col-md-2 col-0 d-none d-md-block"></div>
     </div>
 </div>
-<!-- 在下面的index.js部分适配后端接口 -->
-<script src="static/js/index.js"></script>
 </body>
-
 </html>

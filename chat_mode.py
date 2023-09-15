@@ -137,6 +137,29 @@ class chat_bot:
         answer = '发现您今天发生了蓝屏' + answer
         return {'chat':answer}
 
+    def mode6(self,data):
+        """
+        mode6: 壁纸模式
+        Args:
+            data (dict): 需要用到的属性
+            inputs:用户问题
+        """
+        # from utils.wallpaper_generate import sdmodels
+        # from utils.wallpaper_generate import args as wallpaper_args
+        # sd = sdmodels(wallpaper_args)
+        print("当前壁纸模式...")
+#         context = data['inputs']
+        
+#         prompt_chat = f"""<用户>：现在我给你一句话，请你用英语提取出中间的实体。
+# ##句子：
+# {context}
+# <LenoMate>："""
+#         output = self.infer(prompt_chat,max_length=8000)
+#         answer = self.tokenizer.decode(output[0]).split('<LenoMate>：')[1]
+#         pic_path = sd.inference(answer)
+        path = f"svg/{data['inputs']}.png"
+        return {'path':path}
+    
 class operation_bot():
     def __init__(self,model,tokenizer,model_sim,tokenizer_sim,corpus) -> None:
         self.model = model
@@ -178,6 +201,10 @@ class operation_bot():
                 opt = eval(f"operation.Operation{self.selected_idx}")(self.input_statement,context)
             result = opt.fit(self.model, self.tokenizer)
             return result
+        
+        
+
+            
             
                 
 

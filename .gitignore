@@ -97,3 +97,13 @@ model/models--GanymedeNil--text2vec-large-chinese/snapshots/eb0ba6f8f02dcf960514
 
 test_file
 test_file/hi_eng.csv
+utils/example_loras/PAseerCloudV1.safetensors
+utils/models/anything-v5-PrtRE.safetensors
+svg/1.png
+svg/2.png
+svg/3.png
+svg/4.png
+svg/5.png
+svg/6.png
+svg/7.png
+svg/8.png

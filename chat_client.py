@@ -14,11 +14,12 @@ import audio.speech_recognition as recognition
 import utils.blue_screen as bs
 import operation.read_file as rd
 import operation
-
+import os
 app = FastAPI()
-app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount("/svg", StaticFiles(directory="svg"), name="svg")
 app.mount("/web", StaticFiles(directory="web"), name="web")
 
+root_path = os.path.dirname(os.path.abspath(__file__))
 
 @app.post("/data")
 async def upload_file(file: UploadFile):
@@ -82,13 +83,26 @@ def text2(data: Dict):
     return res
 
 
-@app.post("/audio")  # 显示返回消息
+@app.post("/audio")  # 显示server返回消息
 def audio(data: Dict):
-    result, bot = output_queue.get()
-    if bot:
-        threading.Thread(target=sys, args=(result,)).start()
-    return JSONResponse(content={"result": result.strip('\n'), "bot": bot})
+    data, bot = output_queue.get()
 
+    if 'path' in data.keys():
+        return JSONResponse(content={"location": data['path'], "bot": bot})
+    else:
+        result = data['chat']
+        if bot:
+            threading.Thread(target=sys, args=(result,)).start()
+
+        return JSONResponse(content={"result": result.strip('\n'), "bot": bot})
+
+@app.post("/image")
+def wallpaper_set(data: Dict):
+    from utils.wallpaper import main
+    # data
+    path = data['wall_path'].replace('http://localhost:8081/','')
+    print(os.path.join(root_path,path))
+    main(os.path.join(root_path,path))
 
 def sys(result):
     synthesis.speech_synthesis(result)
@@ -115,7 +129,12 @@ def handle(**kwargs):
                 # str({"inputs": temp.decode("gbk").replace("\r\n\x1b[0m", ''), "state_code": 1}).encode("utf-8"))
                 str({"inputs": eval_content, "state_code": 1}).encode("utf-8"))
     if "chat" in kwargs.keys():
-        output_queue.put((kwargs["chat"], True))
+        # kwargs['location'] = r"svg/2.png" #测试用
+
+        output_queue.put((kwargs, True))
+    elif 'path' in kwargs.keys():
+        print(kwargs)
+        output_queue.put((kwargs, True))
 
 
 def receive_messages():
@@ -179,6 +198,7 @@ def load_and_run_audio():
                             client_socket.send(str(message).encode("utf-8"))
                             function_finished_flag.clear()
                             function_finished_flag.wait()
+
                     except:
                         sys("你好像没有说话，试试说小诺小诺唤醒我")
                         break
@@ -211,13 +231,14 @@ if __name__ == '__main__':
         2: "当前为分析模式",
         3: "当前为联网模式",
         4: "当前为功能模式",
-        5: "当前为蓝屏模式"
+        5: "当前为蓝屏模式",
+        6: "当前为壁纸模式",
     }
     mode, file_content, file_type, eval_content = 0, '', '', ''
     function_finished_flag = threading.Event()
     # 创建一个显示队列
     output_queue = queue.Queue()
-    # 创建套接字
+    # 创建套接字F
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     # 连接服务器
     client_socket.connect((server_addr, 8888))
