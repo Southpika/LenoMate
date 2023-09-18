@@ -1,18 +1,16 @@
-
 document.addEventListener('DOMContentLoaded', function () {
     /* 发送消息模块 */
     const chatContainer = document.getElementById('chatContainer');
     const textInput = document.getElementById('typing');
     const sendMessageButton = document.getElementById('send');
-
     // 发送消息
     sendMessageButton.addEventListener('click', function () {
         const inputText = textInput.value;
-        const xml = new XMLHttpRequest();
-        xml.open('POST', 'http://localhost:8081/text');
-        xml.setRequestHeader('Content-Type', 'application/json');
-        xml.send(JSON.stringify({ userInput: inputText }));
         if (inputText.trim() !== '') {
+            const xml = new XMLHttpRequest();
+            xml.open('POST', 'http://localhost:8081/text');
+            xml.setRequestHeader('Content-Type', 'application/json');
+            xml.send(JSON.stringify({userInput: inputText}));
             appendMessage('user', inputText); // 显示用户发送的消息
             textInput.value = ''; // 清空输入框
         }
@@ -21,12 +19,11 @@ document.addEventListener('DOMContentLoaded', function () {
     // 接收服务器消息
     function appendMessage(sender, message) {
         const messageDiv = document.createElement('div');
+        const messageText = document.createElement('div');
         const fill2 = document.createElement('span');
-        const fill3 = document.createElement('span');
         fill2.className = 'fill2';
         // 创建包含消息文本的元素
         messageDiv.className = `${sender}-message`;
-        const messageText = document.createElement('div');
         if (sender === 'server') {
             // 创建小人logo
             const img = document.createElement('img');
@@ -36,15 +33,12 @@ document.addEventListener('DOMContentLoaded', function () {
             messageDiv.appendChild(fill2);
             messageText.className = 'line1';
         }
-
         messageText.textContent = `${message}`;
         // 添加图像和消息文本到消息容器
         messageDiv.appendChild(messageText);
-
         chatContainer.appendChild(messageDiv);
         chatContainer.scrollTop = chatContainer.scrollHeight; // 滚动到底部
     }
-    /* 对话模块 */
 
     /* 壁纸模式 */
     // 壁纸模式服务器消息显示
@@ -136,23 +130,21 @@ document.addEventListener('DOMContentLoaded', function () {
         xml.open('POST', 'http://localhost:8081/image');
         xml.setRequestHeader('Content-Type', 'application/json');
         console.log(imagePaths[currentImageIndex])
-        xml.send(JSON.stringify({wall_path: imagePaths[currentImageIndex] }));
+        xml.send(JSON.stringify({wall_path: imagePaths[currentImageIndex]}));
 
     });
 
     next_wallpaper.addEventListener('click', function () {
         if (imagePaths.length > 0) {
             currentImageIndex = (currentImageIndex + 1) % imagePaths.length; // 循环显示图片
-            const imagePath = imagePaths[currentImageIndex];
-            wallpaper.src = imagePath; // 更新wallpaper元素的src属性
+            wallpaper.src = imagePaths[currentImageIndex]; // 更新wallpaper元素的src属性
         }
     });
 
     last_wallpaper.addEventListener('click', function () {
         if (imagePaths.length > 0) {
             currentImageIndex = (currentImageIndex - 1 + imagePaths.length) % imagePaths.length; // 循环显示图片
-            const imagePath = imagePaths[currentImageIndex];
-            wallpaper.src = imagePath; // 更新wallpaper元素的src属性
+            wallpaper.src = imagePaths[currentImageIndex]; // 更新wallpaper元素的src属性
         }
     });
 
@@ -160,39 +152,36 @@ document.addEventListener('DOMContentLoaded', function () {
         imagePaths.push(imagePath);
         currentImageIndex = imagePaths.length - 1;
     }
-    /* 壁纸模式 */
 
     /* 接收消息模块 */
+
     // 接收消息到服务器的函数
     function getMessage() {
         const xml = new XMLHttpRequest();
         xml.open('POST', 'http://localhost:8081/audio');
         xml.setRequestHeader('Content-Type', 'application/json');
-        console.log(xml.status, xml.readyState)
         xml.onreadystatechange = function () {
             if (xml.readyState === 4 && xml.status === 200) {
                 const obj = JSON.parse(xml.responseText);
                 if (obj["bot"]) {
                     if ("location" in obj) {
-                        appendIMG('server',obj["location"]);;
-                    }
-                    else if ('result' in obj) {
+                        appendIMG('server', obj["location"]);
+
+                    } else if ('result' in obj) {
                         appendMessage('server', obj["result"]);
                     }
                 }
                 getMessage()
             }
         }
-        xml.send(JSON.stringify({userInput: "content" }));
+        xml.send(JSON.stringify({userInput: "content"}));
     }
 
-    // appendMessage('server', '123');
     getMessage()
-    /* 接收消息模块 */
 
     /* mode栏弹出 */
     const openTextingButton = document.querySelector('.typing');
-    const closeModalButton = document.querySelector('.send');
+    const closeModalButton = document.querySelector('.mid');
     const modalOverlay = document.querySelector('.texting_mode');
 
     openTextingButton.addEventListener('click', function () {
@@ -202,7 +191,6 @@ document.addEventListener('DOMContentLoaded', function () {
     closeModalButton.addEventListener('click', function () {
         modalOverlay.classList.remove('active');
     });
-    /* mode栏弹出 */
 
     /* 模式选择栏的弹出与隐藏 */
     // 获取元素
@@ -223,7 +211,6 @@ document.addEventListener('DOMContentLoaded', function () {
             dropdownContent.classList.remove('show');
         });
     });
-    /* 模式选择栏的弹出与隐藏 */
 
     /* 切换模式状态 */
     const dom = {
@@ -236,9 +223,9 @@ document.addEventListener('DOMContentLoaded', function () {
         file: document.querySelector('.file'),//上传文件按钮
     };
 
-    let state = 'normal';
-    let fstate = 'no';
-    let file_name = ''
+    let state = '';
+    let fstate = false;
+    let file_name = '';
 
     // 切换联网模式
     dom.net.addEventListener('click', () => {
@@ -249,10 +236,9 @@ document.addEventListener('DOMContentLoaded', function () {
             const xml = new XMLHttpRequest();
             xml.open('POST', 'http://localhost:8081/text2');
             xml.setRequestHeader('Content-Type', 'application/json');
-            xml.send(JSON.stringify({ switch: 3 }));
+            xml.send(JSON.stringify({switch: 3}));
         }
     })
-
 
     // 切换功能模式
     dom.analyze.addEventListener('click', () => {
@@ -263,10 +249,9 @@ document.addEventListener('DOMContentLoaded', function () {
             const xml = new XMLHttpRequest();
             xml.open('POST', 'http://localhost:8081/text2');
             xml.setRequestHeader('Content-Type', 'application/json');
-            xml.send(JSON.stringify({ switch: 4 }));
+            xml.send(JSON.stringify({switch: 4}));
         }
     });
-
 
     // 切换绘画模式
     dom.paint.addEventListener('click', () => {
@@ -277,7 +262,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const xml = new XMLHttpRequest();
             xml.open('POST', 'http://localhost:8081/text2');
             xml.setRequestHeader('Content-Type', 'application/json');
-            xml.send(JSON.stringify({ switch: 6 }));
+            xml.send(JSON.stringify({switch: 6}));
         }
     });
 
@@ -290,42 +275,46 @@ document.addEventListener('DOMContentLoaded', function () {
             const xml = new XMLHttpRequest();
             xml.open('POST', 'http://localhost:8081/text2');
             xml.setRequestHeader('Content-Type', 'application/json');
-            xml.send(JSON.stringify({ switch: 0 }));
+            xml.send(JSON.stringify({switch: 0}));
         }
     });
 
     // 文件分析
     dom.file.addEventListener('click', () => {
-
-        if (fstate === 'no') {
-            fstate = 'yes'
+        if (!fstate) {
+            fstate = !fstate
             const fileInput = document.createElement('input');
             fileInput.type = 'file';
             fileInput.addEventListener('change', (event) => {
                 const selectedFile = event.target.files[0];
                 if (selectedFile) {
-                    const xhr = new XMLHttpRequest();
-                    xhr.open('POST', 'http://localhost:8081/data');
+                    const xml = new XMLHttpRequest();
+                    xml.open('POST', 'http://localhost:8081/data');
                     const formData = new FormData();
                     formData.append('file', selectedFile);
-
                     xml.onreadystatechange = function () {
                         if (xml.readyState === 4 && xml.status === 200) {
                             const obj = JSON.parse(xml.responseText);
-                            if (obj["bot"]) {
-                                appendMessage('server', obj["result"]);
-                            }
-                            getMessage()
+                            file_name = obj["filename"]
+                            appendMessage('server', obj["message"]);
                         }
-                    }
-
+                    };
+                    xml.send(formData);
                 }
             });
             fileInput.click();
+        } else {
+            fstate = false
+            const xml = new XMLHttpRequest();
+            xml.open('DELETE', `http://localhost:8081/data/${file_name}`);
+            xml.onreadystatechange = function () {
+                if (xml.readyState === 4 && xml.status === 200) {
+                    const obj = JSON.parse(xml.responseText);
+                    appendMessage('server', obj["message"]);
+                }
+            };
+            xml.send()
         }
-        xhr.send()
-    })
-}
-);
+    });
 
-/* 切换模式状态 */
+});

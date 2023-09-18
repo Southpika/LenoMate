@@ -1,25 +1,27 @@
 # -*- coding: UTF-8 -*-
 import os
-import socket
 import queue
+import socket
 import threading
 from typing import Dict
-import uvicorn
+
 import pythoncom
+import uvicorn
 from fastapi import FastAPI, UploadFile, HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
-import audio.speech_synthesis as synthesis
+
 import audio.speech_recognition as recognition
-import utils.blue_screen as bs
+import audio.speech_synthesis as synthesis
 import operation.read_file as rd
-import operation
-import os
+import utils.blue_screen as bs
+
 app = FastAPI()
 app.mount("/svg", StaticFiles(directory="svg"), name="svg")
 app.mount("/web", StaticFiles(directory="web"), name="web")
 
 root_path = os.path.dirname(os.path.abspath(__file__))
+
 
 @app.post("/data")
 async def upload_file(file: UploadFile):
@@ -96,13 +98,15 @@ def audio(data: Dict):
 
         return JSONResponse(content={"result": result.strip('\n'), "bot": bot})
 
+
 @app.post("/image")
 def wallpaper_set(data: Dict):
     from utils.wallpaper import main
     # data
-    path = data['wall_path'].replace('http://localhost:8081/','')
-    print(os.path.join(root_path,path))
-    main(os.path.join(root_path,path))
+    path = data['wall_path'].replace('http://localhost:8081/', '')
+    print(os.path.join(root_path, path))
+    main(os.path.join(root_path, path))
+
 
 def sys(result):
     synthesis.speech_synthesis(result)
