@@ -29,7 +29,7 @@ def contains_numbers(sentence):
 def contains_pattern(sentence,key_words,context,num):
     for key_word in key_words:
         if key_word in sentence:
-            print(f"不含key word{key_word}")
+            print(f"含key word{key_word}")
             return f"{context[2:]},已调至{num}%"
     return None
        
