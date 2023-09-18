@@ -269,7 +269,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // 切换聊天模式
     dom.chat.addEventListener('click', () => {
         if (state !== 'chat') {
-            state = 'chat';
+            state = 'chat'
             dom.stat.textContent = '聊天模式';
             dom.stat2.textContent = '聊天';
             const xml = new XMLHttpRequest();
@@ -297,6 +297,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             const obj = JSON.parse(xml.responseText);
                             file_name = obj["filename"]
                             appendMessage('server', obj["message"]);
+                            dom.file.src = 'svg/file2.svg'
                         }
                     };
                     xml.send(formData);
@@ -311,6 +312,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (xml.readyState === 4 && xml.status === 200) {
                     const obj = JSON.parse(xml.responseText);
                     appendMessage('server', obj["message"]);
+                    dom.file.src = 'svg/file.svg'
                 }
             };
             xml.send()
