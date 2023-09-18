@@ -96,6 +96,8 @@ class computer_info(information):
         information.list.append("本机IP地址: %s" % addr)
 
     def fit(self):
+        information.list = list(set(information.list))
+        # print(set(information.list))
         return '\n'.join(information.list)
 
 

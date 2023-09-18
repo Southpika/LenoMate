@@ -6,7 +6,7 @@ from .hello import *
 from .open_app import *
 # from .operation import *
 from .operation_client import *
-from .operation_server import *
+from .operation_server_glm import *
 from .prompt import *
 from .volumn_control import *
 from .screen_brightness import *

@@ -11,13 +11,13 @@ import audio.synthesis as synthesis
 from transformers import StoppingCriteriaList,StoppingCriteria
 import operation.prompt as prompt
 import operation.operation_server as operation
-from stop_criterion import StopWordsCriteria
+from utils.glm.stop_criterion import StopWordsCriteria
 import argparse
 from peft import PeftModel
 import re
 from utils.web_search import web_searcher
 from operation import fortune
-import chat_mode
+import utils.glm.glm_chat_mode as glm_chat_mode
 
 def get_parser():
     parser = argparse.ArgumentParser()

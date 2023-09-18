@@ -15,6 +15,7 @@ import audio.speech_recognition as recognition
 import audio.speech_synthesis as synthesis
 import operation.read_file as rd
 import utils.blue_screen as bs
+import operation
 
 app = FastAPI()
 app.mount("/svg", StaticFiles(directory="svg"), name="svg")

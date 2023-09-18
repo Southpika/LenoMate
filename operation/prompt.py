@@ -73,8 +73,4 @@ class Prompt4(Prompt):
 # ##回答："""
 
 
-class qw_prompt:
-    def fit(self):
-        raise NotImplementedError
-
 

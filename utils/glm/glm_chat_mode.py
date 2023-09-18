@@ -1,11 +1,15 @@
+import sys
+import os
+# print(os.path.dirname(os.path.abspath('__file__')))
+sys.path.append(os.path.dirname(os.path.abspath('__file__')))
 import torch
-from stop_criterion import StopWordsCriteria
+from utils.glm.stop_criterion import StopWordsCriteria
 from transformers import StoppingCriteriaList,StoppingCriteria
 import re
 from utils.web_search import web_searcher
 from utils.search_doc_faiss import faiss_corpus
 import operation.prompt as prompt
-import operation.operation_server as operation
+import operation.operation_server_glm as operation
 
 class chat_bot:
     def __init__(self,model,tokenizer) -> None:
@@ -15,7 +19,7 @@ class chat_bot:
         self.pattern = r'<[^>]+>[:：]?'
         self.web_search = web_searcher(web_num=5)
         
-    def infer(self,prompt_chat,max_length,stop_words=['<User>','<LenoMate>','<用户>','<Brother>'],temperature=0.9,top_p=0.95):
+    def chat(self,prompt_chat,max_length,stop_words=['<User>','<LenoMate>','<用户>','<Brother>'],temperature=0.9,top_p=0.95):
         
         stop_criteria = StopWordsCriteria(self.tokenizer, stop_words, stream_callback=None)
         with torch.no_grad():
@@ -41,12 +45,12 @@ class chat_bot:
 
         if conversation:
             prompt_chat = self.chat_history
-            output = self.infer(prompt_chat=prompt_chat, max_length=6000)
+            output = self.chat(prompt_chat=prompt_chat, max_length=6000)
             
         else:
             prompt_chat = f"<用户>:{input_statement}\n<LenoMate>:"   
             # print(prompt_chat)     
-            output = self.infer(prompt_chat=prompt_chat, max_length=1000)
+            output = self.chat(prompt_chat=prompt_chat, max_length=1000)
         answer = self.tokenizer.decode(output[0]).split('<LenoMate>:')[-1].strip('\n').strip()
         answer = re.sub(self.pattern,"",answer)
         self.chat_history += f"{answer}\n"
@@ -72,7 +76,7 @@ class chat_bot:
 {query}
 ## 回答：
 """     
-        output = self.infer(prompt_chat,max_length=8000,stop_words= ['##'])
+        output = self.chat(prompt_chat,max_length=8000,stop_words= ['##'])
 
         answer = self.tokenizer.decode(output[0]).split('## 回答：')[1]
         return {'chat':answer}
@@ -100,7 +104,7 @@ class chat_bot:
 {query}
 ## 回答：
 """
-        output = self.infer(prompt_chat,max_length=8000,stop_words= ['##'])
+        output = self.chat(prompt_chat,max_length=8000,stop_words= ['##'])
         answer = self.tokenizer.decode(output[0]).split('## 回答：')[1]
         return {'chat':answer}
   
@@ -131,7 +135,7 @@ class chat_bot:
 请帮我总结分析一下这次的蓝屏信息。
 ## 回答：
 """
-        output = self.infer(prompt_chat,max_length=8000,stop_words= ['##'])
+        output = self.chat(prompt_chat,max_length=8000,stop_words= ['##'])
         answer = self.tokenizer.decode(output[0]).split('## 回答：')[1]
         
         answer = '发现您今天发生了蓝屏' + answer
