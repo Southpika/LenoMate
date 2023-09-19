@@ -88,7 +88,7 @@ def handle_client(client_socket, client_address, lenomate):
                 print(f"收到{client_address[0]}:{client_address[1]}的消息：{data}")
                 # 广播消息给所有连接的客户端
                 send_data = lenomate.process(eval(data))
-                client_socket.send(send_data.encode('utf-8') + b'__end_of_socket__')
+                client_socket.sendall(send_data.encode('utf-8') + b'__end_of_socket__')
                 print(f"回复{client_address[0]}:{client_address[1]}的消息：{send_data}")
         except Exception as e:
             print(e)
