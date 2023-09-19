@@ -5,11 +5,11 @@ import queue
 from transformers import AutoTokenizer, AutoModel
 from utils.search_doc_faiss import faiss_corpus
 import torch
-import operation.operation_server as operation
+import operation.operation_server_glm as operation
 import argparse
 from peft import PeftModel
 from operation.hello import bot_hello 
-import chat_mode
+import utils.glm.glm_chat_mode as glm_chat_mode
 import os
 def get_parser():
     parser = argparse.ArgumentParser()
@@ -50,8 +50,8 @@ def load_and_run_model():
     tokenizer_sim = AutoTokenizer.from_pretrained(args.simmodel_dir)
     # tokenizer_sim.eos_token = 
     corpus = faiss_corpus(args=args,model = model_sim, tokenizer=tokenizer_sim)
-    bot = chat_mode.chat_bot(model,tokenizer)    
-    opr = chat_mode.operation_bot(model,tokenizer,model_sim,tokenizer_sim,corpus)
+    bot = glm_chat_mode.chat_bot(model,tokenizer)    
+    opr = glm_chat_mode.operation_bot(model,tokenizer,model_sim,tokenizer_sim,corpus)
     print("模型加载完成")
 
     while True: 
