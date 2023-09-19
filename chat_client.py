@@ -150,7 +150,7 @@ def receive_messages():
         try:
             socket_data = b''
             while True:
-                data = client_socket.recv(1024)
+                data = client_socket.recv(10240)
                 if data.endswith(b'__end_of_socket__'):
                     socket_data += data[:-len(b'__end_of_socket__')]
                     break
