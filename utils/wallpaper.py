@@ -16,7 +16,7 @@ def main(wallpaper_path):
 
         # 设置壁纸
     img = Image.open(wallpaper_path)
-    img.show()
+    # img.show()
     # ans = input("y/n?")
     # if ans in ['y','Y']:
     #     SPI_SETDESKWALLPAPER = 20

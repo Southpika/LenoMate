@@ -168,12 +168,13 @@ class chat_bot:
         return {'image':image_data}
     
 class operation_bot():
-    def __init__(self,model,tokenizer,model_sim,tokenizer_sim,corpus) -> None:
+    def __init__(self,model,tokenizer,model_sim,tokenizer_sim,corpus,sdmodels) -> None:
         self.model = model
         self.tokenizer = tokenizer
         self.model_sim = model_sim
         self.tokenizer_sim = tokenizer_sim
         self.corpus = corpus
+        self.sdmodel = sdmodels
     
     def fit(self,data):
         # self.input_statement = data['inputs']
@@ -210,8 +211,7 @@ class operation_bot():
             return result
         
         elif data['state_code'] == 6:
-
-            path = r"C:\Users\admin\Desktop\sd\sd_tzh\outputs\txt2img-samples\samples\00112.png"
+            path = self.sdmodel.inference(data['inputs'])[0]
             with open(path, 'rb') as file:
                 image_data = file.read()
             # 发送图像数据给客户端

@@ -28,7 +28,7 @@ parser.add_argument(
     "--lora-location",
     type=str,
     nargs="?",
-    default=r'./example_loras/PAseerCloudV1.safetensors',
+    default=r'./models/example_loras/PAseerCloudV1.safetensors',
     help="lora path(end with safetensors),recommend ./example_loras/PAseerCloudV1.safetensors"
 )
 
@@ -52,7 +52,7 @@ parser.add_argument(
     "--num_images",
     type=int,
     nargs="?",
-    default=4,
+    default=1,
     help="num_images_per_prompt"
 )
 
@@ -86,7 +86,7 @@ parser.add_argument(
     default="xformers"
 )
 
-args = parser.parse_args()
+sd_args = parser.parse_args()
 
 class sdmodels:
     def __init__(self,args):
@@ -108,10 +108,10 @@ class sdmodels:
         self.negative_prompt =  ["(low quality, worst quality:1.4), (bad anatomy), (inaccurate limb:1.2), "
                    "bad composition, inaccurate eyes, extra digit, fewer digits, (extra arms:1.2), large breasts"]
         self.prompt = args.prompt
-        self.prompt_tokenizer = AutoTokenizer.from_pretrained('alibaba-pai/pai-bloom-1b1-text2prompt-sd')
-        self.prompt_model = AutoModelForCausalLM.from_pretrained('alibaba-pai/pai-bloom-1b1-text2prompt-sd').eval().cuda()
-        self.prompt_model.eval()
-        # self.prompt_model = None
+        # self.prompt_tokenizer = AutoTokenizer.from_pretrained('alibaba-pai/pai-bloom-1b1-text2prompt-sd')
+        # self.prompt_model = AutoModelForCausalLM.from_pretrained('alibaba-pai/pai-bloom-1b1-text2prompt-sd').eval().cuda()
+        # self.prompt_model.eval()
+        self.prompt_model = None
         print('model prepared...')
         print('*'*50)
 
@@ -120,7 +120,7 @@ class sdmodels:
     def inference(self,prompt=None):
         torch.cuda.empty_cache()
         
-        input_prompt = prompt if prompt else args.prompt
+        input_prompt = prompt if prompt else self.args.prompt
 
         if self.prompt_model:
             input = f'Instruction: Give a simple description of the image to generate a drawing prompt.\nInput: {input_prompt}\nOutput:'
@@ -134,22 +134,22 @@ class sdmodels:
                     top_k=50,
                     top_p=0.95,
                     repetition_penalty=1.2,
-                    num_return_sequences=args.num_images)
+                    num_return_sequences=self.args.num_images)
 
             prompts = self.prompt_tokenizer.batch_decode(outputs[:, input_ids.size(1):], skip_special_tokens=True)
             input_prompt = [p.strip() for p in prompts]
         else:
-            input_prompt = [input_prompt] * args.num_images
+            input_prompt = [input_prompt] * self.args.num_images
         torch.cuda.empty_cache()
         with torch.inference_mode():
             print(input_prompt)
             image = self.pipeline(
                 prompt = input_prompt, 
-                width = args.width,
-                height = args.height,
+                width = self.args.width,
+                height = self.args.height,
                 num_images_per_prompt=1,
                 num_inference_steps=20, 
-                negative_prompt=self.negative_prompt * args.num_images, 
+                negative_prompt=self.negative_prompt * self.args.num_images, 
                 generator=torch.manual_seed(0)
             ).images
         torch.cuda.empty_cache()
