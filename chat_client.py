@@ -148,7 +148,14 @@ def receive_messages():
     print("已与服务器建立连接")
     while True:
         try:
-            data = eval(client_socket.recv(10240).decode('utf-8'))
+            socket_data = b''
+            while True:
+                data = client_socket.recv(1024)
+                if data.endswith(b'__end_of_socket__'):
+                    socket_data += data[:-len(b'__end_of_socket__')]
+                    break
+                socket_data += data
+            data = eval(socket_data.decode('utf-8'))
             print(f"收到服务器的消息：{data}")
             handle(**data)
         except Exception as e:

@@ -87,7 +87,7 @@ def handle_client(client_socket, client_address):
                 input_queue.put(data_temp) 
                 send_data = output_queue.get()
                 output_queue_client.put(send_data)
-                client_socket.send(str(output_queue_client.get()).encode('utf-8'))
+                client_socket.sendall(str(output_queue_client.get() + b'__end_of_image__').encode('utf-8'))
                 print(f"回复{client_address[0]}:{client_address[1]}的消息：{send_data}")
         except Exception as e:
             print(e)
