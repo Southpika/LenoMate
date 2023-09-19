@@ -105,15 +105,37 @@ input {
 
 }
 
+.server-message-wallpaper {
+    width: 100%;
+    position: relative;
+    color: #253854;
+    font-family: Inter;
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 200;
+    line-height: normal;
+}
+
+.server-message-file {
+    width: 100%;
+    position: relative;
+    color: #253854;
+    font-family: Inter;
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 200;
+    line-height: normal;
+}
+
 .line1 {
     position: relative;
-    width: 86.5%;
+    width: 84.5%;
     left: 7%;
     display: flex;
     border-radius: 5px;
     box-shadow: 0px 2px 2px 0px rgba(217, 217, 217, 0.60);
     background: #FFF;
-    padding: 3%;
+    padding: 4%;
     margin-bottom: 3%
 }
 
@@ -163,6 +185,15 @@ input {
     left: 0;
     z-index: 11;
 }
+
+.file_delete {
+
+    position: relative;
+}
+
+
+
+
 
 
 /* 底部样式 */
