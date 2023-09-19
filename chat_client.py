@@ -90,8 +90,10 @@ def text2(data: Dict):
 def audio(data: Dict):
     data, bot = output_queue.get()
 
-    if 'path' in data.keys():
-        return JSONResponse(content={"location": data['path'], "bot": bot})
+    if 'image' in data.keys():
+        with open('svg/1.png', 'wb') as file:
+            file.write(data['image'])
+        return JSONResponse(content={"location": 'svg/1.png', "bot": bot})
     else:
         result = data['chat']
         if bot:
@@ -137,7 +139,7 @@ def handle(**kwargs):
         # kwargs['location'] = r"svg/2.png" #测试用
 
         output_queue.put((kwargs, True))
-    elif 'path' in kwargs.keys():
+    elif 'image' in kwargs.keys():
         print(kwargs)
         output_queue.put((kwargs, True))
 
@@ -146,7 +148,14 @@ def receive_messages():
     print("已与服务器建立连接")
     while True:
         try:
-            data = eval(client_socket.recv(10240).decode('utf-8'))
+            socket_data = b''
+            while True:
+                data = client_socket.recv(10240)
+                if data.endswith(b'__end_of_socket__'):
+                    socket_data += data[:-len(b'__end_of_socket__')]
+                    break
+                socket_data += data
+            data = eval(socket_data.decode('utf-8'))
             print(f"收到服务器的消息：{data}")
             handle(**data)
         except Exception as e:
