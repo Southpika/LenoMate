@@ -89,8 +89,10 @@ def text2(data: Dict):
 def audio(data: Dict):
     data, bot = output_queue.get()
 
-    if 'path' in data.keys():
-        return JSONResponse(content={"location": data['path'], "bot": bot})
+    if 'image' in data.keys():
+        with open('svg/1.png', 'wb') as file:
+            file.write(data['image'])
+        return JSONResponse(content={"location": 'svg/1.png', "bot": bot})
     else:
         result = data['chat']
         if bot:
@@ -136,7 +138,7 @@ def handle(**kwargs):
         # kwargs['location'] = r"svg/2.png" #测试用
 
         output_queue.put((kwargs, True))
-    elif 'path' in kwargs.keys():
+    elif 'image' in kwargs.keys():
         print(kwargs)
         output_queue.put((kwargs, True))
 
