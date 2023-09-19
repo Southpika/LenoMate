@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', function (index) {
     /* 发送消息模块 */
     const chatContainer = document.getElementById('chatContainer');
     const textInput = document.getElementById('typing');
@@ -11,10 +11,66 @@ document.addEventListener('DOMContentLoaded', function () {
             xml.open('POST', 'http://localhost:8081/text');
             xml.setRequestHeader('Content-Type', 'application/json');
             xml.send(JSON.stringify({userInput: inputText}));
+            // 先清除之前的"server-message-wallpaper"
+            const previousServerWallpapers = document.querySelectorAll('.server-message-wallpaper');
+            previousServerWallpapers.forEach(function (element) {
+                element.remove();
+            });
             appendMessage('user', inputText); // 显示用户发送的消息
             textInput.value = ''; // 清空输入框
         }
     });
+
+    // 文件接受
+    function appendFile(sender, message) {
+        const messageDiv = document.createElement('div');
+        const messageDivunder = document.createElement('div');
+        const messageText = document.createElement('div');
+        const fill2 = document.createElement('span');
+        fill2.className = 'fill2';
+        // 创建包含消息文本的元素
+        messageDiv.className = `${sender}-message-file`;
+        // 创建小人logo
+        const img = document.createElement('img');
+        const deleted = document.createElement('img');
+        img.src = 'svg/guy.svg'; // 设置服务器图像的路径
+        deleted.src = 'svg/filedelete.svg'; // 设置服务器图像的路径
+        img.className = 'avatar'; // 设置图像的样式类
+        deleted.className = 'file_delete';
+        messageDiv.appendChild(img);
+        messageDiv.appendChild(fill2);
+        messageDivunder.appendChild(messageText);
+        messageDivunder.appendChild(deleted);
+        messageDiv.appendChild(messageDivunder);
+        messageDivunder.className = 'line1';
+        messageText.textContent = `${message}`;
+        // 添加图像和消息文本到消息容器
+        messageDiv.appendChild(messageDivunder);
+        chatContainer.appendChild(messageDiv);
+        chatContainer.scrollTop = chatContainer.scrollHeight; // 滚动到底部
+
+        // 获取具有'file_delete'类的所有元素
+        const elements = document.getElementsByClassName('file_delete');
+        // 遍历每个元素并添加点击事件监听器
+        for (let i = 0; i < elements.length; i++) {
+            elements[i].addEventListener('click', function () {
+                if (fstate) {
+                    fstate = false;
+                    const xml = new XMLHttpRequest();
+                    xml.open('DELETE', `http://localhost:8081/data/${file_name}`);
+                    xml.onreadystatechange = function () {
+                        if (xml.readyState === 4 && xml.status === 200) {
+                            const obj = JSON.parse(xml.responseText);
+                            appendMessage('server', obj["message"]);
+                            // 转换颜色
+                            dom.file.src = 'svg/file.svg';
+                        }
+                    };
+                    xml.send();
+                }
+            });
+        }
+    }
 
     // 接收服务器消息
     function appendMessage(sender, message) {
@@ -65,7 +121,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const fill2 = document.createElement('span');
         const fill3 = document.createElement('span');
         fill2.className = 'fill2';
-        messageDiv.className = `${sender}-message`;
+        messageDiv.className = `${sender}-message-wallpaper`;
 
         console.log(location)
         // 创建小人logo
@@ -269,7 +325,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // 切换聊天模式
     dom.chat.addEventListener('click', () => {
         if (state !== 'chat') {
-            state = 'chat'
+            state = 'chat';
             dom.stat.textContent = '聊天模式';
             dom.stat2.textContent = '聊天';
             const xml = new XMLHttpRequest();
@@ -282,7 +338,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // 文件分析
     dom.file.addEventListener('click', () => {
         if (!fstate) {
-            fstate = !fstate
+            fstate = !fstate;
             const fileInput = document.createElement('input');
             fileInput.type = 'file';
             fileInput.addEventListener('change', (event) => {
@@ -295,28 +351,16 @@ document.addEventListener('DOMContentLoaded', function () {
                     xml.onreadystatechange = function () {
                         if (xml.readyState === 4 && xml.status === 200) {
                             const obj = JSON.parse(xml.responseText);
-                            file_name = obj["filename"]
-                            appendMessage('server', obj["message"]);
-                            dom.file.src = 'svg/file2.svg'
+                            file_name = obj["filename"];
+                            appendFile('server', obj["message"]);
+                            // 转换颜色
+                            dom.file.src = 'svg/file2.svg';
                         }
                     };
                     xml.send(formData);
                 }
             });
             fileInput.click();
-        } else {
-            fstate = false
-            const xml = new XMLHttpRequest();
-            xml.open('DELETE', `http://localhost:8081/data/${file_name}`);
-            xml.onreadystatechange = function () {
-                if (xml.readyState === 4 && xml.status === 200) {
-                    const obj = JSON.parse(xml.responseText);
-                    appendMessage('server', obj["message"]);
-                    dom.file.src = 'svg/file.svg'
-                }
-            };
-            xml.send()
         }
     });
-
 });
