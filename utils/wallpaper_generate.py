@@ -36,7 +36,7 @@ parser.add_argument(
     "--width",
     type=int,
     nargs="?",
-    default=1920,
+    default=968,
     help="picture width"
 )
 
@@ -44,7 +44,7 @@ parser.add_argument(
     "--height",
     type=int,
     nargs="?",
-    default=1080,
+    default=560,
     help="picture height"
 )
 
@@ -52,7 +52,7 @@ parser.add_argument(
     "--num_images",
     type=int,
     nargs="?",
-    default=1,
+    default=4,
     help="num_images_per_prompt"
 )
 

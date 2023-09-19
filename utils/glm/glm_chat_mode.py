@@ -211,11 +211,14 @@ class operation_bot():
             return result
         
         elif data['state_code'] == 6:
-            path = self.sdmodel.inference(data['inputs'])[0]
-            with open(path, 'rb') as file:
-                image_data = file.read()
-            # 发送图像数据给客户端
-            return {'image':image_data}
+            paths = self.sdmodel.inference(data['inputs'])
+            image_list = []
+            for path in paths:
+                with open(path, 'rb') as file:
+                    image_data = file.read()
+                    image_list.append(image_data)
+                # 发送图像数据给客户端
+            return {'image':image_list}
 
             
             

@@ -75,25 +75,49 @@ def text(data: Dict):
         message["content"] = file_content
     client_socket.send(str(message).encode("utf-8"))
 
+def remove_cached():
+    try:
+        for file in os.listdir('./svg'):
+            if file.endswith('png'):
+                os.remove(os.path.join('./svg',file))
+        print('Finish cached clean')
+    except Exception as e:
+        print(e)
 
-@app.post("/text2")  # 切换按钮
+@app.post("/text2")  # 切换按钮ge
 def text2(data: Dict):
     global mode
     mode = data["switch"]
     print(mode)
     res = memo[mode]
+    remove_cached()
     threading.Thread(target=sys, args=(res,)).start()
     return res
 
+def get_basecount():
+    base_count = 0
+    for file in os.listdir('./svg'):
+        if file.endswith('png'):
+            print(file)
+            base_count += 1
+    return base_count
 
 @app.post("/audio")  # 显示server返回消息
 def audio(data: Dict):
     data, bot = output_queue.get()
 
+    image_num = get_basecount() + 1
+    image_filename = "svg/{image_num}.png"
+    images_path = []
     if 'image' in data.keys():
-        with open('svg/1.png', 'wb') as file:
-            file.write(data['image'])
-        return JSONResponse(content={"location": 'svg/1.png', "bot": bot})
+        for image_io in data['image']:
+            with open(image_filename.format(image_num=image_num), 'wb') as file:
+                file.write(image_io)
+                images_path.append(image_filename.format(image_num=image_num))
+            image_num += 1
+        # images_path:"["svg/1.png","svg/2.png","svg/3.png","svg/4.png"]"
+        print(images_path)
+        return JSONResponse(content={"location": images_path, "bot": bot})
     else:
         result = data['chat']
         if bot:
@@ -156,7 +180,8 @@ def receive_messages():
                     break
                 socket_data += data
             data = eval(socket_data.decode('utf-8'))
-            print(f"收到服务器的消息：{data}")
+            if len(data) < 1000:
+                print(f"收到服务器的消息：{data}")
             handle(**data)
         except Exception as e:
             print(e)

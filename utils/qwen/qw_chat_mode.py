@@ -201,12 +201,13 @@ Question: {query}"""
 
 import operation.qw_prompt as prompt
 class operation_bot(chat_bot):
-    def __init__(self,model,tokenizer,model_sim,tokenizer_sim,corpus,generation_config) -> None:
+    def __init__(self,model,tokenizer,model_sim,tokenizer_sim,corpus,generation_config,sdmodel) -> None:
         super().__init__(model,tokenizer,generation_config)
         self.model_sim = model_sim
         self.tokenizer_sim = tokenizer_sim
         self.corpus = corpus
         self.system_message: str = "You are a helpful assistant named LenoMate from Lenovo."
+        self.sdmodel = sdmodel
         
     def fit(self,data):
         # self.input_statement = data['inputs']
@@ -246,7 +247,18 @@ class operation_bot(chat_bot):
             return result
 
         elif data['state_code'] == 6:
-            context = data['inputs']
+            
+            prompt_img = prompt.ImagePrompt(data['inputs']).prompt
+            prompt_img = self.chat(prompt_img, self.generation_config, history = [])
+            
+            paths = self.sdmodel.inference(prompt_img)
+            image_list = []
+            for path in paths:
+                with open(path, 'rb') as file:
+                    image_data = file.read()
+                    image_list.append(image_data)
+                # 发送图像数据给客户端
+            return {'image':image_list}
         
     def opr0(self,input_statement,context):
         # 屏幕亮度
