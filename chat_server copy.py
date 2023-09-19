@@ -83,7 +83,7 @@ def handle_client(client_socket, client_address, lenomate):
     while True:
         try:
             # 接收客户端消息
-            data = client_socket.recv(102400).decode('utf-8')
+            data = client_socket.recv(1024**2).decode('utf-8')
             if data:
                 print(f"收到{client_address[0]}:{client_address[1]}的消息：{data}")
                 # 广播消息给所有连接的客户端
@@ -106,7 +106,7 @@ def chat_server(ip='192.168.137.1'):
     server_socket.bind((ip, 8888))
     server_socket.listen(5)
     print("服务器已启动，等待连接...")
-    lenomate = LenoMate('qw',args=args)
+    lenomate = LenoMate('glm',args=args)
     while True:
         # 接受客户端连接
         client_socket, client_address = server_socket.accept()

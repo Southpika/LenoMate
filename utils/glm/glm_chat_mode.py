@@ -161,8 +161,11 @@ class chat_bot:
 #         output = self.infer(prompt_chat,max_length=8000)
 #         answer = self.tokenizer.decode(output[0]).split('<LenoMate>：')[1]
 #         pic_path = sd.inference(answer)
-        path = f"svg/{data['inputs']}.png"
-        return {'path':path}
+        path = r"C:\Users\admin\Desktop\sd\sd_tzh\outputs\txt2img-samples\samples\00112.png"
+        with open(path, 'rb') as file:
+            image_data = file.read()
+        # 发送图像数据给客户端
+        return {'image':image_data}
     
 class operation_bot():
     def __init__(self,model,tokenizer,model_sim,tokenizer_sim,corpus) -> None:
@@ -206,7 +209,13 @@ class operation_bot():
             result = opt.fit(self.model, self.tokenizer)
             return result
         
-        
+        elif data['state_code'] == 6:
+
+            path = r"C:\Users\admin\Desktop\sd\sd_tzh\outputs\txt2img-samples\samples\00112.png"
+            with open(path, 'rb') as file:
+                image_data = file.read()
+            # 发送图像数据给客户端
+            return {'image':image_data}
 
             
             
