@@ -87,6 +87,7 @@ class LenoMate:
             return str(result)
         else:
             answer_dict = eval(f"self.chat_bot.mode{data_client['state_code']}")(data_client)
+            print("模型输出：", answer_dict)
             return str(answer_dict)
 
 
