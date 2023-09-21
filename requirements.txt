@@ -30,3 +30,6 @@ unstructured
 bs4
 selenium
 transformers
+diffusers
+omegaconf
+xformers
