@@ -235,6 +235,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     } else if ('result' in obj) {
                         appendMessage('server', obj["result"]);
                     }
+                } else {
+                    appendMessage('user', obj["result"])
                 }
                 getMessage()
             }

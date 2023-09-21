@@ -208,7 +208,7 @@ def load_and_run_audio():
             result = recognition.recognize_from_microphone()
 
             # 根据指令执行相应的操作
-            if "小诺" in result or "想弄" in result or "小鹿" in result or "小洛" in result:
+            if "小诺" in result or "想弄" in result or "小鹿" in result or "小洛" in result or "小娜" in result:
                 # 执行您的程序代码
                 sys("我在听")
                 while True:
@@ -229,7 +229,7 @@ def load_and_run_audio():
                             sys("你好像没有说话，试试说小诺小诺唤醒我")
                             break
                         else:
-                            output_queue.put(({"chat", result}, False))
+                            output_queue.put(({"chat": result}, False))
                             sys("请稍等")
                             message = {"inputs": result, "state_code": mode}
                             if mode == 2:

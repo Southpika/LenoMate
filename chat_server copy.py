@@ -53,7 +53,8 @@ class LenoMate:
         args.model_type = model_type
 
         if model_type == 'glm':
-            prompt_model = AutoModelForCausalLM.from_pretrained('alibaba-pai/pai-bloom-1b1-text2prompt-sd').eval().cuda()
+            prompt_model = AutoModelForCausalLM.from_pretrained(
+                'alibaba-pai/pai-bloom-1b1-text2prompt-sd').eval().cuda()
             prompt_tokenizer = AutoTokenizer.from_pretrained('alibaba-pai/pai-bloom-1b1-text2prompt-sd')
 
             self.sd = sdmodels(sd_args,prompt_model,prompt_tokenizer)
@@ -99,7 +100,7 @@ def handle_client(client_socket, client_address, lenomate):
     while True:
         try:
             # 接收客户端消息
-            data = client_socket.recv(10240).decode('utf-8')
+            data = client_socket.recv(102400).decode('utf-8')
             if data:
                 print(f"收到{client_address[0]}:{client_address[1]}的消息：{data}")
                 # 广播消息给所有连接的客户端

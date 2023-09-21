@@ -7,7 +7,7 @@ from selenium import webdriver
 def search_web(keyword):
     options = webdriver.EdgeOptions()
     # options = webdriver.ChromeOptions()
-    options.add_argument('headless')
+    # options.add_argument()
     options.add_experimental_option('excludeSwitches', ['enable-logging'])
     driver = webdriver.Edge(options=options)
     driver.get(quote("https://cn.bing.com/search?q="+str(keyword),safe='/:?=.'))
