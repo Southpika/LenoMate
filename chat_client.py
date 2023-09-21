@@ -229,7 +229,7 @@ def load_and_run_audio():
                             sys("你好像没有说话，试试说小诺小诺唤醒我")
                             break
                         else:
-                            output_queue.put((result, False))
+                            output_queue.put(({"chat", result}, False))
                             sys("请稍等")
                             message = {"inputs": result, "state_code": mode}
                             if mode == 2:
