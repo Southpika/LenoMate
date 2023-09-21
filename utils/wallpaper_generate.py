@@ -89,7 +89,7 @@ parser.add_argument(
 sd_args = parser.parse_args()
 
 class sdmodels:
-    def __init__(self,args):
+    def __init__(self,args,prompt_model = None, prompt_tokenizer = None):
         print('[Painting]loading model...')
         os.makedirs(os.path.dirname(args.model_location), exist_ok=True)
         self.args = args
@@ -111,7 +111,8 @@ class sdmodels:
         # self.prompt_tokenizer = AutoTokenizer.from_pretrained('alibaba-pai/pai-bloom-1b1-text2prompt-sd')
         # self.prompt_model = AutoModelForCausalLM.from_pretrained('alibaba-pai/pai-bloom-1b1-text2prompt-sd').eval().cuda()
         # self.prompt_model.eval()
-        self.prompt_model = None
+        self.prompt_model = prompt_model
+        self.prompt_tokenizer = prompt_tokenizer
         print('model prepared...')
         print('*'*50)
 

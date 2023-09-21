@@ -167,10 +167,9 @@ class chat_bot:
         # 发送图像数据给客户端
         return {'image':image_data}
     
-class operation_bot():
+class operation_bot(chat_bot):
     def __init__(self,model,tokenizer,model_sim,tokenizer_sim,corpus,sdmodels) -> None:
-        self.model = model
-        self.tokenizer = tokenizer
+        super().__init__(model,tokenizer)
         self.model_sim = model_sim
         self.tokenizer_sim = tokenizer_sim
         self.corpus = corpus
@@ -211,7 +210,12 @@ class operation_bot():
             return result
         
         elif data['state_code'] == 6:
-            paths = self.sdmodel.inference(data['inputs'])
+            
+            output = self.chat(prompt_chat=prompt.ImagePrompt(data['inputs']).prompt,max_length=8000,stop_words= ['##'])
+            answer = self.tokenizer.decode(output[0]).split('##输出：')[1].replace('##','').strip()
+            print('图片prompt:',answer)
+            paths = self.sdmodel.inference(answer)
+            
             image_list = []
             for path in paths:
                 with open(path, 'rb') as file:

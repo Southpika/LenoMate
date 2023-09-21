@@ -72,5 +72,12 @@ class Prompt4(Prompt):
 # 已知{inp}，用户需要“{context}”，请模仿"“您现在电脑当前音量为X，已调至Y”"进行回答：
 # ##回答："""
 
+class ImagePrompt(Prompt):
+    def __init__(self, inp) -> None:
+
+        self.prompt = f"""基于以下已知信息，帮助用户完成翻译任务。
+##输入:
+请帮我翻译成英语：{inp}
+##输出："""
 
 
