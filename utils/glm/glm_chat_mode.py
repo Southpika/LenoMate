@@ -96,7 +96,7 @@ class chat_bot:
         for item in web_contents[1]:
             content += item
             content += '\n'
-        # print('[网页搜索]',content)
+        print('[网页搜索]',content)
         prompt_chat = f"""基于以下的内容，详细和专业的来回答用户的问题。
 ## 内容:
 {content}

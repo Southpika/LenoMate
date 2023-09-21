@@ -57,8 +57,8 @@ class LenoMate:
             prompt_tokenizer = AutoTokenizer.from_pretrained('alibaba-pai/pai-bloom-1b1-text2prompt-sd')
 
             self.sd = sdmodels(sd_args,prompt_model,prompt_tokenizer)
-            self.model = AutoModel.from_pretrained("THUDM/chatglm2-6b", trust_remote_code=True).cuda()
-            self.tokenizer = AutoTokenizer.from_pretrained("THUDM/chatglm2-6b", trust_remote_code=True)
+            self.model = AutoModel.from_pretrained(args.glm_model_dir,  trust_remote_code=True).cuda()
+            self.tokenizer = AutoTokenizer.from_pretrained(args.glm_model_dir,trust_remote_code=True)
             self.model = PeftModel.from_pretrained(self.model, args.glm_work_dir)
             import utils.glm.glm_chat_mode as glm_chat_mode
             self.chat_bot = glm_chat_mode.chat_bot(self.model, self.tokenizer)
@@ -71,7 +71,7 @@ class LenoMate:
             import utils.qwen.qw_chat_mode as qw_chat_mode    
             generation_config = GenerationConfig.from_pretrained(args.qw_model_dir, trust_remote_code=True)        
             self.chat_bot = qw_chat_mode.chat_bot(self.model,self.tokenizer,generation_config)
-            self.opr = qw_chat_mode.operation_bot(self.model,self.tokenizer,self.model_sim,self.tokenizer_sim,corpus,generation_config)
+            self.opr = qw_chat_mode.operation_bot(self.model,self.tokenizer,self.model_sim,self.tokenizer_sim,corpus,generation_config,self.sd)
         self.model.is_parallelizable = True
         self.model.model_parallel = True
         self.model.eval()
@@ -123,7 +123,7 @@ def chat_server(ip='192.168.137.1'):
     server_socket.bind((ip, 8888))
     server_socket.listen(5)
     print("服务器已启动，等待连接...")
-    lenomate = LenoMate('glm', args=args)
+    lenomate = LenoMate('qw', args=args)
     while True:
         # 接受客户端连接
         client_socket, client_address = server_socket.accept()

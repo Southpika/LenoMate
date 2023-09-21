@@ -108,7 +108,7 @@ class chat_bot:
         self.system_message: str = "You are a helpful assistant named LenoMate from Lenovo."
         self.history = []
         self.generation_config = generation_config
-        
+        self.history_doc = []
         self.history_web = []
 
     def chat(self,
@@ -249,7 +249,7 @@ class operation_bot(chat_bot):
         elif data['state_code'] == 6:
             
             prompt_img = prompt.ImagePrompt(data['inputs']).prompt
-            prompt_img = self.chat(prompt_img, self.generation_config, history = [])
+            prompt_img,_ = self.chat(prompt_img, self.generation_config, history = [])
             
             paths = self.sdmodel.inference(prompt_img)
             image_list = []
