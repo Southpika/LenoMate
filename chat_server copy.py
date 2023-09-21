@@ -53,10 +53,11 @@ class LenoMate:
         args.model_type = model_type
 
         if model_type == 'glm':
-            prompt_model = AutoModelForCausalLM.from_pretrained('alibaba-pai/pai-bloom-1b1-text2prompt-sd').eval().cuda()
+            prompt_model = AutoModelForCausalLM.from_pretrained(
+                'alibaba-pai/pai-bloom-1b1-text2prompt-sd').eval().cuda()
             prompt_tokenizer = AutoTokenizer.from_pretrained('alibaba-pai/pai-bloom-1b1-text2prompt-sd')
 
-            self.sd = sdmodels(sd_args,prompt_model,prompt_tokenizer)
+            self.sd = sdmodels(sd_args, prompt_model, prompt_tokenizer)
             self.model = AutoModel.from_pretrained("THUDM/chatglm2-6b", trust_remote_code=True).cuda()
             self.tokenizer = AutoTokenizer.from_pretrained("THUDM/chatglm2-6b", trust_remote_code=True)
             self.model = PeftModel.from_pretrained(self.model, args.glm_work_dir)
@@ -66,12 +67,14 @@ class LenoMate:
                                                    corpus, self.sd)
         if model_type == 'qw':
             self.sd = sdmodels(sd_args)
-            self.model = AutoModelForCausalLM.from_pretrained(args.qw_model_dir,  trust_remote_code=True, bf16=True).cuda()
-            self.tokenizer = AutoTokenizer.from_pretrained(args.qw_model_dir,trust_remote_code=True)
-            import utils.qwen.qw_chat_mode as qw_chat_mode    
-            generation_config = GenerationConfig.from_pretrained(args.qw_model_dir, trust_remote_code=True)        
-            self.chat_bot = qw_chat_mode.chat_bot(self.model,self.tokenizer,generation_config)
-            self.opr = qw_chat_mode.operation_bot(self.model,self.tokenizer,self.model_sim,self.tokenizer_sim,corpus,generation_config)
+            self.model = AutoModelForCausalLM.from_pretrained(args.qw_model_dir, trust_remote_code=True,
+                                                              bf16=True).cuda()
+            self.tokenizer = AutoTokenizer.from_pretrained(args.qw_model_dir, trust_remote_code=True)
+            import utils.qwen.qw_chat_mode as qw_chat_mode
+            generation_config = GenerationConfig.from_pretrained(args.qw_model_dir, trust_remote_code=True)
+            self.chat_bot = qw_chat_mode.chat_bot(self.model, self.tokenizer, generation_config)
+            self.opr = qw_chat_mode.operation_bot(self.model, self.tokenizer, self.model_sim, self.tokenizer_sim,
+                                                  corpus, generation_config)
         self.model.is_parallelizable = True
         self.model.model_parallel = True
         self.model.eval()
@@ -99,7 +102,7 @@ def handle_client(client_socket, client_address, lenomate):
     while True:
         try:
             # 接收客户端消息
-            data = client_socket.recv(10240).decode('utf-8')
+            data = client_socket.recv(102400).decode('utf-8')
             if data:
                 print(f"收到{client_address[0]}:{client_address[1]}的消息：{data}")
                 # 广播消息给所有连接的客户端

@@ -52,7 +52,7 @@ parser.add_argument(
     "--num-images",
     type=int,
     nargs="?",
-    default=4,
+    default=1,
     help="num_images_per_prompt"
 )
 
