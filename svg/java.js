@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function (index) {
+document.addEventListener('DOMContentLoaded', function () {
     /* 发送消息模块 */
     const chatContainer = document.getElementById('chatContainer');
     const textInput = document.getElementById('typing');
@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', function (index) {
             previousServerWallpapers.forEach(function (element) {
                 element.remove();
             });
+
             appendMessage('user', inputText); // 显示用户发送的消息
             textInput.value = ''; // 清空输入框
         }
@@ -114,6 +115,7 @@ document.addEventListener('DOMContentLoaded', function (index) {
 
     /// 定义包含初始图片路径的数组
     let imagePaths = [];
+    console.log(imagePaths);
     let currentImageIndex = 0; // 当前显示的图片索引
 
     function appendIMG(sender, location) {
@@ -136,13 +138,18 @@ document.addEventListener('DOMContentLoaded', function (index) {
         messageText.textContent = '您可以选择将本张图片设置为您的桌面壁纸，也可以试试新的图片';
         messageDiv.appendChild(messageText);
 
-        // 创建图片
-        console.log('done');
-        wallpaper.src = `${location}`;
+//        wallpaper_list = JSON.parse(`${location}`);
+//        console.log(wallpaper_list);
         // 将接收的图片路径存入imagePaths
-        imagePaths.push(wallpaper.src);
 
-        messageDiv.appendChild(wallpaper);
+        imagePaths = imagePaths.concat(location);
+        console.log(imagePaths);
+        for (const item of imagePaths) {
+            wallpaper.src = item;
+            messageDiv.appendChild(wallpaper);
+        }
+
+//      messageDiv.appendChild(imagePaths[0]);
         // 创建控制栏
         const chooser = document.createElement('div');
         /// 控制栏填充
@@ -207,6 +214,7 @@ document.addEventListener('DOMContentLoaded', function (index) {
     function addImageToPaths(imagePath) {
         imagePaths.push(imagePath);
         currentImageIndex = imagePaths.length - 1;
+        console.log(imagePaths)
     }
 
     /* 接收消息模块 */
