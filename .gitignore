@@ -85,14 +85,7 @@ test_file
 test_file/hi_eng.csv
 utils/example_loras/PAseerCloudV1.safetensors
 utils/models/anything-v5-PrtRE.safetensors
-svg/1.png
-svg/2.png
-svg/3.png
-svg/4.png
-svg/5.png
-svg/6.png
-svg/7.png
-svg/8.png
+svg
 models
 chat_server copy.py
 outputs
