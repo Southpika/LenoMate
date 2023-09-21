@@ -22,6 +22,8 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+
+
     // 文件接受
     function appendFile(sender, message) {
         const messageDiv = document.createElement('div');
@@ -63,8 +65,6 @@ document.addEventListener('DOMContentLoaded', function () {
                         if (xml.readyState === 4 && xml.status === 200) {
                             const obj = JSON.parse(xml.responseText);
                             appendMessage('server', obj["message"]);
-                            // 转换颜色
-                            dom.file.src = 'svg/file.svg';
                         }
                     };
                     xml.send();
@@ -178,6 +178,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         messageDiv.appendChild(chooser);
 
+        currentImageIndex += 4;
         chatContainer.appendChild(messageDiv);
         chatContainer.scrollTop = chatContainer.scrollHeight; // 滚动到底部
     }
@@ -246,6 +247,7 @@ document.addEventListener('DOMContentLoaded', function () {
     /* mode栏弹出 */
     const openTextingButton = document.querySelector('.typing');
     const closeModalButton = document.querySelector('.mid');
+    const closeModalButton2 = document.querySelector('.send');
     const modalOverlay = document.querySelector('.texting_mode');
 
     openTextingButton.addEventListener('click', function () {
@@ -253,6 +255,10 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     closeModalButton.addEventListener('click', function () {
+        modalOverlay.classList.remove('active');
+    });
+
+    closeModalButton2.addEventListener('click', function () {
         modalOverlay.classList.remove('active');
     });
 
@@ -361,8 +367,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             const obj = JSON.parse(xml.responseText);
                             file_name = obj["filename"];
                             appendFile('server', obj["message"]);
-                            // 转换颜色
-                            dom.file.src = 'svg/file2.svg';
+
                         }
                     };
                     xml.send(formData);

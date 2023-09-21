@@ -49,7 +49,7 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    "--num_images",
+    "--num-images",
     type=int,
     nargs="?",
     default=4,
@@ -75,7 +75,7 @@ parser.add_argument(
     type=str,
     nargs="?",
     help="dir to write results to",
-    default="outputs/txt2img-samples"
+    default="data/outputs/txt2img-samples"
 )
 
 parser.add_argument(
@@ -103,7 +103,7 @@ class sdmodels:
         if args.accelerate:
             self._accelerate()
         if args.lora_location:
-            self.pipeline.load_lora_weights(args.lora_location)       
+            self.pipeline.load_lora_weights(args.lora_location,lora_scale = 0.5)       
 
         self.negative_prompt =  ["(low quality, worst quality:1.4), (bad anatomy), (inaccurate limb:1.2), "
                    "bad composition, inaccurate eyes, extra digit, fewer digits, (extra arms:1.2), large breasts"]
@@ -197,9 +197,7 @@ class sdmodels:
 
 if __name__ == '__main__':
     
-    sd = sdmodels(args)
+    sd = sdmodels(sd_args)
     while True:
         path = sd.inference(input('Prompt: '))
-        print(path)
-        for pth in path:
-            wallpaper.main(pth)
+        
