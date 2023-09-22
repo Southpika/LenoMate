@@ -49,7 +49,7 @@ class LenoMate:
         self.model_sim = AutoModel.from_pretrained(args.simmodel_dir).to('cuda')
         self.tokenizer_sim = AutoTokenizer.from_pretrained(args.simmodel_dir)
         self.model_sim.eval()
-        corpus = faiss_corpus(args=args, model=self.model_sim, tokenizer=self.tokenizer_sim)
+        self.corpus = faiss_corpus(args=args, model=self.model_sim, tokenizer=self.tokenizer_sim)
         args.model_type = model_type
 
         if model_type == 'glm':
@@ -61,18 +61,13 @@ class LenoMate:
             self.model = AutoModel.from_pretrained(args.glm_model_dir,  trust_remote_code=True).cuda()
             self.tokenizer = AutoTokenizer.from_pretrained(args.glm_model_dir,trust_remote_code=True)
             self.model = PeftModel.from_pretrained(self.model, args.glm_work_dir)
-            import utils.glm.glm_chat_mode as glm_chat_mode
-            self.chat_bot = glm_chat_mode.chat_bot(self.model, self.tokenizer)
-            self.opr = glm_chat_mode.operation_bot(self.model, self.tokenizer, self.model_sim, self.tokenizer_sim,
-                                                   corpus, self.sd)
+
         if model_type == 'qw':
             self.sd = sdmodels(sd_args)
             self.model = AutoModelForCausalLM.from_pretrained(args.qw_model_dir,  trust_remote_code=True, bf16=True).cuda()
             self.tokenizer = AutoTokenizer.from_pretrained(args.qw_model_dir,trust_remote_code=True)
-            import utils.qwen.qw_chat_mode as qw_chat_mode    
-            generation_config = GenerationConfig.from_pretrained(args.qw_model_dir, trust_remote_code=True)        
-            self.chat_bot = qw_chat_mode.chat_bot(self.model,self.tokenizer,generation_config)
-            self.opr = qw_chat_mode.operation_bot(self.model,self.tokenizer,self.model_sim,self.tokenizer_sim,corpus,generation_config,self.sd)
+
+        
         self.model.is_parallelizable = True
         self.model.model_parallel = True
         self.model.eval()
@@ -80,16 +75,31 @@ class LenoMate:
         print("模型加载完成")
 
     def process(self, data_client):
+        self.reset_bot()
         torch.cuda.empty_cache()
         if data_client['state_code'] in [1, 4, 6]:
             result = self.opr.fit(data_client)
-            if data_client['state_code'] != 6:
-                print("模型输出：", result)
+            # if data_client['state_code'] != 6:
+                # print("模型输出：", result)
             return str(result)
         else:
             answer_dict = eval(f"self.chat_bot.mode{data_client['state_code']}")(data_client)
-            print("模型输出：", answer_dict)
+            # print("模型输出：", answer_dict)
             return str(answer_dict)
+    
+    def reset_bot(self):
+        if args.model_type == 'glm':
+            import utils.glm.glm_chat_mode as glm_chat_mode
+            self.chat_bot = glm_chat_mode.chat_bot(self.model, self.tokenizer)
+            self.opr = glm_chat_mode.operation_bot(self.model, self.tokenizer, self.model_sim, self.tokenizer_sim,
+                                                   self.corpus, self.sd)
+        if args.model_type == 'qw':
+            import utils.qwen.qw_chat_mode as qw_chat_mode    
+            generation_config = GenerationConfig.from_pretrained(args.qw_model_dir, trust_remote_code=True)        
+            self.chat_bot = qw_chat_mode.chat_bot(self.model,self.tokenizer,generation_config)
+            self.opr = qw_chat_mode.operation_bot(self.model,self.tokenizer,self.model_sim,self.tokenizer_sim,self.corpus,generation_config,self.sd)
+        
+
 
 
 def handle_client(client_socket, client_address, lenomate):
