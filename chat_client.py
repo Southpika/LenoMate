@@ -15,12 +15,10 @@ import audio.speech_recognition as recognition
 import audio.speech_synthesis as synthesis
 import operation.read_file as rd
 import utils.blue_screen as bs
-import operation
 
 app = FastAPI()
 app.mount("/svg", StaticFiles(directory="svg"), name="svg")
 app.mount("/web", StaticFiles(directory="web"), name="web")
-
 root_path = os.path.dirname(os.path.abspath(__file__))
 
 
@@ -75,14 +73,16 @@ def text(data: Dict):
         message["content"] = file_content
     client_socket.send(str(message).encode("utf-8"))
 
+
 def remove_cached():
     try:
         for file in os.listdir('./svg'):
             if file.endswith('png'):
-                os.remove(os.path.join('./svg',file))
+                os.remove(os.path.join('./svg', file))
         print('Finish cached clean')
     except Exception as e:
         print(e)
+
 
 @app.post("/text2")  # 切换按钮ge
 def text2(data: Dict):
@@ -94,6 +94,7 @@ def text2(data: Dict):
     threading.Thread(target=sys, args=(res,)).start()
     return res
 
+
 def get_basecount():
     base_count = 0
     for file in os.listdir('./svg'):
@@ -102,10 +103,10 @@ def get_basecount():
             base_count += 1
     return base_count
 
+
 @app.post("/audio")  # 显示server返回消息
 def audio(data: Dict):
     data, bot = output_queue.get()
-
     image_num = get_basecount() + 1
     image_filename = "svg/{image_num}.png"
     images_path = []
@@ -120,10 +121,12 @@ def audio(data: Dict):
         return JSONResponse(content={"location": images_path, "bot": bot})
     else:
         result = data['chat']
-        if bot:
-            threading.Thread(target=sys, args=(result,)).start()
-
-        return JSONResponse(content={"result": result.strip('\n'), "bot": bot})
+        # if bot:
+        #     threading.Thread(target=sys, args=(result,)).start()
+        if 'follow' in data:
+            return JSONResponse(content={"result": result.strip('\n'), "bot": bot, "follow": data['follow']})
+        else:
+            return JSONResponse(content={"result": result.strip('\n'), "bot": bot})
 
 
 @app.post("/image")
@@ -161,7 +164,6 @@ def handle(**kwargs):
                 str({"inputs": eval_content, "state_code": 1}).encode("utf-8"))
     if "chat" in kwargs.keys():
         # kwargs['location'] = r"svg/2.png" #测试用
-
         output_queue.put((kwargs, True))
     elif 'image' in kwargs.keys():
         print(kwargs)
@@ -179,6 +181,7 @@ def receive_messages():
                     socket_data += data[:-len(b'__end_of_socket__')]
                     break
                 socket_data += data
+            socket_data = socket_data.split(b'__end_of_socket__')[-1]
             data = eval(socket_data.decode('utf-8'))
             if 'image' not in data:
                 print(f"收到服务器的消息：{data}")
@@ -206,7 +209,6 @@ def load_and_run_audio():
             # result = recognition.main2(audio_frame.frame_data)
             # print("识别结果：", result)
             result = recognition.recognize_from_microphone()
-
             # 根据指令执行相应的操作
             if "小诺" in result or "想弄" in result or "小鹿" in result or "小洛" in result or "小娜" in result:
                 # 执行您的程序代码
@@ -223,7 +225,6 @@ def load_and_run_audio():
                         # result = recognition.main2(audio_frame.frame_data)
                         # print("识别结果：", result)
                         result = recognition.recognize_from_microphone()
-
                         # 根据指令执行相应的操作
                         if not result.strip():
                             sys("你好像没有说话，试试说小诺小诺唤醒我")
@@ -239,11 +240,9 @@ def load_and_run_audio():
                             client_socket.send(str(message).encode("utf-8"))
                             function_finished_flag.clear()
                             function_finished_flag.wait()
-
                     except:
                         sys("你好像没有说话，试试说小诺小诺唤醒我")
                         break
-
         except:
             print("无法识别语音")
 

@@ -16,12 +16,10 @@ document.addEventListener('DOMContentLoaded', function () {
             previousServerWallpapers.forEach(function (element) {
                 element.remove();
             });
-
             appendMessage('user', inputText); // 显示用户发送的消息
             textInput.value = ''; // 清空输入框
         }
     });
-
 
 
     // 文件接受
@@ -51,7 +49,6 @@ document.addEventListener('DOMContentLoaded', function () {
         messageDiv.appendChild(messageDivunder);
         chatContainer.appendChild(messageDiv);
         chatContainer.scrollTop = chatContainer.scrollHeight; // 滚动到底部
-
         // 获取具有'file_delete'类的所有元素
         const elements = document.getElementsByClassName('file_delete');
         // 遍历每个元素并添加点击事件监听器
@@ -231,9 +228,17 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (obj["bot"]) {
                     if ("location" in obj) {
                         appendIMG('server', obj["location"]);
-
                     } else if ('result' in obj) {
-                        appendMessage('server', obj["result"]);
+                        if ('follow' in obj) {
+                            if (obj['follow']) {
+                                const lastMessageDiv = chatContainer.lastElementChild;
+                                lastMessageDiv.textContent = `${obj["result"]}`;
+                            } else {
+                                appendMessage('server', obj["result"]);
+                            }
+                        } else {
+                            appendMessage('server', obj["result"]);
+                        }
                     }
                 } else {
                     appendMessage('user', obj["result"])
@@ -369,7 +374,6 @@ document.addEventListener('DOMContentLoaded', function () {
                             const obj = JSON.parse(xml.responseText);
                             file_name = obj["filename"];
                             appendFile('server', obj["message"]);
-
                         }
                     };
                     xml.send(formData);

@@ -14,12 +14,15 @@ from utils.wallpaper_generate import sdmodels, sd_args
 
 import os
 
-import os,sys,platform
+import os, sys, platform
+
+
 def _clear_screen():
     os.system("cls" if platform.system() == "Windows" else "clear")
     if 'ipykernel' in sys.modules:
         from IPython.display import clear_output as clear
         clear()
+
 
 def get_parser():
     parser = argparse.ArgumentParser()
@@ -63,21 +66,22 @@ class LenoMate:
                 'alibaba-pai/pai-bloom-1b1-text2prompt-sd').eval().cuda()
             prompt_tokenizer = AutoTokenizer.from_pretrained('alibaba-pai/pai-bloom-1b1-text2prompt-sd')
 
-            self.sd = sdmodels(sd_args,prompt_model,prompt_tokenizer)
-            self.model = AutoModel.from_pretrained(args.glm_model_dir,  trust_remote_code=True).cuda()
-            self.tokenizer = AutoTokenizer.from_pretrained(args.glm_model_dir,trust_remote_code=True)
+            self.sd = sdmodels(sd_args, prompt_model, prompt_tokenizer)
+            self.model = AutoModel.from_pretrained(args.glm_model_dir, trust_remote_code=True).cuda()
+            self.tokenizer = AutoTokenizer.from_pretrained(args.glm_model_dir, trust_remote_code=True)
             self.model = PeftModel.from_pretrained(self.model, args.glm_work_dir)
 
         if model_type == 'qw':
             self.sd = sdmodels(sd_args)
-            self.model = AutoModelForCausalLM.from_pretrained(args.qw_model_dir,  trust_remote_code=True, bf16=True).cuda()
-            self.tokenizer = AutoTokenizer.from_pretrained(args.qw_model_dir,trust_remote_code=True)
+            self.model = AutoModelForCausalLM.from_pretrained(args.qw_model_dir, trust_remote_code=True,
+                                                              bf16=True).cuda()
+            self.tokenizer = AutoTokenizer.from_pretrained(args.qw_model_dir, trust_remote_code=True)
             from transformers import PreTrainedModel
             from transformers_stream_generator.main import NewGenerationMixin, StreamGenerationConfig
             PreTrainedModel.generate = NewGenerationMixin.generate
-            PreTrainedModel.sample_stream = NewGenerationMixin.sample_stream 
+            PreTrainedModel.sample_stream = NewGenerationMixin.sample_stream
         self.reset_bot()
-        
+
         self.model.is_parallelizable = True
         self.model.model_parallel = True
         self.model.eval()
@@ -90,14 +94,14 @@ class LenoMate:
         if data_client['state_code'] in [1, 4, 6]:
             result = self.opr.fit(data_client)
             # if data_client['state_code'] != 6:
-                # print("模型输出：", result)
+            # print("模型输出：", result)
             return str(result)
-            
+
         else:
             answer_dict = eval(f"self.chat_bot.mode{data_client['state_code']}")(data_client)
             # print("模型输出：", answer_dict)
             return answer_dict
-    
+
     def reset_bot(self):
         if args.model_type == 'glm':
             import utils.glm.glm_chat_mode as glm_chat_mode
@@ -105,16 +109,15 @@ class LenoMate:
             self.opr = glm_chat_mode.operation_bot(self.model, self.tokenizer, self.model_sim, self.tokenizer_sim,
                                                    self.corpus, self.sd)
         if args.model_type == 'qw':
-            import utils.qwen.qw_chat_mode as qw_chat_mode   
+            import utils.qwen.qw_chat_mode as qw_chat_mode
             from transformers_stream_generator.main import StreamGenerationConfig
             generation_config = GenerationConfig.from_pretrained(args.qw_model_dir, trust_remote_code=True)
             stream_config = StreamGenerationConfig(**generation_config.to_dict(), do_stream=True)
 
-            generation_config = GenerationConfig.from_pretrained(args.qw_model_dir, trust_remote_code=True)        
-            self.chat_bot = qw_chat_mode.chat_bot(self.model,self.tokenizer,stream_config)
-            self.opr = qw_chat_mode.operation_bot(self.model,self.tokenizer,self.model_sim,self.tokenizer_sim,self.corpus,stream_config,self.sd)
-
-
+            generation_config = GenerationConfig.from_pretrained(args.qw_model_dir, trust_remote_code=True)
+            self.chat_bot = qw_chat_mode.chat_bot(self.model, self.tokenizer, stream_config)
+            self.opr = qw_chat_mode.operation_bot(self.model, self.tokenizer, self.model_sim, self.tokenizer_sim,
+                                                  self.corpus, stream_config, self.sd)
 
 
 def handle_client(client_socket, client_address, lenomate):
@@ -131,19 +134,16 @@ def handle_client(client_socket, client_address, lenomate):
                 # 广播消息给所有连接的客户端
                 send_data = lenomate.process(eval(data))
                 if eval(data)['state_code'] in [0]:
-                    for res,history in send_data['chat']:
-                        send_data = {'chat':res}
-                        # import time
-                        # time.sleep(0.05)
+                    start = True
+                    for res, history in send_data['chat']:
+                        send_data = {'chat': res, 'follow': start}
                         _clear_screen()
-                        print(res,flush=True)
+                        print(res, flush=True)
                         client_socket.sendall(str(send_data).encode('utf-8') + b'__end_of_socket__')
-                    # send_data['flow'] = False
-                    # client_socket.sendall(str(send_data).encode('utf-8') + b'__end_of_socket__')
-                
+                        start = False
                 else:
                     client_socket.sendall(str(send_data).encode('utf-8') + b'__end_of_socket__')
-                print('history',history)
+                print('history', history)
                 if eval(data)['state_code'] != 6:
                     print(f"回复{client_address[0]}:{client_address[1]}的消息：{send_data}")
         except Exception as e:
