@@ -134,7 +134,8 @@ class chat_bot:
         response_ids = self.model.generate(
                                     input_ids,
                                     # seed = -1,
-                                    generation_config = generation_config    
+                                    generation_config = generation_config,
+                                    do_stream=False,    
                                     )
         self.im_end = self.tokenizer.im_end_id
         for eod_token_idx in range(len(input_ids[0]), len(response_ids[0])):
@@ -145,6 +146,46 @@ class chat_bot:
         history.append((query, response))
         return response, history
 
+    def chat_stream(self,
+             query,
+             generation_config: Optional[GenerationConfig],
+             history=None,
+            ):
+        if history is None:
+            history = []
+        
+        prompts,input_ids = make_context(
+            self.tokenizer,
+            query = query,
+            history = history,
+            system = self.system_message,
+            max_window_size = generation_config.max_window_size,
+            chat_format=generation_config.chat_format,
+        )
+        input_ids = torch.tensor([input_ids]).to('cuda')
+        generator = self.model.generate(
+                                    input_ids,
+                                    seed = -1,
+                                    do_sample=True,
+                                    generation_config = generation_config,
+                                    do_stream=True    
+                                    )
+        outputs = []
+        for token in generator:
+            
+            outputs.append(token.item())
+            word = self.tokenizer.decode(outputs,skip_special_tokens=False,errors='ignore')
+            new_history = history + [word]
+            yield word, new_history
+        # self.im_end = self.tokenizer.im_end_id
+        # for eod_token_idx in range(len(input_ids[0]), len(response_ids[0])):
+        #     if response_ids[0][eod_token_idx] in [self.im_start, self.im_end]:
+        #         self.end_reason = f"Gen {self.tokenizer.decode([response_ids[0][eod_token_idx]])!r}"
+        #         break
+        # response = self.tokenizer.decode(response_ids[0][:eod_token_idx])[len(prompts):]
+        # history.append((query, response))
+        # return response, history
+
     def mode0(self,data):
         """
         mode0: 聊天模式
@@ -153,7 +194,7 @@ class chat_bot:
         """
         print("当前为聊天模式...")
         self.system_message: str = "You are a helpful assistant named LenoMate from Lenovo."
-        response, self.history = self.chat(data['inputs'], self.generation_config, history = self.history)
+        response = self.chat_stream(data['inputs'], self.generation_config, history = self.history)
         return {'chat':response}
     
     def mode2(self,data):

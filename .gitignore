@@ -89,3 +89,4 @@ svg
 models
 chat_server copy.py
 outputs
+data/tempfile.pdf
