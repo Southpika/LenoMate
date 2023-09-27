@@ -2,25 +2,22 @@ import sys
 import os
 # print(os.path.dirname(os.path.abspath('__file__')))
 sys.path.append(os.path.dirname(os.path.abspath('__file__')))
+from utils.qwen.stop_criterion import StopWordsLogitsProcessor
 import torch
 from typing import TYPE_CHECKING, Optional, Tuple, Union, Callable, List, Any, Generator
-from transformers import StoppingCriteriaList,StoppingCriteria
 import re
 from utils.web_search import web_searcher
-from utils.search_doc_faiss import faiss_corpus
 import operation.qw_prompt as prompt
 import operation.operation_server_qw as operation
-from transformers import AutoModelForCausalLM, AutoTokenizer
 from transformers.generation import GenerationConfig
-from transformers import PreTrainedModel
-from transformers_stream_generator.main import NewGenerationMixin, StreamGenerationConfig
-import time
 import os
 import argparse
 import torch
 import re
 from operation.open_app import search_tool
 import numpy as np
+
+from transformers.generation import LogitsProcessor,LogitsProcessorList
 
 def make_context(
     tokenizer,
@@ -153,7 +150,14 @@ class chat_bot:
             ):
         if history is None:
             history = []
-        
+        stop_words_ids = [[self.tokenizer.im_end_id], [self.tokenizer.im_start_id]]
+
+        if stop_words_ids is not None:
+            stop_words_logits_processor = StopWordsLogitsProcessor(
+                stop_words_ids=stop_words_ids,
+                eos_token_id=generation_config.eos_token_id,
+            )
+        logits_processor = LogitsProcessorList([stop_words_logits_processor])
         prompts,input_ids = make_context(
             self.tokenizer,
             query = query,
@@ -168,13 +172,13 @@ class chat_bot:
                                     seed = -1,
                                     do_sample=True,
                                     generation_config = generation_config,
-                                    do_stream=True    
+                                    logits_processor=logits_processor,    
                                     )
         outputs = []
         for token in generator:
             
             outputs.append(token.item())
-            word = self.tokenizer.decode(outputs,skip_special_tokens=False,errors='ignore')
+            word = self.tokenizer.decode(outputs,skip_special_tokens=True,errors='ignore')
             new_history = history + [word]
             yield word, new_history
         # self.im_end = self.tokenizer.im_end_id
@@ -186,7 +190,7 @@ class chat_bot:
         # history.append((query, response))
         # return response, history
 
-    def mode0(self,data):
+    def mode0(self,data,history):
         """
         mode0: 聊天模式
         Args:
@@ -194,10 +198,10 @@ class chat_bot:
         """
         print("当前为聊天模式...")
         self.system_message: str = "You are a helpful assistant named LenoMate from Lenovo."
-        response = self.chat_stream(data['inputs'], self.generation_config, history = self.history)
+        response = self.chat_stream(data['inputs'], self.generation_config, history = history)
         return {'chat':response}
     
-    def mode2(self,data):
+    def mode2(self,data,history):
         """
         mode2: 文档模式
         Args:
@@ -210,11 +214,11 @@ class chat_bot:
         query = data['inputs']
         content = data['content']
         self.system_message = f"<|im_start|>system\nYou are a helpful file analysis assistant.Please answer the user's question based on the following text.\nDocument:{content}\n<|im_end|>\n<|im_start|>user\n{query}<|im_end|>\n<|im_start|>assistant\n"
-        response, self.history_doc = self.chat(query,self.generation_config,history = self.history_doc)
+        response, self.history_doc = self.chat(query,self.generation_config,history = history)
         return {'chat':response}
 
 
-    def mode3(self,data):
+    def mode3(self,data,history):
         """
         mode3: 联网模式
         Args:
@@ -236,7 +240,7 @@ class chat_bot:
 {documents}
 
 Question: {query}"""
-        answer,self.history_web = self.chat(REACT_PROMPT.format(documents=content,query=query),self.generation_config,history = self.history_web)
+        answer,self.history_web = self.chat(REACT_PROMPT.format(documents=content,query=query),self.generation_config,history = history)
        
         return {'chat':answer}
 
