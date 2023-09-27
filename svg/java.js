@@ -234,7 +234,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             if (!obj['follow']) {
                                 const lastMessageDiv = chatContainer.lastElementChild;
                                 if (lastMessageDiv.className === 'server-message') {
-                                    lastMessageDiv.lastElementChild.textContent = `${res}`;
+                                    lastMessageDiv.lastElementChild.innerHTML = `${res}`;
                                 } else {
                                     appendMessage('server', res);
                                 }
