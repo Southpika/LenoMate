@@ -229,15 +229,20 @@ document.addEventListener('DOMContentLoaded', function () {
                     if ("location" in obj) {
                         appendIMG('server', obj["location"]);
                     } else if ('result' in obj) {
+                        res = obj['result'];
                         if ('follow' in obj) {
-                            if (obj['follow']) {
+                            if (!obj['follow']) {
                                 const lastMessageDiv = chatContainer.lastElementChild;
-                                lastMessageDiv.textContent = `${obj["result"]}`;
+                                if (lastMessageDiv.className === 'server-message') {
+                                    lastMessageDiv.lastElementChild.textContent = `${res}`;
+                                } else {
+                                    appendMessage('server', res);
+                                }
                             } else {
-                                appendMessage('server', obj["result"]);
+                                appendMessage('server', res);
                             }
                         } else {
-                            appendMessage('server', obj["result"]);
+                            appendMessage('server', res);
                         }
                     }
                 } else {
