@@ -229,7 +229,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     if ("location" in obj) {
                         appendIMG('server', obj["location"]);
                     } else if ('result' in obj) {
-                        res = obj['result'];
+                        res = obj['result'].replace(/\n/g, '<br>');
                         if ('follow' in obj) {
                             if (!obj['follow']) {
                                 const lastMessageDiv = chatContainer.lastElementChild;
