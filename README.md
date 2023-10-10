@@ -20,6 +20,11 @@ LenoMate是一款智能桌面助手，作为电脑的中枢，可以帮助用户
 
 ![1696926782813](image/README/1696926782813.png)
 
+
+## 壁纸生成
+
+![1696927615537](image/README/1696927615537.png)
+
 # 操作指令更新操作
 
 每次加入新的指令(data/document_corpus)，需更新操作库的embedding, 命令行运行 python utils/renew_corpus.py
