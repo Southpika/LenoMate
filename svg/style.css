@@ -232,6 +232,7 @@ input {
     visibility: visible;
     transform: translateY(0);
     position: relative;
+    z-index: 100;
 }
 
 .texting_mode_status {
