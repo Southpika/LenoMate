@@ -4,22 +4,38 @@ document.addEventListener('DOMContentLoaded', function () {
     const textInput = document.getElementById('typing');
     const sendMessageButton = document.getElementById('send');
     // 发送消息
-    sendMessageButton.addEventListener('click', function () {
+    function sendMessage() {
         const inputText = textInput.value;
         if (inputText.trim() !== '') {
             const xml = new XMLHttpRequest();
             xml.open('POST', 'http://localhost:8081/text');
             xml.setRequestHeader('Content-Type', 'application/json');
             xml.send(JSON.stringify({userInput: inputText}));
+
             // 先清除之前的"server-message-wallpaper"
             const previousServerWallpapers = document.querySelectorAll('.server-message-wallpaper');
             previousServerWallpapers.forEach(function (element) {
                 element.remove();
             });
+
             appendMessage('user', inputText); // 显示用户发送的消息
             textInput.value = ''; // 清空输入框
         }
+    }
+
+    // 监听文本输入框的键盘事件和点击按钮事件
+    textInput.addEventListener('keydown', function (event) {
+        if (event.keyCode === 13) { // 检查是否按下了回车键（键码13）
+            event.preventDefault(); // 阻止默认的换行行为
+            modalOverlay.classList.remove('active');
+            sendMessage();
+        }
     });
+
+    sendMessageButton.addEventListener('click', function () {
+        sendMessage();
+    });
+
 
 
     // 文件接受
