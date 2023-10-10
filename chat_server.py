@@ -4,7 +4,7 @@ import threading
 import argparse
 from operation.hello import bot_hello
 from lenomate import LenoMate
-import os, sys, platform
+import os, sys, platform 
 
 
 def _clear_screen():
@@ -59,16 +59,17 @@ def handle_client(client_socket, client_address, lenomate):
                 print(f"收到{client_address[0]}:{client_address[1]}的消息：{data}")
                 # 广播消息给所有连接的客户端
                 send_data = lenomate.process(eval(data),history_record.get(eval(data)['state_code']))
-                if eval(data)['state_code'] in [0,3]:
+                if eval(data)['state_code'] in [0,3,2]:
                     start = True
                     for res, history in send_data['chat']:
                         send_data = {'chat': res, 'follow': start}
                         client_socket.sendall(str(send_data).encode('utf-8') + b'__end_of_socket__')
                         start = False
+                    history_record[eval(data)['state_code']] = history
+                    print(history_record)
                 else:
                     client_socket.sendall(str(send_data).encode('utf-8') + b'__end_of_socket__')
-                history_record[eval(data)['state_code']] = history
-                print(history_record)
+
                 if eval(data)['state_code'] != 6:
                     print(f"回复{client_address[0]}:{client_address[1]}的消息：{send_data}")
         except Exception as e:

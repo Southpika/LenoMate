@@ -6,87 +6,92 @@ from PIL import Image
 import math
 import os
 # import wallpaper
-parser = argparse.ArgumentParser()
 
-parser.add_argument(
-    "--prompt",
-    type=str,
-    nargs="?",
-    default="sea",
-    help="the prompt to render"
-)
+def get_parser_sd():
+    parser = argparse.ArgumentParser()
 
-parser.add_argument(
-    "--model-location",
-    type=str,
-    nargs="?",
-    default=r"models/anything-v5-PrtRE.safetensors",
-    help="model path(end with safetensors)"
-)
+    parser.add_argument(
+        "--prompt",
+        type=str,
+        nargs="?",
+        default="sea",
+        help="the prompt to render"
+    )
 
-parser.add_argument(
-    "--lora-location",
-    type=str,
-    nargs="?",
-    default=r'./models/example_loras/PAseerCloudV1.safetensors',
-    help="lora path(end with safetensors),recommend ./example_loras/PAseerCloudV1.safetensors"
-)
+    parser.add_argument(
+        "--model-location",
+        type=str,
+        nargs="?",
+        default=r"models/anything-v5-PrtRE.safetensors",
+        help="model path(end with safetensors)"
+    )
 
-parser.add_argument(
-    "--width",
-    type=int,
-    nargs="?",
-    default=968,
-    help="picture width"
-)
+    parser.add_argument(
+        "--lora-location",
+        type=str,
+        nargs="?",
+        default=r'./models/example_loras/PAseerCloudV1.safetensors',
+        help="lora path(end with safetensors),recommend ./example_loras/PAseerCloudV1.safetensors"
+    )
 
-parser.add_argument(
-    "--height",
-    type=int,
-    nargs="?",
-    default=560,
-    help="picture height"
-)
+    parser.add_argument(
+        "--width",
+        type=int,
+        nargs="?",
+        default=968,
+        help="picture width"
+    )
 
-parser.add_argument(
-    "--num-images",
-    type=int,
-    nargs="?",
-    default=1,
-    help="num_images_per_prompt"
-)
+    parser.add_argument(
+        "--height",
+        type=int,
+        nargs="?",
+        default=560,
+        help="picture height"
+    )
 
-parser.add_argument(
-    "--grid",
-    type=bool,
-    default=True,
-    help="grid images"
-)
+    parser.add_argument(
+        "--num-images",
+        type=int,
+        nargs="?",
+        default=1,
+        help="num_images_per_prompt"
+    )
 
-parser.add_argument(
-    "--save-dir",
-    type=str,
-    default=True,
-    help="grid images"
-)
+    parser.add_argument(
+        "--grid",
+        type=bool,
+        default=True,
+        help="grid images"
+    )
 
-parser.add_argument(
-    "--outpath",
-    type=str,
-    nargs="?",
-    help="dir to write results to",
-    default="data/outputs/txt2img-samples"
-)
+    parser.add_argument(
+        "--save-dir",
+        type=str,
+        default=True,
+        help="grid images"
+    )
 
-parser.add_argument(
-    "--accelerate",
-    type=str,
-    nargs="?",
-    help="accelerate ways",
-    default="xformers"
-)
+    parser.add_argument(
+        "--outpath",
+        type=str,
+        nargs="?",
+        help="dir to write results to",
+        default="data/outputs/txt2img-samples"
+    )
 
-sd_args = parser.parse_args()
+    parser.add_argument(
+        "--accelerate",
+        type=str,
+        nargs="?",
+        help="accelerate ways",
+        default="xformers"
+    )
+
+    sd_args = parser.parse_args()
+    return sd_args
+
+sd_args = get_parser_sd()
 
 class sdmodels:
     def __init__(self,args,prompt_model = None, prompt_tokenizer = None):

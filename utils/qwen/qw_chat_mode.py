@@ -214,7 +214,7 @@ class chat_bot:
         query = data['inputs']
         content = data['content']
         self.system_message = f"<|im_start|>system\nYou are a helpful file analysis assistant. Please answer the user's question based on the following text.\nDocument:{content}\n<|im_end|>\n<|im_start|>user\n{query}<|im_end|>\n<|im_start|>assistant\n"
-        response, self.history_doc = self.chat(query,self.generation_config,history = history)
+        response = self.chat_stream(query,self.generation_config,history = history)
         return {'chat':response}
 
 
@@ -251,7 +251,7 @@ class operation_bot(chat_bot):
         self.model_sim = model_sim
         self.tokenizer_sim = tokenizer_sim
         self.corpus = corpus
-        self.system_message: str = "You are a helpful assistant named LenoMate from Lenovo."
+        self.system_message: str = "You are a helpful assistant."
         self.sdmodel = sdmodel
         
     def fit(self,data):
@@ -283,8 +283,9 @@ class operation_bot(chat_bot):
             torch.cuda.empty_cache()
             if self.selected_idx in [5]:
                 
-                opt.fit(self.model, self.tokenizer)
+                
                 opt = eval(f"operation.Operation{self.selected_idx}")(self.input_statement,context,self.model_sim,self.tokenizer_sim)
+                opt.fit(self.model, self.tokenizer)
             else:
                 
                 result = eval(f"self.opr{self.selected_idx}")(self.input_statement,context)
