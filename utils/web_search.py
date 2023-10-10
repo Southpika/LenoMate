@@ -7,7 +7,7 @@ from selenium import webdriver
 def search_web(keyword):
     options = webdriver.EdgeOptions()
     # options = webdriver.ChromeOptions()
-    # options.add_argument()
+    options.add_argument('headless')
     options.add_experimental_option('excludeSwitches', ['enable-logging'])
     driver = webdriver.Edge(options=options)
     driver.get(quote("https://cn.bing.com/search?q="+str(keyword),safe='/:?=.'))
@@ -62,11 +62,11 @@ def search_zhihu_que(url,headers):
     html = r.text
     soup = BeautifulSoup(html, 'html.parser')
     item_list = soup.find_all(class_='List-item')
-    relist = []
+    relist = ''
     for items in item_list:
-        item_prelist = items.find(class_ = "RichText ztext CopyrightRichText-richText css-1g0fqss")
+        item_prelist = items.find(class_ = "RichText ztext CopyrightRichText-richText css-117anjg")
         item_title = re.sub(r'(<[^>]+>|\s)','',str(item_prelist))
-        relist.append(item_title)
+        relist += item_title + '\n'
     return relist
 
 def search_csdn(url,headers):
@@ -136,32 +136,30 @@ class web_searcher:
                 self.web_list.append(item)
         return_content = []
         reference_list = []
+        
         for items in self.web_list:
             if "zhihu.com/question/" in items[1] or '知乎回复' in feature:
-                return_content.append(str(search_zhihu_que(ext_zhihu(items[1]),self.headers))[0:1000]) #int(get_config().get("web").get('web_max_length'))
-                reference_list.append(items[1])
+                content = search_zhihu_que(ext_zhihu(items[1]),self.headers)
             if "baike.sogou.com" in items[1] or '百科' in feature:
-                return_content.append(str(search_baike_sougou(items[1],self.headers))[0:1000])
-                reference_list.append(items[1])
+                content = search_baike_sougou(items[1],self.headers)
             if "zhidao.baidu.com" in items[1] or '百度知道' in feature:
-                return_content.append(str(search_baidu_zhidao(items[1],self.headers))[0:1000])
-                reference_list.append(items[1])
+                content = search_baidu_zhidao(items[1],self.headers)
             if "zhuanlan.zhihu.com" in items[1] or '知乎专栏' in feature:
-                return_content.append(str(search_zhihu_zhuanlan(items[1],self.headers))[0:1000])
-                reference_list.append(items[1])
+                content = search_zhihu_zhuanlan(items[1],self.headers)
             if 'new.qq.com' in items[1]:
-                return_content.append(str(search_tencent_news(items[1],self.headers))[0:1000])
-                reference_list.append(items[1])
+                content = search_tencent_news(items[1],self.headers)
             if "mp.weixin.qq.com" in items[1] or '微信公众号' in feature:
-                return_content.append(str(search_wx(items[1],self.headers))[0:1000])
-                reference_list.append(items[1])
+                content = search_wx(items[1],self.headers)
             if "baike.baidu.com" in items[1] or '百度百科' in feature:
-                return_content.append(str(search_baike_baidu(items[1],self.headers))[0:1000])
-                reference_list.append(items[1])
+                content = search_baike_baidu(items[1],self.headers)
             if "blog.csdn.net" in items[1] or 'CSDN' in feature:
-                return_content.append(str(search_csdn(items[1],self.headers))[0:1000])
-                reference_list.append(items[1])                
-                
+                content = search_csdn(items[1],self.headers)
+
+            if content:
+                return_content.append(str(content)[0:1000])
+                reference_list.append(items[1])
+                content = None
+
         return [reference_list[:self.web_num],return_content[:self.web_num]]
 
 if __name__ == '__main__':

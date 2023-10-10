@@ -179,7 +179,7 @@ class chat_bot:
             
             outputs.append(token.item())
             word = self.tokenizer.decode(outputs,skip_special_tokens=True,errors='ignore')
-            new_history = history + [word]
+            new_history = history + [(query,word)]
             yield word, new_history
         # self.im_end = self.tokenizer.im_end_id
         # for eod_token_idx in range(len(input_ids[0]), len(response_ids[0])):
@@ -213,7 +213,7 @@ class chat_bot:
         print("当前为分析模式...")
         query = data['inputs']
         content = data['content']
-        self.system_message = f"<|im_start|>system\nYou are a helpful file analysis assistant.Please answer the user's question based on the following text.\nDocument:{content}\n<|im_end|>\n<|im_start|>user\n{query}<|im_end|>\n<|im_start|>assistant\n"
+        self.system_message = f"<|im_start|>system\nYou are a helpful file analysis assistant. Please answer the user's question based on the following text.\nDocument:{content}\n<|im_end|>\n<|im_start|>user\n{query}<|im_end|>\n<|im_start|>assistant\n"
         response, self.history_doc = self.chat(query,self.generation_config,history = history)
         return {'chat':response}
 
@@ -227,7 +227,7 @@ class chat_bot:
         """
         print("当前联网模式...")
         query = data['inputs']
-        self.system_message: str = "You are a helpful assistant named LenoMate from Lenovo."
+        self.system_message: str = "You are a helpful file analysis assistant."
         web_contents = self.web_search.search_main(query)
         content = ''
         for item in web_contents[1]:
@@ -240,7 +240,7 @@ class chat_bot:
 {documents}
 
 Question: {query}"""
-        answer,self.history_web = self.chat(REACT_PROMPT.format(documents=content,query=query),self.generation_config,history = history)
+        answer = self.chat_stream(REACT_PROMPT.format(documents=content,query=query),self.generation_config,history = history)
        
         return {'chat':answer}
 
