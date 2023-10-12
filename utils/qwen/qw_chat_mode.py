@@ -231,8 +231,9 @@ class chat_bot:
         web_contents = self.web_search.search_main(query)
         content = ''
         for item in web_contents[1]:
-            content += item
-            content += '\n'
+            if item != "None":
+                content += item
+                content += '\n'
         print('[网页搜索]',content)
         # self.system_message = f"<|im_start|>system\nYou are a helpful file analysis assistant.Please answer the user's question based on the following text.\nDocument:{content}\n<|im_end|>\n<|im_start|>user\n{query}<|im_end|>\n<|im_start|>assistant\n"
         REACT_PROMPT = """Answer the following questions as best you can. You have access to the following documents:
