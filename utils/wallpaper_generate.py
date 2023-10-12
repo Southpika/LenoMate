@@ -54,7 +54,7 @@ def get_parser_sd():
         "--num-images",
         type=int,
         nargs="?",
-        default=1,
+        default=4,
         help="num_images_per_prompt"
     )
 

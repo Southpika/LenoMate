@@ -90,3 +90,5 @@ models
 chat_server copy.py
 outputs
 data/tempfile.pdf
+
+data/chat_history
