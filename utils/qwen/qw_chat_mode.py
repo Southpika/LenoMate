@@ -244,6 +244,28 @@ Question: {query}"""
        
         return {'chat':answer}
 
+    def mode5(self,data):
+        """
+        mode5: 蓝屏分析模式
+        Args:
+            data (dict): 需要用到的属性
+                inputs:用户问题
+        """
+        print("当前蓝屏分析模式...")
+        context = data['inputs']
+        
+        REACT_PROMPT = f"""Answer the following questions as best you can. You have access to the following documents about BUG ANALYSIS DOCUMENTATION:
+
+BUG ANALYSIS DOCUMENTATION:
+{context}
+
+Question:请帮我总结分析一下这次的蓝屏信息。"""
+        
+        answer = self.chat_stream(REACT_PROMPT.format(context=context),self.generation_config,history = None)
+        
+        answer = '发现您今天发生了蓝屏' + answer
+        return {'chat':answer}
+
 import operation.qw_prompt as prompt
 class operation_bot(chat_bot):
     def __init__(self,model,tokenizer,model_sim,tokenizer_sim,corpus,generation_config,sdmodel) -> None:
