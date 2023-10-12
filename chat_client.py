@@ -258,9 +258,9 @@ def dmp_analysis():
 
 
 if __name__ == '__main__':
-    server_addr = input('请设置服务器地址，默认为“192.168.137.1”：')
+    server_addr = input('请设置服务器地址，默认为“10.176.132.105”：')
     if not server_addr:
-        server_addr = "192.168.137.1"
+        server_addr = "10.176.132.105"
     dmp_addr = input('请设置dmp文件地址，默认为“C:/Users/Tzu-cheng Chang/Desktop/GLM”：')
     if not dmp_addr:
         dmp_addr = "C:/Users/Tzu-cheng Chang/Desktop/GLM"
