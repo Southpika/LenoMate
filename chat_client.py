@@ -15,6 +15,8 @@ import audio.speech_recognition as recognition
 import audio.speech_synthesis as synthesis
 import operation.read_file as rd
 import utils.blue_screen as bs
+#  勿删，功能模式使用
+import operation
 
 app = FastAPI()
 app.mount("/svg", StaticFiles(directory="svg"), name="svg")
@@ -154,6 +156,7 @@ def handle(**kwargs):
     if "command" in kwargs.keys():
         # temp = subprocess.check_output(kwargs["command"], shell=True)
         # temp = eval(kwargs["command"])
+        # 勿删，功能模式eval
         eval_thred = threading.Thread(target=evaluate, args=(kwargs["command"],))
         eval_thred.start()
         eval_thred.join()
