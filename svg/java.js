@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', function () {
         messageDivunder.appendChild(deleted);
         messageDiv.appendChild(messageDivunder);
         messageDivunder.className = 'line1';
-        messageText.textContent = `${message}`;
+        messageText.innerHTML = `${message}`;
         // 添加图像和消息文本到消息容器
         messageDiv.appendChild(messageDivunder);
         chatContainer.appendChild(messageDiv);
@@ -103,7 +103,7 @@ document.addEventListener('DOMContentLoaded', function () {
             messageDiv.appendChild(fill2);
             messageText.className = 'line1';
         }
-        messageText.textContent = `${message}`;
+        messageText.innerHTML = `${message}`;
         // 添加图像和消息文本到消息容器
         messageDiv.appendChild(messageText);
         chatContainer.appendChild(messageDiv);
@@ -148,7 +148,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // 创建包含消息文本的元素
         const messageText = document.createElement('div');
         messageText.className = 'line2';
-        messageText.textContent = '您可以选择将本张图片设置为您的桌面壁纸，也可以试试新的图片';
+        messageText.innerHTML = '您可以选择将本张图片设置为您的桌面壁纸，也可以试试新的图片';
         messageDiv.appendChild(messageText);
 
 //        wallpaper_list = JSON.parse(`${location}`);
@@ -330,8 +330,8 @@ document.addEventListener('DOMContentLoaded', function () {
     dom.net.addEventListener('click', () => {
         if (state !== 'net') {
             state = 'net';
-            dom.stat.textContent = '联网模式';
-            dom.stat2.textContent = '联网';
+            dom.stat.innerHTML = '联网模式';
+            dom.stat2.innerHTML = '联网';
             const xml = new XMLHttpRequest();
             xml.open('POST', 'http://localhost:8081/text2');
             xml.setRequestHeader('Content-Type', 'application/json');
@@ -343,8 +343,8 @@ document.addEventListener('DOMContentLoaded', function () {
     dom.analyze.addEventListener('click', () => {
         if (state !== 'analyze') {
             state = 'analyze';
-            dom.stat.textContent = '功能模式';
-            dom.stat2.textContent = '功能';
+            dom.stat.innerHTML = '功能模式';
+            dom.stat2.innerHTML = '功能';
             const xml = new XMLHttpRequest();
             xml.open('POST', 'http://localhost:8081/text2');
             xml.setRequestHeader('Content-Type', 'application/json');
@@ -356,8 +356,8 @@ document.addEventListener('DOMContentLoaded', function () {
     dom.paint.addEventListener('click', () => {
         if (state !== 'paint') {
             state = 'paint';
-            dom.stat.textContent = '壁纸模式';
-            dom.stat2.textContent = '壁纸';
+            dom.stat.innerHTML = '壁纸模式';
+            dom.stat2.innerHTML = '壁纸';
             const xml = new XMLHttpRequest();
             xml.open('POST', 'http://localhost:8081/text2');
             xml.setRequestHeader('Content-Type', 'application/json');
@@ -369,8 +369,8 @@ document.addEventListener('DOMContentLoaded', function () {
     dom.chat.addEventListener('click', () => {
         if (state !== 'chat') {
             state = 'chat';
-            dom.stat.textContent = '聊天模式';
-            dom.stat2.textContent = '聊天';
+            dom.stat.innerHTML= '聊天模式';
+            dom.stat2.innerHTML = '聊天';
             const xml = new XMLHttpRequest();
             xml.open('POST', 'http://localhost:8081/text2');
             xml.setRequestHeader('Content-Type', 'application/json');
