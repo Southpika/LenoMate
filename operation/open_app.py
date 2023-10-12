@@ -17,7 +17,7 @@ class search_tool:
         find_file = self.search_file(a=a, b=b)
         if find_file:
             app_dir = os.path.join(find_file, b)
-            print(app_dir)
+            
             os.startfile(app_dir)
             return '找到了'
         else:

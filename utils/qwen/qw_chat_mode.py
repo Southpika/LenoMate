@@ -285,7 +285,7 @@ class operation_bot(chat_bot):
                 
                 
                 opt = eval(f"operation.Operation{self.selected_idx}")(self.input_statement,context,self.model_sim,self.tokenizer_sim)
-                opt.fit(self.model, self.tokenizer)
+                result = opt.fit(self.model, self.tokenizer)
             else:
                 
                 result = eval(f"self.opr{self.selected_idx}")(self.input_statement,context)
