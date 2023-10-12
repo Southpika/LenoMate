@@ -9,17 +9,7 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 # import pythoncom
 import uvicorn
-def import_pkg_module(mode_select:List):
-    if 1 in mode_select:
-        import utils.blue_screen as bs
-        #  勿删，功能模式使用
-        import operation
-    if 2 in mode_select:
-        import operation.read_file as rd
-    if 4 in mode_select:
-        import audio.speech_recognition as recognition
-        import audio.speech_synthesis as synthesis
-        threading.Thread(target=load_and_run_audio).start()
+
 
 
 
@@ -279,6 +269,18 @@ if __name__ == '__main__':
         mode_select = [0,1,2,3]
     else:
         mode_select = list(map(int,mode_select.split()))
+    print('已选择',mode_select)
+    
+    if 1 in mode_select:
+        import utils.blue_screen as bs
+        #  勿删，功能模式使用
+        import operation
+    if 2 in mode_select:
+        import operation.read_file as rd
+    if 4 in mode_select:
+        import audio.speech_recognition as recognition
+        import audio.speech_synthesis as synthesis
+        threading.Thread(target=load_and_run_audio).start()
     # 聊天模式为0
     memo = {
         0: "当前为聊天模式",
@@ -298,10 +300,11 @@ if __name__ == '__main__':
     # 连接服务器
     client_socket.connect((server_addr, 8888))
     # 创建线程接收消息
+    
     threading.Thread(target=receive_messages).start()
     threading.Thread(target=dmp_analysis).start()
     # 创建一个线程，用于加载和运行语音识别和合成
-    import_pkg_module(mode_select)
+    
         
     # 启动前端
     uvicorn.run(app, host="127.0.0.1", port=8081)
