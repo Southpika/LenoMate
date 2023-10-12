@@ -136,6 +136,7 @@ class web_searcher:
                 self.web_list.append(item)
         return_content = []
         reference_list = []
+        content = None
         
         for items in self.web_list:
             if "zhihu.com/question/" in items[1] or '知乎回复' in feature:
