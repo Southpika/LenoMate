@@ -3,20 +3,25 @@ import os
 import queue
 import socket
 import threading
-from typing import Dict
-
-import pythoncom
-import uvicorn
+from typing import Dict,List
 from fastapi import FastAPI, UploadFile, HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
+import pythoncom
+import uvicorn
+def import_pkg_module(mode_select:List):
+    if 1 in mode_select:
+        import utils.blue_screen as bs
+        #  勿删，功能模式使用
+        import operation
+    if 2 in mode_select:
+        import operation.read_file as rd
+    if 4 in mode_select:
+        import audio.speech_recognition as recognition
+        import audio.speech_synthesis as synthesis
+        threading.Thread(target=load_and_run_audio).start()
 
-import audio.speech_recognition as recognition
-import audio.speech_synthesis as synthesis
-import operation.read_file as rd
-import utils.blue_screen as bs
-#  勿删，功能模式使用
-import operation
+
 
 app = FastAPI()
 app.mount("/svg", StaticFiles(directory="svg"), name="svg")
@@ -258,15 +263,20 @@ def dmp_analysis():
 
 
 if __name__ == '__main__':
-    server_addr = input('请设置服务器地址，默认为“10.176.132.105”：')
+    server_addr_default = "10.176.132.105"
+    server_addr = input(f'请设置服务器地址，默认为“{server_addr_default}”：')
     if not server_addr:
-        server_addr = "10.176.132.105"
+        server_addr = server_addr_default
     dmp_addr = input('请设置dmp文件地址，默认为“C:/Users/Tzu-cheng Chang/Desktop/GLM”：')
     if not dmp_addr:
         dmp_addr = "C:/Users/Tzu-cheng Chang/Desktop/GLM"
-    is_audio = input('是否开启语音功能， 默认为“否”：')
-    if not is_audio:
-        is_audio = "否"
+
+        
+    mode_select = input('请选择要打开的模式， 默认为全部：0：聊天 1：功能 2：文件分析 3：壁纸 4:语音: ')
+    if not mode_select:
+        mode_select = [0,1,2,3]
+    else:
+        mode_select = list(map(int,mode_select.split()))
     # 聊天模式为0
     memo = {
         0: "当前为聊天模式",
@@ -289,7 +299,7 @@ if __name__ == '__main__':
     threading.Thread(target=receive_messages).start()
     threading.Thread(target=dmp_analysis).start()
     # 创建一个线程，用于加载和运行语音识别和合成
-    if is_audio == "是":
-        threading.Thread(target=load_and_run_audio).start()
+    import_pkg_module(mode_select)
+        
     # 启动前端
     uvicorn.run(app, host="127.0.0.1", port=8081)
