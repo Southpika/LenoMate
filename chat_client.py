@@ -1,5 +1,5 @@
 # -*- coding: UTF-8 -*-
-import os
+import os,platform
 import queue
 import socket
 import threading
@@ -7,7 +7,7 @@ from typing import Dict,List
 from fastapi import FastAPI, UploadFile, HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
-import pythoncom
+# import pythoncom
 import uvicorn
 def import_pkg_module(mode_select:List):
     if 1 in mode_select:
@@ -152,9 +152,9 @@ def sys(result):
 
 def evaluate(content):
     global eval_content
-    pythoncom.CoInitialize()
+    # pythoncom.CoInitialize()
     eval_content = eval(content)
-    pythoncom.CoUninitialize()
+    # pythoncom.CoUninitialize()
 
 
 def handle(**kwargs):
@@ -180,6 +180,8 @@ def handle(**kwargs):
 
 def receive_messages():
     print("已与服务器建立连接")
+    system = platform.system()
+    client_socket.send(str(system).encode("utf-8"))
     while True:
         try:
             socket_data = b''
