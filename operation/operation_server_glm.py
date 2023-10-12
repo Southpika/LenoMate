@@ -205,7 +205,7 @@ class Operation3(Operation):
         print(f'find app {app_name}')
         a = 'C:/Users'
         output = {
-            'command':f"operation.open_app.search_tool().open_app(a='C:/Users',b='{name_exe_map[app_name]}')",
+            'command':f"operation.open_app.search_tool().open_app(a='C://',b='{name_exe_map[app_name]}')",
             'chat':f"已为您打开{app_name}"
         }
         return output
