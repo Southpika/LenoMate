@@ -7,7 +7,7 @@ from typing import Dict,List
 from fastapi import FastAPI, UploadFile, HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
-# import pythoncom
+import pythoncom
 import uvicorn
 
 
@@ -142,9 +142,9 @@ def sys(result):
 
 def evaluate(content):
     global eval_content
-    # pythoncom.CoInitialize()
+    pythoncom.CoInitialize()
     eval_content = eval(content)
-    # pythoncom.CoUninitialize()
+    pythoncom.CoUninitialize()
 
 
 def handle(**kwargs):
