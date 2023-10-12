@@ -251,6 +251,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                 const lastMessageDiv = chatContainer.lastElementChild;
                                 if (lastMessageDiv.className === 'server-message') {
                                     lastMessageDiv.lastElementChild.innerHTML = `${res}`;
+                                    chatContainer.scrollTop = chatContainer.scrollHeight;
                                 } else {
                                     appendMessage('server', res);
                                 }
