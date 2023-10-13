@@ -33,10 +33,11 @@ class Prompt2(Prompt):
 
 
 
-class Prompt4(Prompt):
+
+class Prompt5(Prompt):
     def __init__(self, inp, context) -> None:
         super().__init__()
-        query = "Please provide an answer in the required format based on the known information.\n\nInfomation:{CONTEXTS}\nInput:如果用户需要“{INPUTS}”，模仿“您现在电脑当前音量为X%，已调至Y%”进行回答\nOutput:"
+        query = "Please provide an answer in the required format based on the known information.\n\nInfomation:{CONTEXTS}\n\nInput:如果用户需要“{INPUTS}”，模仿“现在电脑当前音量为X%，已调至Y%”的样式进行回答。"
         self.prompt = self.prompt_template.format(QUERY = query.format(CONTEXTS = context, INPUTS = inp))
 
 class ImagePrompt(Prompt):    

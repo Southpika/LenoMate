@@ -96,7 +96,7 @@ def search_zhihu_zhuanlan(url,headers):
     r = requests.get(url, headers=headers)
     html = r.text
     soup = BeautifulSoup(html, 'html.parser')
-    item_list = soup.find(class_='RichText ztext Post-RichText css-1g0fqss')
+    item_list = soup.find(class_='RichText ztext Post-RichText css-117anjg')
     item_title = re.sub(r'(<[^>]+>|\s)','',str(item_list))
     return item_title
 
@@ -137,7 +137,7 @@ class web_searcher:
         return_content = []
         reference_list = []
         content = None
-        
+        print(web_list)
         for items in self.web_list:
             if "zhihu.com/question/" in items[1] or '知乎回复' in feature:
                 content = search_zhihu_que(ext_zhihu(items[1]),self.headers)

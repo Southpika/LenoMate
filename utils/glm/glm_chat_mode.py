@@ -17,7 +17,7 @@ class chat_bot:
         self.model = model
         self.chat_history = ''
         self.pattern = r'<[^>]+>[:：]?'
-        self.web_search = web_searcher(web_num=5)
+        self.web_search = web_searcher(web_num=3)
         
     def chat(self,prompt_chat,max_length,stop_words=['<User>','<LenoMate>','<用户>','<Brother>'],temperature=0.9,top_p=0.95):
         

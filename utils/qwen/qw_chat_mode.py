@@ -96,7 +96,7 @@ class chat_bot:
         self.tokenizer = tokenizer
         self.model = model
 
-        self.web_search = web_searcher(web_num=5)
+        self.web_search = web_searcher(web_num=3)
         self.roles = {"user": "<|im_start|>user", "assistant": "<|im_start|>assistant"}
         self.im_start = self.tokenizer.im_start_id
         self.im_end = self.tokenizer.im_end_id
@@ -166,6 +166,7 @@ class chat_bot:
             max_window_size = generation_config.max_window_size,
             chat_format=generation_config.chat_format,
         )
+        # print(prompts)
         input_ids = torch.tensor([input_ids]).to('cuda')
         generator = self.model.generate(
                                     input_ids,
@@ -245,7 +246,7 @@ Question: {query}"""
        
         return {'chat':answer}
 
-    def mode5(self,data):
+    def mode5(self,data,history):
         """
         mode5: 蓝屏分析模式
         Args:
@@ -260,11 +261,11 @@ Question: {query}"""
 BUG ANALYSIS DOCUMENTATION:
 {context}
 
-Question:请帮我总结分析一下这次的蓝屏信息。"""
+Question: Please summarize the blue screen bug analysis."""
         
         answer = self.chat_stream(REACT_PROMPT.format(context=context),self.generation_config,history = None)
         
-        answer = '发现您今天发生了蓝屏' + answer
+        
         return {'chat':answer}
 
 import operation.qw_prompt as prompt
@@ -293,11 +294,11 @@ class operation_bot(chat_bot):
                 client_data['state_code']=1
                 return client_data         
             else:
-                opt = eval(f"operation.Operation{self.selected_idx}")(self.input_statement)
+                # opt = eval(f"operation.Operation{self.selected_idx}")(self.input_statement)
                 if self.selected_idx == 3:
                     result = eval(f"self.opr{self.selected_idx}")(self.input_statement)
                 else:
-                    result = opt.fit(self.model, self.tokenizer) 
+                    result = eval(f"self.opr{self.selected_idx}")(self.input_statement) 
                 return result
             
         elif data['state_code'] == 1:
@@ -307,7 +308,7 @@ class operation_bot(chat_bot):
             if self.selected_idx in [5]:
                 
                 
-                opt = eval(f"operation.Operation{self.selected_idx}")(self.input_statement,context,self.model_sim,self.tokenizer_sim)
+                opt = eval(f"self.opr{self.selected_idx}")(self.input_statement,context,self.model_sim,self.tokenizer_sim)
                 result = opt.fit(self.model, self.tokenizer)
             else:
                 
@@ -341,6 +342,44 @@ class operation_bot(chat_bot):
         print(f"[亮度调节]:{self.answer}")
         return res
 
+    def opr2(self,input_statement,context):
+        pass  
+
+    def opr5(self,input_statement,context,model_sim,tokenizer_sim):
+        # 音量
+        self._extract_info(prompt.Prompt5(input_statement, context).prompt)
+
+        res = {
+            'chat':self.answer,
+            'state_code':0,
+            'command':f"operation.screen_brightness.operation({self.num}).fit()"
+        }
+        print(f"[亮度调节]:{self.answer}")
+        return res
+    
+    def judge(self):
+        _mute = '静音'
+        _normal = '调节音量'
+        _no_mute = '取消静音'
+        corpus = [_mute, _normal, _no_mute]
+        self.model_sim.eval()
+        input_data = self.tokenizer_sim(self.input_statement, return_tensors="pt")
+        corp = self.tokenizer_sim(corpus, return_tensors="pt", padding=True)
+        with torch.no_grad():
+            corpus_embeddings = self.model_sim(**corp.to('cuda'))
+            input_embeddings = self.model_sim(**input_data.to('cuda'))
+        corpus_embeddings = self._pooling(corpus_embeddings, attention_mask=corp['attention_mask'])
+        input_embeddings = self._pooling(input_embeddings, attention_mask=input_data['attention_mask'])
+        self.selected = corpus[(corpus_embeddings @ input_embeddings.T).argmax(axis=0)[0]]
+        print(f"[音量调节功能]音量功能匹配为'{self.selected}'")
+
+    def _pooling(self, model_output, attention_mask):
+        token_embeddings = model_output[0]  # First element of model_output contains all token embeddings
+        input_mask_expanded = attention_mask.unsqueeze(-1).expand(token_embeddings.size()).float()
+        output = torch.sum(token_embeddings * input_mask_expanded, 1) / torch.clamp(input_mask_expanded.sum(1),
+                                                                                    min=1e-9)
+        return l2_normalization(output.cpu().numpy()) 
+       
     def _extract_info(self, prompt):
         # print('prompt',prompt)
         self.answer,_ = self.chat(prompt, self.generation_config, history = [])
@@ -369,7 +408,7 @@ class operation_bot(chat_bot):
         print(f'find app {app_name}')
         a = 'C:/Users'
         output = {
-            'command':f"operation.open_app.search_tool().open_app(a='C:/Users',b='{name_exe_map[app_name]}')",
+            'command':f"operation.open_app.search_tool().open_app(a='C:/',b='{name_exe_map[app_name]}')",
             'chat':f"已为您打开{app_name}"
         }
         return output
