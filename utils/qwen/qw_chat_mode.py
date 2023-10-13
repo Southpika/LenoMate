@@ -3,6 +3,7 @@ import os
 # print(os.path.dirname(os.path.abspath('__file__')))
 sys.path.append(os.path.dirname(os.path.abspath('__file__')))
 from utils.qwen.stop_criterion import StopWordsLogitsProcessor
+from utils.vol_select import judge
 import torch
 from typing import TYPE_CHECKING, Optional, Tuple, Union, Callable, List, Any, Generator
 import re
@@ -308,8 +309,8 @@ class operation_bot(chat_bot):
             if self.selected_idx in [5]:
                 
                 
-                opt = eval(f"self.opr{self.selected_idx}")(self.input_statement,context,self.model_sim,self.tokenizer_sim)
-                result = opt.fit(self.model, self.tokenizer)
+                result = eval(f"self.opr{self.selected_idx}")(self.input_statement,context,self.model_sim,self.tokenizer_sim)
+                
             else:
                 
                 result = eval(f"self.opr{self.selected_idx}")(self.input_statement,context)
@@ -347,38 +348,35 @@ class operation_bot(chat_bot):
 
     def opr5(self,input_statement,context,model_sim,tokenizer_sim):
         # 音量
-        self._extract_info(prompt.Prompt5(input_statement, context).prompt)
+        
+        
+        selected = judge(input_statement,model_sim,tokenizer_sim)
+        if selected == '静音':
+            output = {
+                'command':"operation.volumn_control.vol_ctrl().mute_all()",
+                'chat':'已静音'
+            }
 
-        res = {
-            'chat':self.answer,
-            'state_code':0,
-            'command':f"operation.screen_brightness.operation({self.num}).fit()"
-        }
-        print(f"[亮度调节]:{self.answer}")
+            return output
+        elif selected == '取消静音':
+            output = {
+                'command':"operation.volumn_control.vol_ctrl().mute_all(mute = False)",
+                'chat':'已取消静音'
+            }
+
+        else:
+            self._extract_info(prompt.Prompt5(input_statement, context).prompt)
+
+
+            res = {
+                'command':f"operation.volumn_control.vol_ctrl().alter({self.num})",
+                'chat':self.answer,
+                'state_code':0,
+            }
+            print(f"[音量调节]:{self.answer}")
         return res
-    
-    def judge(self):
-        _mute = '静音'
-        _normal = '调节音量'
-        _no_mute = '取消静音'
-        corpus = [_mute, _normal, _no_mute]
-        self.model_sim.eval()
-        input_data = self.tokenizer_sim(self.input_statement, return_tensors="pt")
-        corp = self.tokenizer_sim(corpus, return_tensors="pt", padding=True)
-        with torch.no_grad():
-            corpus_embeddings = self.model_sim(**corp.to('cuda'))
-            input_embeddings = self.model_sim(**input_data.to('cuda'))
-        corpus_embeddings = self._pooling(corpus_embeddings, attention_mask=corp['attention_mask'])
-        input_embeddings = self._pooling(input_embeddings, attention_mask=input_data['attention_mask'])
-        self.selected = corpus[(corpus_embeddings @ input_embeddings.T).argmax(axis=0)[0]]
-        print(f"[音量调节功能]音量功能匹配为'{self.selected}'")
 
-    def _pooling(self, model_output, attention_mask):
-        token_embeddings = model_output[0]  # First element of model_output contains all token embeddings
-        input_mask_expanded = attention_mask.unsqueeze(-1).expand(token_embeddings.size()).float()
-        output = torch.sum(token_embeddings * input_mask_expanded, 1) / torch.clamp(input_mask_expanded.sum(1),
-                                                                                    min=1e-9)
-        return l2_normalization(output.cpu().numpy()) 
+
        
     def _extract_info(self, prompt):
         # print('prompt',prompt)
