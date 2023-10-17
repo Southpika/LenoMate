@@ -256,9 +256,9 @@ def dmp_analysis():
 
 if __name__ == '__main__':
     server_addr_default = "n81595194d.zicp.fun"
-    server_port_default = "13964"
+    server_port_default = 13964
     server_addr = input(f'请设置服务器地址，默认为“{server_addr_default}”：')
-    server_port = input(f'请设置服务器地址，默认为“{server_addr_default}”：')
+    server_port = input(f'请设置服务器端口，默认为“{server_port_default}”：')
     if not server_addr:
         server_addr = server_addr_default
     if not server_port:
