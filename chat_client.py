@@ -255,10 +255,14 @@ def dmp_analysis():
 
 
 if __name__ == '__main__':
-    server_addr_default = "10.176.132.105"
+    server_addr_default = "n81595194d.zicp.fun"
+    server_port_default = 13964
     server_addr = input(f'请设置服务器地址，默认为“{server_addr_default}”：')
+    server_port = input(f'请设置服务器端口，默认为“{server_port_default}”：')
     if not server_addr:
         server_addr = server_addr_default
+    if not server_port:
+        server_port = server_port_default
     dmp_addr = input('请设置dmp文件地址，默认为“C:/Users/Tzu-cheng Chang/Desktop/GLM”：')
     if not dmp_addr:
         dmp_addr = "C:/Users/Tzu-cheng Chang/Desktop/GLM"
@@ -296,7 +300,7 @@ if __name__ == '__main__':
     # 创建套接字F
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     # 连接服务器
-    client_socket.connect((server_addr, 8888))
+    client_socket.connect((server_addr, server_port))
     # 创建线程接收消息
     threading.Thread(target=receive_messages).start()
     threading.Thread(target=dmp_analysis).start()
