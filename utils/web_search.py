@@ -137,7 +137,7 @@ class web_searcher:
         return_content = []
         reference_list = []
         content = None
-        print(web_list)
+        # print(web_list)
         for items in self.web_list:
             if "zhihu.com/question/" in items[1] or '知乎回复' in feature:
                 content = search_zhihu_que(ext_zhihu(items[1]),self.headers)
@@ -157,7 +157,7 @@ class web_searcher:
                 content = search_csdn(items[1],self.headers)
 
             if content:
-                return_content.append(str(content)[0:1000])
+                return_content.append(str(content)[0:1500])
                 reference_list.append(items[1])
                 content = None
 

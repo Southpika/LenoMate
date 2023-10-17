@@ -108,6 +108,13 @@ class chat_bot:
         self.generation_config = generation_config
         self.history_doc = []
         self.history_web = []
+        stop_words_ids = [[self.tokenizer.im_end_id], [self.tokenizer.im_start_id]]
+
+        if stop_words_ids is not None:
+            self.stop_words_logits_processor = StopWordsLogitsProcessor(
+                stop_words_ids=stop_words_ids,
+                eos_token_id=generation_config.eos_token_id,
+            )
 
     def chat(self,
              query,
@@ -128,12 +135,14 @@ class chat_bot:
         # input_ids = self.tokenizer(
         #     prompts, return_tensors="pt", add_special_tokens=False
         # ).input_ids.to("cuda:0")
+        logits_processor = LogitsProcessorList([self.stop_words_logits_processor])
         input_ids = torch.tensor([input_ids]).to('cuda')
         response_ids = self.model.generate(
                                     input_ids,
                                     # seed = -1,
                                     generation_config = generation_config,
-                                    do_stream=False,    
+                                    do_stream=False,
+                                    logits_processor=logits_processor,    
                                     )
         self.im_end = self.tokenizer.im_end_id
         for eod_token_idx in range(len(input_ids[0]), len(response_ids[0])):
@@ -151,14 +160,8 @@ class chat_bot:
             ):
         if history is None:
             history = []
-        stop_words_ids = [[self.tokenizer.im_end_id], [self.tokenizer.im_start_id]]
 
-        if stop_words_ids is not None:
-            stop_words_logits_processor = StopWordsLogitsProcessor(
-                stop_words_ids=stop_words_ids,
-                eos_token_id=generation_config.eos_token_id,
-            )
-        logits_processor = LogitsProcessorList([stop_words_logits_processor])
+        logits_processor = LogitsProcessorList([self.stop_words_logits_processor])
         prompts,input_ids = make_context(
             self.tokenizer,
             query = query,
@@ -229,17 +232,22 @@ class chat_bot:
         """
         print("当前联网模式...")
         query = data['inputs']
-        self.system_message: str = "You are a helpful file analysis assistant."
-        web_contents = self.web_search.search_main(query)
+        search_prompt = "Give a brief search prompt in Chinese according to the input and history.\nHistory: {History}\n\nInput: {DESCRIPTION}\nOutput:"
+        search_query = self.chat(search_prompt.format(DESCRIPTION=query,History = None),self.generation_config,history=None)[0].strip().strip('"')
+        self.system_message: str = "You are a helpful assistant."
+        web_contents = self.web_search.search_main(search_query)
         content = ''
         for item in web_contents[1]:
             if item != "None":
                 content += item
                 content += '\n'
+        
         print('[网页搜索]',content)
+        print('='*50)
         # self.system_message = f"<|im_start|>system\nYou are a helpful file analysis assistant.Please answer the user's question based on the following text.\nDocument:{content}\n<|im_end|>\n<|im_start|>user\n{query}<|im_end|>\n<|im_start|>assistant\n"
-        REACT_PROMPT = """Answer the following questions as best you can. You have access to the following documents:
+        REACT_PROMPT = """Answer the following questions as best and brief as you can. You have access to the following resources:
 
+Resources:    
 {documents}
 
 Question: {query}"""
@@ -336,7 +344,8 @@ class operation_bot(chat_bot):
         self._extract_info(prompt.Prompt0(input_statement, context).prompt)
 
         res = {
-            'chat':self.answer,
+            # 'chat':self.answer,
+            'chat':f"Have already turned to {self.num}",
             'state_code':0,
             'command':f"operation.screen_brightness.operation({self.num}).fit()"
         }
@@ -354,14 +363,16 @@ class operation_bot(chat_bot):
         if selected == '静音':
             output = {
                 'command':"operation.volumn_control.vol_ctrl().mute_all()",
-                'chat':'已静音'
+                # 'chat':'已静音',
+                'chat':'Your system have been mute',
             }
 
             return output
         elif selected == '取消静音':
             output = {
                 'command':"operation.volumn_control.vol_ctrl().mute_all(mute = False)",
-                'chat':'已取消静音'
+                # 'chat':'已取消静音'
+                'chat':'Mute cancelled',
             }
 
         else:
@@ -370,7 +381,8 @@ class operation_bot(chat_bot):
 
             res = {
                 'command':f"operation.volumn_control.vol_ctrl().alter({self.num})",
-                'chat':self.answer,
+                # 'chat':self.answer,
+                'chat':f"Have already turned to {self.num}",
                 'state_code':0,
             }
             print(f"[音量调节]:{self.answer}")
@@ -407,7 +419,9 @@ class operation_bot(chat_bot):
         a = 'C:/Users'
         output = {
             'command':f"operation.open_app.search_tool().open_app(a='C:/',b='{name_exe_map[app_name]}')",
-            'chat':f"已为您打开{app_name}"
+            # 'chat':f"已为您打开{app_name}"
+            'chat':f"okay"
+            
         }
         return output
     

@@ -55,7 +55,7 @@ def handle_client(client_socket, client_address, lenomate):
     while True:
         try:
             # 接收客户端消息
-            data = client_socket.recv(102400).decode('utf-8')
+            data = client_socket.recv(1024 ** 2).decode('utf-8')
             if data:
                 print(f"收到{client_address[0]}:{client_address[1]}的消息：{data}")
                 # 广播消息给所有连接的客户端
