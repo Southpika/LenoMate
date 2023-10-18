@@ -4,8 +4,9 @@ import threading
 import argparse
 from operation.hello import bot_hello
 from lenomate import LenoMate
-import os, sys, platform 
+import os, sys, platform
 from utils.history_record import save_history
+
 
 def _clear_screen():
     os.system("cls" if platform.system() == "Windows" else "clear")
@@ -29,7 +30,7 @@ def get_parser():
     parser.add_argument('--simmodel-dir', default="GanymedeNil/text2vec-large-chinese")
     # parser.add_argument('--qw-model-dir', default=r"C:\Users\admin\Desktop\qw\qwen")
     parser.add_argument('--qw-model-dir', default=r"C:\Users\admin\Desktop\新建文件夹\glm_train\merged_model")
-   
+
     # parser.add_argument('--simmodel-dir',default="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2")
     parser.add_argument('--temperature', default=0.95)
     # parser.add_argument('--model-dir',default=r"/home/tzh/model_dir_cache/models--THUDM--chatglm-6b")
@@ -48,27 +49,34 @@ args = get_parser()
 def handle_client(client_socket, client_address, lenomate):
     print(f"已与{client_address[0]}:{client_address[1]}建立连接")
     system = client_socket.recv(1024).decode('utf-8')
-    hello_state = bot_hello(system = system) 
+    hello_state = bot_hello(system=system)
     client_socket.sendall(str(hello_state.hello(ast=False)).encode('utf-8') + b'__end_of_socket__')
     print('欢迎语已发送')
     history_record = {}
     while True:
         try:
             # 接收客户端消息
-            data = client_socket.recv(1024 ** 2).decode('utf-8')
+            socket_data = b''
+            while True:
+                data = client_socket.recv(10240)
+                if data.endswith(b'__end_of_socket__'):
+                    socket_data += data[:-len(b'__end_of_socket__')]
+                    break
+                socket_data += data
+            socket_data = socket_data.split(b'__end_of_socket__')[-1]
+            data = socket_data.decode('utf-8')
             if data:
                 print(f"收到{client_address[0]}:{client_address[1]}的消息：{data}")
                 # 广播消息给所有连接的客户端
-                send_data = lenomate.process(eval(data),history_record.get(eval(data)['state_code']))
-                if eval(data)['state_code'] in [0,3,2,5]:
+                send_data = lenomate.process(eval(data), history_record.get(eval(data)['state_code']))
+                if eval(data)['state_code'] in [0, 3, 2, 5]:
                     start = True
                     for res, history in send_data['chat']:
                         send_data = {'chat': res, 'follow': start}
                         client_socket.sendall(str(send_data).encode('utf-8') + b'__end_of_socket__')
                         start = False
                     history_record[eval(data)['state_code']] = history
-                    save_history(client_address[1],history_record)
-                    
+                    save_history(client_address[1], history_record)
                 else:
                     client_socket.sendall(str(send_data).encode('utf-8') + b'__end_of_socket__')
 

@@ -1,17 +1,14 @@
 # -*- coding: UTF-8 -*-
-import os,platform
+import os, platform
 import queue
 import socket
 import threading
-from typing import Dict,List
+from typing import Dict, List
 from fastapi import FastAPI, UploadFile, HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 import pythoncom
 import uvicorn
-
-
-
 
 app = FastAPI()
 app.mount("/svg", StaticFiles(directory="svg"), name="svg")
@@ -68,7 +65,7 @@ def text(data: Dict):
         type_doc = 'PDF' if file_type == '.pdf' else 'PPT'
         message["type_doc"] = type_doc
         message["content"] = file_content
-    client_socket.send(str(message).encode("utf-8"))
+    client_socket.send(str(message).encode("utf-8") + b'__end_of_socket__')
 
 
 def remove_cached():
@@ -157,9 +154,7 @@ def handle(**kwargs):
         eval_thred.join()
         global eval_content
         if "chat" not in kwargs.keys():
-            client_socket.send(
-                # str({"inputs": temp.decode("gbk").replace("\r\n\x1b[0m", ''), "state_code": 1}).encode("utf-8"))
-                str({"inputs": eval_content, "state_code": 1}).encode("utf-8"))
+            client_socket.send(str({"inputs": eval_content, "state_code": 1}).encode("utf-8") + b'__end_of_socket__')
     if "chat" in kwargs.keys():
         # kwargs['location'] = r"svg/2.png" #测试用
         output_queue.put((kwargs, True))
@@ -171,7 +166,7 @@ def handle(**kwargs):
 def receive_messages():
     print("已与服务器建立连接")
     system = platform.system()
-    client_socket.send(str(system).encode("utf-8"))
+    client_socket.send(str(system).encode("utf-8") + b'__end_of_socket__')
     while True:
         try:
             socket_data = b''
@@ -237,7 +232,7 @@ def load_and_run_audio():
                                 type_doc = 'PDF' if file_type == '.pdf' else 'PPT'
                                 message["type_doc"] = type_doc
                                 message["content"] = file_content
-                            client_socket.send(str(message).encode("utf-8"))
+                            client_socket.send(str(message).encode("utf-8") + b'__end_of_socket__')
                             function_finished_flag.clear()
                             function_finished_flag.wait()
                     except:
@@ -251,7 +246,8 @@ def dmp_analysis():
     bs_check_c = bs.bs_check_client()
     if bs_check_c.is_file_created_today_with(dmp_addr):
         test = bs.bs_check()
-        client_socket.send(str({"inputs": test.analyze('blue_sceen.txt'), 'state_code': 5}).encode('utf-8'))
+        client_socket.send(
+            str({"inputs": test.analyze('blue_sceen.txt'), 'state_code': 5}).encode('utf-8') + b'__end_of_socket__')
 
 
 if __name__ == '__main__':
@@ -267,12 +263,11 @@ if __name__ == '__main__':
     if not dmp_addr:
         dmp_addr = "C:/Users/Tzu-cheng Chang/Desktop/GLM"
 
-        
     mode_select = input('请选择要打开的模式， 默认为全部：0：聊天 1：功能 2：文件分析 3：壁纸 4:语音: ')
     if not mode_select:
-        mode_select = [0,1,2,3]
+        mode_select = [0, 1, 2, 3]
     else:
-        mode_select = list(map(int,mode_select.split()))
+        mode_select = list(map(int, mode_select.split()))
     # 聊天模式为0
     if 1 in mode_select:
         import utils.blue_screen as bs
@@ -283,6 +278,7 @@ if __name__ == '__main__':
     if 4 in mode_select:
         import audio.speech_recognition as recognition
         import audio.speech_synthesis as synthesis
+
         threading.Thread(target=load_and_run_audio).start()
     memo = {
         0: "当前为聊天模式",
@@ -305,7 +301,6 @@ if __name__ == '__main__':
     threading.Thread(target=receive_messages).start()
     threading.Thread(target=dmp_analysis).start()
     # 创建一个线程，用于加载和运行语音识别和合成
-    
-        
+
     # 启动前端
     uvicorn.run(app, host="127.0.0.1", port=8081)
