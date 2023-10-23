@@ -83,11 +83,12 @@ def handle_client(client_socket, client_address, lenomate):
                         send_data = {'chat': res, 'follow': start}
                         client_socket.sendall(str(send_data).encode('utf-8') + b'__end_of_socket__')
                         start = False
+                    end_data = {'chat': res, 'follow': False, 'end': True}
+                    client_socket.sendall(str(end_data).encode('utf-8') + b'__end_of_socket__')
                     history_record[eval(data)['state_code']] = history
                     save_history(client_address[1], history_record)
                 else:
                     client_socket.sendall(str(send_data).encode('utf-8') + b'__end_of_socket__')
-
                 if eval(data)['state_code'] != 6:
                     print(f"回复{client_address[0]}:{client_address[1]}的消息：{send_data}")
         except Exception as e:

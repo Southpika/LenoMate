@@ -3,10 +3,11 @@ import os, platform
 import queue
 import socket
 import threading
-from typing import Dict, List
+from typing import Dict
 from fastapi import FastAPI, UploadFile, HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
+from audio.speech_synthesis import speech_synthesis as sys
 import pythoncom
 import uvicorn
 
@@ -65,7 +66,7 @@ def text(data: Dict):
         type_doc = 'PDF' if file_type == '.pdf' else 'PPT'
         message["type_doc"] = type_doc
         message["content"] = file_content
-    client_socket.send(str(message).encode("utf-8") + b'__end_of_socket__')
+    client_socket.sendall(str(message).encode("utf-8") + b'__end_of_socket__')
 
 
 def remove_cached():
@@ -115,9 +116,9 @@ def audio(data: Dict):
         return JSONResponse(content={"location": images_path, "bot": bot})
     else:
         result = data['chat']
-        # if bot:
-        #     threading.Thread(target=sys, args=(result,)).start()
         if 'follow' in data:
+            if 'end' in data:
+                threading.Thread(target=sys, args=(result,)).start()
             return JSONResponse(content={"result": result.strip('\n'), "bot": bot, "follow": data['follow']})
         else:
             return JSONResponse(content={"result": result.strip('\n'), "bot": bot})
@@ -132,9 +133,9 @@ def wallpaper_set(data: Dict):
     main(os.path.join(root_path, path))
 
 
-def sys(result):
-    synthesis.speech_synthesis(result)
-    function_finished_flag.set()
+# def sys(result):
+#     synthesis.speech_synthesis(result)
+#     function_finished_flag.set()
 
 
 def evaluate(content):
@@ -154,7 +155,7 @@ def handle(**kwargs):
         eval_thred.join()
         global eval_content
         if "chat" not in kwargs.keys():
-            client_socket.send(str({"inputs": eval_content, "state_code": 1}).encode("utf-8") + b'__end_of_socket__')
+            client_socket.sendall(str({"inputs": eval_content, "state_code": 1}).encode("utf-8") + b'__end_of_socket__')
     if "chat" in kwargs.keys():
         # kwargs['location'] = r"svg/2.png" #测试用
         output_queue.put((kwargs, True))
@@ -166,7 +167,7 @@ def handle(**kwargs):
 def receive_messages():
     print("已与服务器建立连接")
     system = platform.system()
-    client_socket.send(str(system).encode("utf-8") + b'__end_of_socket__')
+    client_socket.sendall(str(system).encode("utf-8") + b'__end_of_socket__')
     while True:
         try:
             socket_data = b''
@@ -232,7 +233,7 @@ def load_and_run_audio():
                                 type_doc = 'PDF' if file_type == '.pdf' else 'PPT'
                                 message["type_doc"] = type_doc
                                 message["content"] = file_content
-                            client_socket.send(str(message).encode("utf-8") + b'__end_of_socket__')
+                            client_socket.sendall(str(message).encode("utf-8") + b'__end_of_socket__')
                             function_finished_flag.clear()
                             function_finished_flag.wait()
                     except:
@@ -246,7 +247,7 @@ def dmp_analysis():
     bs_check_c = bs.bs_check_client()
     if bs_check_c.is_file_created_today_with(dmp_addr):
         test = bs.bs_check()
-        client_socket.send(
+        client_socket.sendall(
             str({"inputs": test.analyze('blue_sceen.txt'), 'state_code': 5}).encode('utf-8') + b'__end_of_socket__')
 
 
@@ -262,7 +263,6 @@ if __name__ == '__main__':
     dmp_addr = input('请设置dmp文件地址，默认为“C:/Users/Tzu-cheng Chang/Desktop/GLM”：')
     if not dmp_addr:
         dmp_addr = "C:/Users/Tzu-cheng Chang/Desktop/GLM"
-
     mode_select = input('请选择要打开的模式， 默认为全部：0：聊天 1：功能 2：文件分析 3：壁纸 4:语音: ')
     if not mode_select:
         mode_select = [0, 1, 2, 3]
@@ -277,7 +277,6 @@ if __name__ == '__main__':
         import operation.read_file as rd
     if 4 in mode_select:
         import audio.speech_recognition as recognition
-        import audio.speech_synthesis as synthesis
 
         threading.Thread(target=load_and_run_audio).start()
     memo = {
@@ -301,6 +300,5 @@ if __name__ == '__main__':
     threading.Thread(target=receive_messages).start()
     threading.Thread(target=dmp_analysis).start()
     # 创建一个线程，用于加载和运行语音识别和合成
-
     # 启动前端
     uvicorn.run(app, host="127.0.0.1", port=8081)
