@@ -40,6 +40,12 @@ class Prompt5(Prompt):
         query = "Please provide an answer in the required format based on the known information.\n\nInfomation:{CONTEXTS}\n\nInput:如果用户需要“{INPUTS}”，模仿“现在电脑当前音量为X%，已调至Y%”的样式进行回答。"
         self.prompt = self.prompt_template.format(QUERY = query.format(CONTEXTS = context, INPUTS = inp))
 
+class Prompt6(Prompt):
+    def __init__(self, inp) -> None:
+        super().__init__()
+        query = "你是LenoMate，用户的私人助理，请以助理的口吻亲切、简洁地提醒用户邮件的内容（以和用户聊天的形式总结邮件内容）。\n\nInput:\n {DESCRIPTION}.\n\nOutput(Answer in Chinese):"
+        self.prompt = self.prompt_template.format(QUERY = query.format(DESCRIPTION = inp))
+
 class ImagePrompt(Prompt):    
     def __init__(self, inp) -> None:    
         super().__init__()
