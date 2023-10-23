@@ -116,9 +116,9 @@ def audio(data: Dict):
         return JSONResponse(content={"location": images_path, "bot": bot})
     else:
         result = data['chat']
+        if 'end' in data:
+            threading.Thread(target=sys, args=(result,)).start()
         if 'follow' in data:
-            if 'end' in data:
-                threading.Thread(target=sys, args=(result,)).start()
             return JSONResponse(content={"result": result.strip('\n'), "bot": bot, "follow": data['follow']})
         else:
             return JSONResponse(content={"result": result.strip('\n'), "bot": bot})
@@ -167,7 +167,7 @@ def handle(**kwargs):
 def receive_messages():
     print("已与服务器建立连接")
     system = platform.system()
-    client_socket.sendall(str(system).encode("utf-8") + b'__end_of_socket__')
+    client_socket.sendall(str(system).encode("utf-8"))
     while True:
         try:
             socket_data = b''
