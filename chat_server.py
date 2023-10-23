@@ -48,16 +48,9 @@ args = get_parser()
 
 def handle_client(client_socket, client_address, lenomate):
     print(f"已与{client_address[0]}:{client_address[1]}建立连接")
-    socket_data = b''
-    while True:
-        data = client_socket.recv(10240)
-        if data.endswith(b'__end_of_socket__'):
-            socket_data += data[:-len(b'__end_of_socket__')]
-            break
-        socket_data += data
-    socket_data = socket_data.split(b'__end_of_socket__')[-1]
-    data = socket_data.decode('utf-8')
-    hello_state = bot_hello(system=data,language='ch')
+    data = client_socket.recv(1024)
+    data = data.decode('utf-8')
+    hello_state = bot_hello(system=data, language='ch')
     client_socket.sendall(str(hello_state.hello(ast=False)).encode('utf-8') + b'__end_of_socket__')
     print('欢迎语已发送')
     history_record = {}
