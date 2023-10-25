@@ -48,8 +48,9 @@ args = get_parser()
 
 def handle_client(client_socket, client_address, lenomate):
     print(f"已与{client_address[0]}:{client_address[1]}建立连接")
-    system = client_socket.recv(1024).decode('utf-8')
-    hello_state = bot_hello(system=system)
+    data = client_socket.recv(1024)
+    data = data.decode('utf-8')
+    hello_state = bot_hello(system=data, language='ch')
     client_socket.sendall(str(hello_state.hello(ast=False)).encode('utf-8') + b'__end_of_socket__')
     print('欢迎语已发送')
     history_record = {}
@@ -75,11 +76,12 @@ def handle_client(client_socket, client_address, lenomate):
                         send_data = {'chat': res, 'follow': start}
                         client_socket.sendall(str(send_data).encode('utf-8') + b'__end_of_socket__')
                         start = False
+                    end_data = {'chat': res, 'follow': False, 'end': True}
+                    client_socket.sendall(str(end_data).encode('utf-8') + b'__end_of_socket__')
                     history_record[eval(data)['state_code']] = history
                     save_history(client_address[1], history_record)
                 else:
                     client_socket.sendall(str(send_data).encode('utf-8') + b'__end_of_socket__')
-
                 if eval(data)['state_code'] != 6:
                     print(f"回复{client_address[0]}:{client_address[1]}的消息：{send_data}")
         except Exception as e:

@@ -107,6 +107,7 @@ class chat_bot:
         self.history = []
         self.generation_config = generation_config
         self.history_doc = []
+        self.file_content = None
         self.history_web = []
         stop_words_ids = [[self.tokenizer.im_end_id], [self.tokenizer.im_start_id]]
 
@@ -217,9 +218,20 @@ class chat_bot:
         """
         print("当前为分析模式...")
         query = data['inputs']
-        content = data['content']
-        self.system_message = f"<|im_start|>system\nYou are a helpful file analysis assistant. Please answer the user's question based on the following text.\nDocument:{content}\n<|im_end|>\n<|im_start|>user\n{query}<|im_end|>\n<|im_start|>assistant\n"
-        response = self.chat_stream(query,self.generation_config,history = history)
+        self.system_message = f"You are a helpful file analysis assistant. Please answer the user's question based on the following {data['type_doc']} document."
+        if self.file_content != data['content']:
+            self.file_content = data['content']
+            
+            REACT_PROMPT = """Answer the following questions as best and brief as you can. You have access to the {filetype} file.:
+
+Document:
+{content}
+
+Question: {query}"""
+        
+            response = self.chat_stream(REACT_PROMPT.format(filetype = data['type_doc'], content = self.file_content, query = query),self.generation_config,history = history)
+        else:
+            response = self.chat_stream(query,self.generation_config,history = history)
         return {'chat':response}
 
 
