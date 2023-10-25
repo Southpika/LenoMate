@@ -59,8 +59,7 @@ def start():
 
 @app.post("/text")  # 文本框交互
 def text(data: Dict):
-    thred = threading.Thread(target=sys, args=("请稍等",))
-    thred.start()
+    threading.Thread(target=sys, args=("请稍等",)).start()
     message = {"inputs": data.get("userInput"), "state_code": mode}
     if mode == 2:
         type_doc = 'PDF' if file_type == '.pdf' else 'PPT'
@@ -117,7 +116,7 @@ def audio(data: Dict):
     else:
         result = data['chat']
         if 'end' in data:
-            threading.Thread(target=sys, args=(result,)).start()
+            threading.Thread(target=sys_flag, args=(result,)).start()
         if 'follow' in data:
             return JSONResponse(content={"result": result.strip('\n'), "bot": bot, "follow": data['follow']})
         else:
@@ -133,9 +132,9 @@ def wallpaper_set(data: Dict):
     main(os.path.join(root_path, path))
 
 
-# def sys(result):
-#     synthesis.speech_synthesis(result)
-#     function_finished_flag.set()
+def sys_flag(result):
+    sys(result)
+    function_finished_flag.set()
 
 
 def evaluate(content):
@@ -180,7 +179,8 @@ def receive_messages():
             socket_data = socket_data.split(b'__end_of_socket__')[-1]
             data = eval(socket_data.decode('utf-8'))
             if 'image' not in data:
-                print(f"收到服务器的消息：{data}")
+                if 'end' in data:
+                    print(f"收到服务器的消息：{data}")
             else:
                 print(f"图片收取中...")
             handle(**data)
