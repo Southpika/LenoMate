@@ -112,6 +112,7 @@ def audio(data: Dict):
             image_num += 1
         # images_path:"["svg/1.png","svg/2.png","svg/3.png","svg/4.png"]"
         print(images_path)
+        threading.Thread(target=sys_flag, args=("壁纸已生成",)).start()
         return JSONResponse(content={"location": images_path, "bot": bot})
     else:
         result = data['chat']
@@ -195,15 +196,6 @@ def load_and_run_audio():
     while True:
         print("处于待唤醒状态")
         try:
-            # # 使用麦克风录制音频
-            # with sr.Microphone(sample_rate=8000) as source:
-            #     r = sr.Recognizer()
-            #     audio_frame = r.listen(source, phrase_time_limit=5)
-            #
-            # # 使用语音识别器解析音频
-            # # result = r.recognize_google(audio_frame, language="zh-CN")
-            # result = recognition.main2(audio_frame.frame_data)
-            # print("识别结果：", result)
             result = recognition.recognize_from_microphone()
             # 根据指令执行相应的操作
             if "小诺" in result or "想弄" in result or "小鹿" in result or "小洛" in result or "小娜" in result:
@@ -212,14 +204,6 @@ def load_and_run_audio():
                 while True:
                     print("处于已唤醒状态")
                     try:
-                        # # 使用麦克风录制音频
-                        # with sr.Microphone(sample_rate=8000) as source:
-                        #     r = sr.Recognizer()
-                        #     audio_frame = r.listen(source, timeout=3)
-                        # # 使用语音识别器解析音频
-                        # # result = r.recognize_google(audio_frame, language="zh-CN")
-                        # result = recognition.main2(audio_frame.frame_data)
-                        # print("识别结果：", result)
                         result = recognition.recognize_from_microphone()
                         # 根据指令执行相应的操作
                         if not result.strip():
