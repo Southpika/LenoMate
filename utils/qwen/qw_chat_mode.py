@@ -288,6 +288,12 @@ Question: Please summarize the blue screen bug analysis."""
         
         
         return {'chat':answer}
+    
+    def mode7(self,data,history):
+
+        prompt_email = prompt.Prompt7(data['inputs']).prompt
+        answer = self.chat_stream(prompt_email, self.generation_config, history = None)
+        return {'chat':answer}
 
 import operation.qw_prompt as prompt
 class operation_bot(chat_bot):
@@ -350,6 +356,8 @@ class operation_bot(chat_bot):
                     image_list.append(image_data)
                 # 发送图像数据给客户端
             return {'image':image_list}
+
+
         
     def opr0(self,input_statement,context):
         # 屏幕亮度
