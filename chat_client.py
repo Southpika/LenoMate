@@ -59,8 +59,7 @@ def start():
 
 @app.post("/text")  # 文本框交互
 def text(data: Dict):
-    thred = threading.Thread(target=sys, args=("请稍等",))
-    thred.start()
+    threading.Thread(target=sys, args=("请稍等",)).start()
     message = {"inputs": data.get("userInput"), "state_code": mode}
     if mode == 2:
         type_doc = 'PDF' if file_type == '.pdf' else 'PPT'
@@ -113,11 +112,12 @@ def audio(data: Dict):
             image_num += 1
         # images_path:"["svg/1.png","svg/2.png","svg/3.png","svg/4.png"]"
         print(images_path)
+        threading.Thread(target=sys_flag, args=("壁纸已生成",)).start()
         return JSONResponse(content={"location": images_path, "bot": bot})
     else:
         result = data['chat']
         if 'end' in data:
-            threading.Thread(target=sys, args=(result,)).start()
+            threading.Thread(target=sys_flag, args=(result,)).start()
         if 'follow' in data:
             return JSONResponse(content={"result": result.strip('\n'), "bot": bot, "follow": data['follow']})
         else:
@@ -133,9 +133,9 @@ def wallpaper_set(data: Dict):
     main(os.path.join(root_path, path))
 
 
-# def sys(result):
-#     synthesis.speech_synthesis(result)
-#     function_finished_flag.set()
+def sys_flag(result):
+    sys(result)
+    function_finished_flag.set()
 
 
 def evaluate(content):
@@ -180,7 +180,8 @@ def receive_messages():
             socket_data = socket_data.split(b'__end_of_socket__')[-1]
             data = eval(socket_data.decode('utf-8'))
             if 'image' not in data:
-                print(f"收到服务器的消息：{data}")
+                if 'end' in data:
+                    print(f"收到服务器的消息：{data}")
             else:
                 print(f"图片收取中...")
             handle(**data)
@@ -195,15 +196,6 @@ def load_and_run_audio():
     while True:
         print("处于待唤醒状态")
         try:
-            # # 使用麦克风录制音频
-            # with sr.Microphone(sample_rate=8000) as source:
-            #     r = sr.Recognizer()
-            #     audio_frame = r.listen(source, phrase_time_limit=5)
-            #
-            # # 使用语音识别器解析音频
-            # # result = r.recognize_google(audio_frame, language="zh-CN")
-            # result = recognition.main2(audio_frame.frame_data)
-            # print("识别结果：", result)
             result = recognition.recognize_from_microphone()
             # 根据指令执行相应的操作
             if "小诺" in result or "想弄" in result or "小鹿" in result or "小洛" in result or "小娜" in result:
@@ -212,14 +204,6 @@ def load_and_run_audio():
                 while True:
                     print("处于已唤醒状态")
                     try:
-                        # # 使用麦克风录制音频
-                        # with sr.Microphone(sample_rate=8000) as source:
-                        #     r = sr.Recognizer()
-                        #     audio_frame = r.listen(source, timeout=3)
-                        # # 使用语音识别器解析音频
-                        # # result = r.recognize_google(audio_frame, language="zh-CN")
-                        # result = recognition.main2(audio_frame.frame_data)
-                        # print("识别结果：", result)
                         result = recognition.recognize_from_microphone()
                         # 根据指令执行相应的操作
                         if not result.strip():

@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const xml = new XMLHttpRequest();
             xml.open('POST', 'http://localhost:8081/text');
             xml.setRequestHeader('Content-Type', 'application/json');
-            xml.send(JSON.stringify({userInput: inputText}));
+            xml.send(JSON.stringify({ userInput: inputText }));
 
             // 先清除之前的"server-message-wallpaper"
             const previousServerWallpapers = document.querySelectorAll('.server-message-wallpaper');
@@ -23,15 +23,30 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // 监听文本输入框的键盘事件和点击按钮事件
+
     textInput.addEventListener('keydown', function (event) {
-        if (event.keyCode === 13) { // 检查是否按下了回车键（键码13）
-            event.preventDefault(); // 阻止默认的换行行为
-            modalOverlay.classList.remove('active');
+        // 判断是否按下了组合键：Ctrl + Enter
+        if (event.ctrlKey && event.key === 'Enter') {
+            // 插入换行字符
+            const currentText = textInput.value;
+            const selectionStart = textInput.selectionStart;
+            const selectionEnd = textInput.selectionEnd;
+            const textBeforeSelection = currentText.substring(0, selectionStart);
+            const textAfterSelection = currentText.substring(selectionEnd);
+            textInput.value = textBeforeSelection + '\n' + textAfterSelection;
+    
+            // 防止默认换行行为
+            event.preventDefault();
+        } else if (event.key === 'Enter' && !event.ctrlKey) {
+            // 如果只按下Enter键但没有Ctrl键，执行发送消息
             sendMessage();
+            event.preventDefault(); // 防止默认换行行为
         }
     });
+    
 
+
+    
     sendMessageButton.addEventListener('click', function () {
         sendMessage();
     });
@@ -148,11 +163,11 @@ document.addEventListener('DOMContentLoaded', function () {
         // 创建包含消息文本的元素
         const messageText = document.createElement('div');
         messageText.className = 'line2';
-        messageText.innerHTML = '您可以选择将本张图片设置为您的桌面壁纸，也可以试试新的图片';
+        messageText.innerHTML = 'You can choose to set this image as your desktop wallpaper or try a new one';
         messageDiv.appendChild(messageText);
 
-//        wallpaper_list = JSON.parse(`${location}`);
-//        console.log(wallpaper_list);
+        //        wallpaper_list = JSON.parse(`${location}`);
+        //        console.log(wallpaper_list);
         // 将接收的图片路径存入imagePaths
 
         imagePaths = imagePaths.concat(location);
@@ -162,7 +177,7 @@ document.addEventListener('DOMContentLoaded', function () {
             messageDiv.appendChild(wallpaper);
         }
 
-//      messageDiv.appendChild(imagePaths[0]);
+        //      messageDiv.appendChild(imagePaths[0]);
         // 创建控制栏
         const chooser = document.createElement('div');
         /// 控制栏填充
@@ -207,7 +222,7 @@ document.addEventListener('DOMContentLoaded', function () {
         xml.open('POST', 'http://localhost:8081/image');
         xml.setRequestHeader('Content-Type', 'application/json');
         console.log(imagePaths[currentImageIndex])
-        xml.send(JSON.stringify({wall_path: imagePaths[currentImageIndex]}));
+        xml.send(JSON.stringify({ wall_path: imagePaths[currentImageIndex] }));
 
     });
 
@@ -268,7 +283,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 getMessage()
             }
         }
-        xml.send(JSON.stringify({userInput: "content"}));
+        xml.send(JSON.stringify({ userInput: "content" }));
     }
 
     getMessage()
@@ -330,12 +345,12 @@ document.addEventListener('DOMContentLoaded', function () {
     dom.net.addEventListener('click', () => {
         if (state !== 'net') {
             state = 'net';
-            dom.stat.innerHTML = '联网模式';
-            dom.stat2.innerHTML = '联网';
+            dom.stat.innerHTML = 'Internet';
+            dom.stat2.innerHTML = 'Internet';
             const xml = new XMLHttpRequest();
             xml.open('POST', 'http://localhost:8081/text2');
             xml.setRequestHeader('Content-Type', 'application/json');
-            xml.send(JSON.stringify({switch: 3}));
+            xml.send(JSON.stringify({ switch: 3 }));
         }
     })
 
@@ -343,12 +358,12 @@ document.addEventListener('DOMContentLoaded', function () {
     dom.analyze.addEventListener('click', () => {
         if (state !== 'analyze') {
             state = 'analyze';
-            dom.stat.innerHTML = '功能模式';
-            dom.stat2.innerHTML = '功能';
+            dom.stat.innerHTML = 'Control';
+            dom.stat2.innerHTML = 'Control';
             const xml = new XMLHttpRequest();
             xml.open('POST', 'http://localhost:8081/text2');
             xml.setRequestHeader('Content-Type', 'application/json');
-            xml.send(JSON.stringify({switch: 4}));
+            xml.send(JSON.stringify({ switch: 4 }));
         }
     });
 
@@ -356,12 +371,12 @@ document.addEventListener('DOMContentLoaded', function () {
     dom.paint.addEventListener('click', () => {
         if (state !== 'paint') {
             state = 'paint';
-            dom.stat.innerHTML = '壁纸模式';
-            dom.stat2.innerHTML = '壁纸';
+            dom.stat.innerHTML = 'AI Wallpaper';
+            dom.stat2.innerHTML = 'AI Wallpaper';
             const xml = new XMLHttpRequest();
             xml.open('POST', 'http://localhost:8081/text2');
             xml.setRequestHeader('Content-Type', 'application/json');
-            xml.send(JSON.stringify({switch: 6}));
+            xml.send(JSON.stringify({ switch: 6 }));
         }
     });
 
@@ -369,12 +384,12 @@ document.addEventListener('DOMContentLoaded', function () {
     dom.chat.addEventListener('click', () => {
         if (state !== 'chat') {
             state = 'chat';
-            dom.stat.innerHTML= '聊天模式';
-            dom.stat2.innerHTML = '聊天';
+            dom.stat.innerHTML = 'Chat';
+            dom.stat2.innerHTML = 'Chat';
             const xml = new XMLHttpRequest();
             xml.open('POST', 'http://localhost:8081/text2');
             xml.setRequestHeader('Content-Type', 'application/json');
-            xml.send(JSON.stringify({switch: 0}));
+            xml.send(JSON.stringify({ switch: 0 }));
         }
     });
 
