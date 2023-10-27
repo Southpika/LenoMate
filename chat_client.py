@@ -1,15 +1,19 @@
 # -*- coding: UTF-8 -*-
-import os, platform
+import os
+import platform
 import queue
+import re
 import socket
 import threading
 from typing import Dict
+
+import pythoncom
+import uvicorn
 from fastapi import FastAPI, UploadFile, HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
+
 from audio.speech_synthesis import speech_synthesis as sys
-import pythoncom
-import uvicorn
 
 app = FastAPI()
 app.mount("/svg", StaticFiles(directory="svg"), name="svg")
@@ -93,7 +97,7 @@ def get_basecount():
     base_count = 0
     for file in os.listdir('./svg'):
         if file.endswith('png'):
-            print(file)
+            # print(file)
             base_count += 1
     return base_count
 
@@ -111,17 +115,32 @@ def audio(data: Dict):
                 images_path.append(image_filename.format(image_num=image_num))
             image_num += 1
         # images_path:"["svg/1.png","svg/2.png","svg/3.png","svg/4.png"]"
-        print(images_path)
-        threading.Thread(target=sys_flag, args=("壁纸已生成",)).start()
+        # print(images_path)
+        threading.Thread(target=flag_join).start()
         return JSONResponse(content={"location": images_path, "bot": bot})
     else:
         result = data['chat']
+        sentences = re.split(r'[.!?。！？]', result)
+        sentences.pop()
+        global last_audio
+        n, m = len(last_audio), len(sentences)
+        if n < m:
+            for i in range(n, m):
+                print(f'put: {sentences[i]}')
+                audio_queue.put(sentences[i])
+            last_audio = sentences
         if 'end' in data:
-            threading.Thread(target=sys_flag, args=(result,)).start()
+            last_audio = []
+            threading.Thread(target=flag_join).start()
         if 'follow' in data:
             return JSONResponse(content={"result": result.strip('\n'), "bot": bot, "follow": data['follow']})
         else:
             return JSONResponse(content={"result": result.strip('\n'), "bot": bot})
+
+
+def flag_join():
+    audio_queue.join()
+    function_finished_flag.set()
 
 
 @app.post("/image")
@@ -129,13 +148,8 @@ def wallpaper_set(data: Dict):
     from utils.wallpaper import main
     # data
     path = data['wall_path'].replace('http://localhost:8081/', '')
-    print(os.path.join(root_path, path))
+    # print(os.path.join(root_path, path))
     main(os.path.join(root_path, path))
-
-
-def sys_flag(result):
-    sys(result)
-    function_finished_flag.set()
 
 
 def evaluate(content):
@@ -160,7 +174,7 @@ def handle(**kwargs):
         # kwargs['location'] = r"svg/2.png" #测试用
         output_queue.put((kwargs, True))
     elif 'image' in kwargs.keys():
-        print(kwargs)
+        # print(kwargs)
         output_queue.put((kwargs, True))
 
 
@@ -227,6 +241,13 @@ def load_and_run_audio():
             print("无法识别语音")
 
 
+def load_and_run_sys():
+    while True:
+        sentence = audio_queue.get()
+        print(f'get: {sentence}')
+        sys(sentence)
+
+
 def dmp_analysis():
     bs_check_c = bs.bs_check_client()
     if bs_check_c.is_file_created_today_with(dmp_addr):
@@ -273,6 +294,9 @@ if __name__ == '__main__':
         6: "当前为壁纸模式",
     }
     mode, file_content, file_type, eval_content = 0, '', '', ''
+    audio_queue = queue.Queue()
+    last_audio = []
+    threading.Thread(target=load_and_run_sys).start()
     function_finished_flag = threading.Event()
     # 创建一个显示队列
     output_queue = queue.Queue()
@@ -285,4 +309,4 @@ if __name__ == '__main__':
     threading.Thread(target=dmp_analysis).start()
     # 创建一个线程，用于加载和运行语音识别和合成
     # 启动前端
-    uvicorn.run(app, host="127.0.0.1", port=8081)
+    uvicorn.run(app, host="127.0.0.1", port=8081, log_level='warning')
