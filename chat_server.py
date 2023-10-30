@@ -1,10 +1,29 @@
 # -*- coding: UTF-8 -*-
-import socket
-import threading
-import argparse
+"""
+File_name: chat_server.py
+author: tanzhehao
+version: /
+
+Overview:
+这个Python文件为服务端的后端，主要包含了一个聊天服务器，用于与客户端建立连接并进行聊天。服务器利用LenoMate和bot_hello（打招呼开头语）来处理客户端的请求，并提供多种功能。
+
+Usage:
+- 运行该文件以启动聊天服务器，等待客户端连接。
+- 客户端连接后，服务器将发送欢迎消息，并可以进行聊天、文件传输、网页请求、功能执行等操作。
+
+Dependencies:
+- Python 3.10
+- 使用了来自'operation'、'utils'、'lenomate'（模型主文件）等模块的自定义代码。
+
+Notes:
+- 请确保所有依赖库都已正确安装。
+- 客户端应按照服务器的IP地址连接（本地局域网，如果不是本地请参照内网穿透平台的ip）。
+- 服务器在接收到客户端消息后，会使用LenoMate来处理请求。
+"""
+
 from operation.hello import bot_hello
 from lenomate import LenoMate
-import os, sys, platform
+import os, sys, platform, threading, socket, argparse
 from utils.history_record import save_history
 
 

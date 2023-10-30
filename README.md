@@ -20,14 +20,20 @@ LenoMate是一款智能桌面助手，作为电脑的中枢，可以帮助用户
 
 ![1696926782813](image/README/1696926782813.png)
 
-
 ## 壁纸生成
 
 ![1696927615537](image/README/1696927615537.png)
 
-# 操作指令更新操作
+# 新功能添加操作
 
-每次加入新的指令(data/document_corpus)，需更新操作库的embedding, 命令行运行 python utils/renew_corpus.py
+1. 定义好新功能的py文件，并且调试通过
+2. 如果有新增prompt，将对应prompt加入到prompt文件中
+3. 在chat_mode.py文件中导入新功能（分模型），如果为文字类放在chat_bot下,如果是操作类放在opr_bot下
+4. chat bot如果需要流式输出使用stream_chat，并且回传时直接回传迭代器然后流式与客户端通信，如果只需要中间过程（如生成image prompt）泽使用chat
+
+# 操作任务更新操作(Operation_bot 增加新操作)
+
+每次加入新的操作类任务(data/document_corpus)，需更新操作库的embedding, 命令行运行 python utils/renew_corpus.py
 
 # windows的bitsandbytes使用如下仓库
 

@@ -1,3 +1,14 @@
+"""
+File_name: lenomate.py
+author: tanzhehao
+version: /
+
+Overview:
+这个文件主要为主处理函数，用于分发以及处理不同的意图
+
+Note:
+- state_code: 0聊天  1中间变量传输 2文件 3网页 4功能 5蓝屏 6绘画 7邮件
+"""
 from transformers import AutoTokenizer, AutoModel, AutoModelForCausalLM
 from utils.search_doc_faiss import faiss_corpus
 import torch
@@ -9,6 +20,29 @@ from utils.wallpaper_generate import sdmodels, sd_args
 
 class LenoMate:
     def __init__(self, model_type, args):
+        """
+        Class: LenoMate
+
+        Description:
+        The LenoMate class is responsible for initializing and managing various models and components used in a chatbot system. It supports different model types, such as 'glm' and 'qw', and processes client data for generating responses.
+
+        Attributes:
+        - model_sim (AutoModel): A transformer model for semantic similarity.
+        - tokenizer_sim (AutoTokenizer): A tokenizer for the semantic similarity model.
+        - corpus (faiss_corpus): An instance for managing the document corpus used in similarity calculations.
+        - args: Configuration parameters and arguments provided during initialization.
+        - sd (sdmodels): A component responsible for picture generation in specific model types.
+        - model (AutoModel or AutoModelForCausalLM): The main conversational model.
+        - tokenizer (AutoTokenizer): The tokenizer for the main conversational model.
+
+        Methods:
+        - __init__(self, model_type, args): Initializes the LenoMate class by loading required models and components based on the model type and provided arguments.
+        - process(self, data_client, history): Processes client data and generates responses based on the model type and chatbot state.
+        - reset_bot(self): Resets the chatbot to its initial state and loads the appropriate model components.
+
+        Note:
+        - This class is designed to support different conversational models (e.g., 'glm' and 'qw') and is responsible for managing their initialization and usage.
+        """
         print("模型加载中...")
         self.model_sim = AutoModel.from_pretrained(args.simmodel_dir).to('cuda')
         self.tokenizer_sim = AutoTokenizer.from_pretrained(args.simmodel_dir)
@@ -43,7 +77,6 @@ class LenoMate:
         self.model.is_parallelizable = True
         self.model.model_parallel = True
         self.model.eval()
-        
         print("模型加载完成")
 
     def process(self, data_client, history):

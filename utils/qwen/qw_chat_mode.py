@@ -1,23 +1,29 @@
-import sys
-import os
+"""
+File_name: qw_chat_mode.py
+author: tanzhehao
+version: /
+
+Overview:
+此Python文件为对话模型和操作模型的实际操作层。通过`LenoMate`类，初始化和管理各种模型和组件以及处理不同模式的客户端请求。
+
+Notes:
+- operation bot的mode数字源于模型匹配，如果需要加入新的操作类功能，先需更新 data/document_corpus.txt 此文件中的modex的x需与此txt文件的index匹配，同时还需要更新faiss向量库
+- chat bot主要为文字类内容，除了operation bot的功能全部在此之下，modeX的X数字参照state code，在lenomate.py中调用
+- statecode为1用于处理需要回传的内容，比如调节屏幕亮度需要先获取用户当前屏幕亮度
+"""
+
+import sys,os,torch,re,argparse
 # print(os.path.dirname(os.path.abspath('__file__')))
 sys.path.append(os.path.dirname(os.path.abspath('__file__')))
 from utils.qwen.stop_criterion import StopWordsLogitsProcessor
 from utils.vol_select import judge
-import torch
 from typing import TYPE_CHECKING, Optional, Tuple, Union, Callable, List, Any, Generator
-import re
 from utils.web_search import web_searcher
 import operation.qw_prompt as prompt
 import operation.operation_server_qw as operation
 from transformers.generation import GenerationConfig
-import os
-import argparse
-import torch
-import re
 from operation.open_app import search_tool
 import numpy as np
-
 from transformers.generation import LogitsProcessor,LogitsProcessorList
 
 def make_context(
@@ -187,14 +193,6 @@ class chat_bot:
             word = self.tokenizer.decode(outputs,skip_special_tokens=True,errors='ignore')
             new_history = history + [(query,word)]
             yield word, new_history
-        # self.im_end = self.tokenizer.im_end_id
-        # for eod_token_idx in range(len(input_ids[0]), len(response_ids[0])):
-        #     if response_ids[0][eod_token_idx] in [self.im_start, self.im_end]:
-        #         self.end_reason = f"Gen {self.tokenizer.decode([response_ids[0][eod_token_idx]])!r}"
-        #         break
-        # response = self.tokenizer.decode(response_ids[0][:eod_token_idx])[len(prompts):]
-        # history.append((query, response))
-        # return response, history
 
     def mode0(self,data,history):
         """
@@ -271,7 +269,8 @@ Question: {query}"""
         """
         mode5: 蓝屏分析模式
         Args:
-            data (dict): 需要用到的属性
+            data (dict):
+            需要用到的属性
                 inputs:用户问题
         """
         print("当前蓝屏分析模式...")
@@ -290,7 +289,13 @@ Question: Please summarize the blue screen bug analysis."""
         return {'chat':answer}
     
     def mode7(self,data,history):
-
+        """
+        mode7: 邮件分析模式
+        Args:
+            data (dict): 
+            需要用到的属性
+            inputs:邮件内容
+        """
         prompt_email = prompt.Prompt7(data['inputs']).prompt
         answer = self.chat_stream(prompt_email, self.generation_config, history = None)
         return {'chat':answer}
