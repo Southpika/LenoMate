@@ -1,3 +1,11 @@
+"""
+File_name:  qw_prompt.py
+author: tanzhehao
+version: /
+
+Overview:
+qwen prompt文件
+"""
 ## 修改prompt后记得修改max_length以及split的部分
 class Prompt:
     def __init__(self):

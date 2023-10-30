@@ -1,3 +1,12 @@
+"""
+File_name: prompt.py
+author: tanzhehao
+version: /
+
+Overview:
+glm prompt文件
+"""
+
 ## 修改prompt后记得修改max_length以及split的部分
 class Prompt:
     def fit(self):

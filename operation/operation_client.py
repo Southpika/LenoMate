@@ -1,3 +1,11 @@
+"""
+File_name: operation_client.py.py
+author: tanzhehao
+version: /
+
+Overview:
+客户端文件，用于处理需要回传的内容，如提供当前屏幕亮度以便于服务器决策
+"""
 import sys
 import os
 

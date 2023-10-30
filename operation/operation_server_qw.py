@@ -1,3 +1,4 @@
+# 此文件已被整合至qw_chat_mode.py，暂时弃用
 import time
 import os
 import argparse

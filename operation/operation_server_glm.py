@@ -1,3 +1,11 @@
+"""
+File_name: operation_server_glm.py.py
+author: tanzhehao
+version: /
+
+Overview:
+用于服务端的GLM模型的相关操作
+"""
 import time
 import os
 import argparse
