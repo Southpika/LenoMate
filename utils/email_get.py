@@ -35,22 +35,23 @@ class email_reciever:
             print(f"检测到{self.jiance}分钟以内的新邮件")
             date = date_obj.date()
             time = date_obj.time()
+            temp_content = ''
             if email_message.is_multipart():
                 for part in email_message.get_payload():
                     if part.get_content_type() == 'text/plain':
-                        body = part.get_payload(decode=True).decode(email_encode)
+                        temp_content += part.get_payload(decode=True).decode(email_encode)
                         break
                     elif part.get_content_type() == 'text/html':
-                        body = part.get_payload(decode=True).decode(email_encode)
-                        body = re.sub(r'(<[^>]+>|\s)','',str(body))
-                        body = re.sub(r'({[^>]+}|\s)','',str(body))
+                        temp_content = part.get_payload(decode=True).decode(email_encode)
+                        temp_content = re.sub(r'(<[^>]+>|\s)','',str(temp_content))
+                        temp_content = re.sub(r'({[^>]+}|\s)','',str(temp_content))
                     elif 'text' in part.get_content_type():
-                        body = part.get_payload(decode=True).decode(email_encode)
+                        temp_content += part.get_payload(decode=True).decode(email_encode)
                     else:
-                        body = 'UNDECODE'
+                        temp_content += 'UNDECODE'
             else:
-                body = email_message.get_payload(decode=True).decode(email_encode)
-            body = re.sub(r'(\r\n){2,}',r'\n\n',body)
+                temp_content = email_message.get_payload(decode=True).decode(email_encode)
+            body = re.sub(r'(\r\n){2,}',r'\n\n',temp_content)
             # print(body)
 
             res = f"Subject:{subject}\nSender:{sender}\nContent:{body}"
