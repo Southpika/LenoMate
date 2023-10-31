@@ -251,12 +251,14 @@ def load_and_run_sys():
 
 def load_and_run_email():
     while True:
-        time.sleep(60000)
         email = tzh.get_email()
+        print(f'已收到邮件信息：{email}')
         global history
         if email != history:
+            print(f'已发送邮件信息：{email}')
             client_socket.sendall(str({"inputs": email, "state_code": 7}).encode("utf-8") + b'__end_of_socket__')
             history = email
+        time.sleep(60000)
 
 
 def dmp_analysis():
@@ -292,8 +294,6 @@ if __name__ == '__main__':
 
         tzh = email_reciever()
         history = ''
-        threading.Thread(target=load_and_run_email).start()
-        threading.Thread(target=dmp_analysis).start()
         #  勿删，功能模式使用
         import operation
     if 2 in mode_select:
@@ -322,6 +322,8 @@ if __name__ == '__main__':
     # 连接服务器
     client_socket.connect((server_addr, server_port))
     # 创建线程接收消息
+    threading.Thread(target=load_and_run_email).start()
+    threading.Thread(target=dmp_analysis).start()
     threading.Thread(target=load_and_run_sys).start()
     threading.Thread(target=receive_messages).start()
     # 启动前端
