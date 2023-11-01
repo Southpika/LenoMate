@@ -62,7 +62,7 @@ args = get_parser()
 
 # args.model_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)),args.model_dir)
 # args.simmodel_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)),args.simmodel_dir)
-# code 0 聊天  1 中间变量传输 2 文件 3 网页 4功能 5 蓝屏 6绘画
+# code 0 聊天  1 中间变量传输 2 文件 3 网页 4功能 5 蓝屏 6绘画 7邮件
 
 
 def handle_client(client_socket, client_address, lenomate):
@@ -89,7 +89,7 @@ def handle_client(client_socket, client_address, lenomate):
                 print(f"收到{client_address[0]}:{client_address[1]}的消息：{data}")
                 # 广播消息给所有连接的客户端
                 send_data = lenomate.process(eval(data), history_record.get(eval(data)['state_code']))
-                if eval(data)['state_code'] in [0, 3, 2, 5]:
+                if eval(data)['state_code'] in [0, 3, 2, 5, 7]:
                     start = True
                     for res, history in send_data['chat']:
                         send_data = {'chat': res, 'follow': start}
@@ -97,7 +97,10 @@ def handle_client(client_socket, client_address, lenomate):
                         start = False
                     end_data = {'chat': res, 'follow': False, 'end': True}
                     client_socket.sendall(str(end_data).encode('utf-8') + b'__end_of_socket__')
-                    history_record[eval(data)['state_code']] = history
+                    if eval(data)['state_code'] != 7:
+                        history_record[eval(data)['state_code']] = history
+                    else:
+                        history_record[0] = history_record.get(0,[]) + history
                     save_history(client_address[1], history_record)
                 else:
                     client_socket.sendall(str(send_data).encode('utf-8') + b'__end_of_socket__')

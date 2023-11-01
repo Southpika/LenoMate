@@ -226,6 +226,7 @@ Document:
 {content}
 
 Question: {query}"""
+            print(REACT_PROMPT.format(filetype = data['type_doc'], content = self.file_content, query = query))
         
             response = self.chat_stream(REACT_PROMPT.format(filetype = data['type_doc'], content = self.file_content, query = query),self.generation_config,history = history)
         else:

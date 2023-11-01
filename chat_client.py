@@ -303,7 +303,7 @@ if __name__ == '__main__':
     # 创建套接字F
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     # 连接服务器
-    client_socket.connect((server_addr, server_port))
+    client_socket.connect((server_addr, int(server_port)))
     # 创建线程接收消息
     threading.Thread(target=receive_messages).start()
     threading.Thread(target=dmp_analysis).start()

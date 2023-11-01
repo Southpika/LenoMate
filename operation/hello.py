@@ -17,6 +17,7 @@ class bot_hello:
         self.query_data += '请问有什么可以帮您?' if self.language == 'cn' else 'What can I do for you? '
         hello = {'chat': self.query_data,
                  'end': True,
-                 'command': "os.system('START msedge.exe http://localhost:8081/')" if self.system == 'Windows' else "os.system('open -a Safari.app http://localhost:8081/')"
+                 'command': "os.system('START msedge.exe http://localhost:8081/')" 
+                #  if self.system == 'Windows' else "os.system('open -a Safari.app http://localhost:8081/')"
                  }
         return hello
