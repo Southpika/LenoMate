@@ -41,6 +41,7 @@ document.addEventListener('DOMContentLoaded', function () {
             // 如果只按下Enter键但没有Ctrl键，执行发送消息
             sendMessage();
             event.preventDefault(); // 防止默认换行行为
+            modalOverlay.classList.remove('active');
         }
     });
     

@@ -5,6 +5,7 @@ import queue
 import re
 import socket
 import threading
+import time
 from typing import Dict
 
 import pythoncom
@@ -248,6 +249,18 @@ def load_and_run_sys():
         sys(sentence)
 
 
+def load_and_run_email():
+    while True:
+        email = tzh.get_email()
+        print(f'已收到邮件信息：{email}')
+        global history
+        if email != history:
+            print(f'已发送邮件信息：{email}')
+            client_socket.sendall(str({"inputs": email, "state_code": 7}).encode("utf-8") + b'__end_of_socket__')
+            history = email
+        time.sleep(60000)
+
+
 def dmp_analysis():
     bs_check_c = bs.bs_check_client()
     if bs_check_c.is_file_created_today_with(dmp_addr):
@@ -259,16 +272,17 @@ def dmp_analysis():
 if __name__ == '__main__':
     server_addr_default = "n81595194d.zicp.fun"
     server_port_default = 13964
+    dmp_addr_default = "C:/Users/Tzu-cheng Chang/Desktop/GLM"
     server_addr = input(f'请设置服务器地址，默认为“{server_addr_default}”：')
     server_port = input(f'请设置服务器端口，默认为“{server_port_default}”：')
+    dmp_addr = input(f'请设置dmp文件地址，默认为{dmp_addr_default}：')
+    mode_select = input('请选择要打开的模式， 默认为"0 1 2 3" (0：聊天 1：功能 2：文件分析 3：壁纸 4: 语音)')
     if not server_addr:
         server_addr = server_addr_default
     if not server_port:
         server_port = server_port_default
-    dmp_addr = input('请设置dmp文件地址，默认为“C:/Users/Tzu-cheng Chang/Desktop/GLM”：')
     if not dmp_addr:
-        dmp_addr = "C:/Users/Tzu-cheng Chang/Desktop/GLM"
-    mode_select = input('请选择要打开的模式， 默认为全部：0：聊天 1：功能 2：文件分析 3：壁纸 4:语音: ')
+        dmp_addr = dmp_addr_default
     if not mode_select:
         mode_select = [0, 1, 2, 3]
     else:
@@ -276,6 +290,10 @@ if __name__ == '__main__':
     # 聊天模式为0
     if 1 in mode_select:
         import utils.blue_screen as bs
+        from utils.email_get import email_reciever
+
+        tzh = email_reciever()
+        history = ''
         #  勿删，功能模式使用
         import operation
     if 2 in mode_select:
@@ -294,19 +312,19 @@ if __name__ == '__main__':
         6: "当前为壁纸模式",
     }
     mode, file_content, file_type, eval_content = 0, '', '', ''
-    audio_queue = queue.Queue()
-    last_audio = []
-    threading.Thread(target=load_and_run_sys).start()
     function_finished_flag = threading.Event()
+    last_audio = []
     # 创建一个显示队列
     output_queue = queue.Queue()
+    audio_queue = queue.Queue()
     # 创建套接字F
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     # 连接服务器
     client_socket.connect((server_addr, int(server_port)))
     # 创建线程接收消息
-    threading.Thread(target=receive_messages).start()
+    threading.Thread(target=load_and_run_email).start()
     threading.Thread(target=dmp_analysis).start()
-    # 创建一个线程，用于加载和运行语音识别和合成
+    threading.Thread(target=load_and_run_sys).start()
+    threading.Thread(target=receive_messages).start()
     # 启动前端
     uvicorn.run(app, host="127.0.0.1", port=8081, log_level='warning')
