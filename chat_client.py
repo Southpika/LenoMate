@@ -281,7 +281,7 @@ if __name__ == '__main__':
     dmp_addr = input(f'请设置dmp文件地址，默认为{dmp_addr_default}：')
     IMAP_SERVER = input(f'请设置邮件服务器，默认为{IMAP_SERVER_default}：')
     EMAIL_ADDRESS = input(f'请设置邮件地址，默认为{EMAIL_ADDRESS_default}：')
-    EMAIL_PASSWORD = input(f'请设置邮件密码，默认为{len(EMAIL_PASSWORD_default)*"*"}：')
+    EMAIL_PASSWORD = input(f'请设置邮件密码，默认为{len(EMAIL_PASSWORD_default) * "*"}：')
     mode_select = input('请选择要打开的模式， 默认为 0 1 2 3 (0：聊天 1：功能 2：文件分析 3：壁纸 4: 语音)')
     if not server_addr:
         server_addr = server_addr_default
@@ -289,6 +289,12 @@ if __name__ == '__main__':
         server_port = server_port_default
     if not dmp_addr:
         dmp_addr = dmp_addr_default
+    if not IMAP_SERVER:
+        IMAP_SERVER = IMAP_SERVER_default
+    if not EMAIL_PASSWORD:
+        EMAIL_PASSWORD = EMAIL_PASSWORD_default
+    if not EMAIL_ADDRESS:
+        EMAIL_ADDRESS = EMAIL_ADDRESS_default
     if not mode_select:
         mode_select = [0, 1, 2, 3]
     else:
@@ -298,7 +304,7 @@ if __name__ == '__main__':
         import utils.blue_screen as bs
         from utils.email_get import email_reciever
 
-        tzh = email_reciever()
+        tzh = email_reciever(EMAIL_ADDRESS, EMAIL_PASSWORD, IMAP_SERVER)
         history = ''
         #  勿删，功能模式使用
         import operation
