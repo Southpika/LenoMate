@@ -35,8 +35,14 @@ class email_reciever:
         subject, email_encode = decode_str(email_message['Subject'])
         sender = email.utils.parseaddr(email_message['From'])[1]
         date_string = email_message.get('Date')
-        date_obj = datetime.strptime(date_string, '%a, %d %b %Y %H:%M:%S %z')
-        # 获取当前时间
+        long = len(date_string.split())
+        if long == 5:
+            date_obj = datetime.strptime(date_string, '%d %b %Y %H:%M:%S %z')
+        elif long == 6:
+            date_obj = datetime.strptime(date_string, '%a, %d %b %Y %H:%M:%S %z')
+        else:
+            date_obj = datetime.strptime(date_string, '%a, %d %b %Y %H:%M:%S %z (%Z)')
+# 获取当前时间
         current_time = datetime.now(date_obj.tzinfo)
         time_difference = current_time - date_obj
 

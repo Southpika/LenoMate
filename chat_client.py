@@ -258,7 +258,7 @@ def load_and_run_email():
             print(f'已发送邮件信息：{email}')
             client_socket.sendall(str({"inputs": email, "state_code": 7}).encode("utf-8") + b'__end_of_socket__')
             history = email
-        time.sleep(60000)
+        time.sleep(60)
 
 
 def dmp_analysis():
