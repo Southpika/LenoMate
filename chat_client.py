@@ -273,10 +273,16 @@ if __name__ == '__main__':
     server_addr_default = "n81595194d.zicp.fun"
     server_port_default = 13964
     dmp_addr_default = "C:/Users/Tzu-cheng Chang/Desktop/GLM"
-    server_addr = input(f'请设置服务器地址，默认为“{server_addr_default}”：')
-    server_port = input(f'请设置服务器端口，默认为“{server_port_default}”：')
+    IMAP_SERVER_default = 'imap.qq.com'
+    EMAIL_ADDRESS_default = '513923576@qq.com'
+    EMAIL_PASSWORD_default = 'wektfdfmtxcgbgce'
+    server_addr = input(f'请设置服务器地址，默认为{server_addr_default}：')
+    server_port = input(f'请设置服务器端口，默认为{server_port_default}：')
     dmp_addr = input(f'请设置dmp文件地址，默认为{dmp_addr_default}：')
-    mode_select = input('请选择要打开的模式， 默认为"0 1 2 3" (0：聊天 1：功能 2：文件分析 3：壁纸 4: 语音)')
+    IMAP_SERVER = input(f'请设置邮件服务器，默认为{IMAP_SERVER_default}：')
+    EMAIL_ADDRESS = input(f'请设置邮件地址，默认为{EMAIL_ADDRESS_default}：')
+    EMAIL_PASSWORD = input(f'请设置邮件密码，默认为{len(EMAIL_PASSWORD_default)*"*"}：')
+    mode_select = input('请选择要打开的模式， 默认为 0 1 2 3 (0：聊天 1：功能 2：文件分析 3：壁纸 4: 语音)')
     if not server_addr:
         server_addr = server_addr_default
     if not server_port:
