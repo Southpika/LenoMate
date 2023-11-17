@@ -272,11 +272,11 @@ def dmp_analysis():
 
 if __name__ == '__main__':
     server_addr_default = "n81595194d.zicp.fun"
-    server_port_default = 13964
+    server_port_default = 17493
     dmp_addr_default = "C:/Users/Tzu-cheng Chang/Desktop/GLM"
     IMAP_SERVER_default = 'imap.qq.com'
-    EMAIL_ADDRESS_default = '513923576@qq.com'
-    EMAIL_PASSWORD_default = 'wektfdfmtxcgbgce'
+    EMAIL_ADDRESS_default = '849120568@qq.com'
+    EMAIL_PASSWORD_default = 'txnllkgnplsvbbij'
     server_addr = input(f'请设置服务器地址，默认为{server_addr_default}：')
     server_port = input(f'请设置服务器端口，默认为{server_port_default}：')
     dmp_addr = input(f'请设置dmp文件地址，默认为{dmp_addr_default}：')
