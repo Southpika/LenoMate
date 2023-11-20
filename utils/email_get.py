@@ -2,10 +2,10 @@ import imaplib, re, datetime, email
 from email.header import decode_header, Header
 from datetime import datetime, timedelta
 
-IMAP_SERVER = 'imap.qq.com'
+IMAP_SERVER = 'outlook.office365.com'
 difference = 14400
-EMAIL_ADDRESS = '513923576@qq.com'
-EMAIL_PASSWORD = 'wektfdfmtxcgbgce'
+EMAIL_ADDRESS = 'alibaba-zzzhang@assoc.main.ntu.edu.sg'
+EMAIL_PASSWORD = 'St283038!'
 
 
 def decode_str(s):
