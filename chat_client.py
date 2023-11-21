@@ -23,7 +23,6 @@ from utils.wallpaper import main
 
 app = FastAPI()
 app.mount("/svg", StaticFiles(directory="svg"), name="svg")
-app.mount("/web", StaticFiles(directory="web"), name="web")
 root_path = os.path.dirname(os.path.abspath(__file__))
 
 
