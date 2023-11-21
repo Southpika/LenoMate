@@ -7,14 +7,18 @@ import socket
 import threading
 import time
 from typing import Dict
-
 import pythoncom
 import uvicorn
 from fastapi import FastAPI, UploadFile, HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
-
 from audio.speech_synthesis import speech_synthesis as sys
+from utils.email_get import email_reciever
+import utils.blue_screen as bs
+#  勿删，功能模式使用
+import operation
+import operation.read_file as rd
+import audio.speech_recognition as recognition
 
 app = FastAPI()
 app.mount("/svg", StaticFiles(directory="svg"), name="svg")
@@ -279,8 +283,8 @@ if __name__ == '__main__':
     server_port = input(f'请设置服务器端口，回车跳过，默认为：{server_port_default}：')
     dmp_addr = input(f'请设置dmp文件地址，回车跳过，默认为：{dmp_addr_default}：')
     mode_select = input("""请选择要打开的模式:
-0：默认（聊天，功能，文件分析，壁纸），1：邮件，2：语音
-输入数字，空格隔开（回车跳过，默认选择为：0）：
+0：默认（聊天，功能，文件分析，壁纸），1：默认 + 邮件，2：默认 + 邮件 + 语音
+输入数字（回车跳过，默认选择为：0）：
 """)
     if not server_addr:
         server_addr = server_addr_default
@@ -292,24 +296,15 @@ if __name__ == '__main__':
         mode_select = [0]
     else:
         mode_select = list(map(int, mode_select.split()))
-        if 1 in mode_select:
+        if 1 in mode_select or 2 in mode_select:
             IMAP_SERVER = input(f'请选择邮件服务器，1：{IMAP_SERVER_default}（默认）， 2："outlook.office365.com"，输入数字：')
             EMAIL_ADDRESS = input(f'请设置邮箱地址：')
             EMAIL_PASSWORD = input(f'请设置邮箱验证码或密码：')
             if IMAP_SERVER == '2':
                 IMAP_SERVER = "outlook.office365.com"
-    # 聊天模式为0
-    if 0 in mode_select:
-        import utils.blue_screen as bs
-        from utils.email_get import email_reciever
-
-        tzh = email_reciever(EMAIL_ADDRESS, EMAIL_PASSWORD, IMAP_SERVER)
-        history = ''
-        #  勿删，功能模式使用
-        import operation
-        import operation.read_file as rd
-        import audio.speech_recognition as recognition
-
+            tzh = email_reciever(EMAIL_ADDRESS, EMAIL_PASSWORD, IMAP_SERVER)
+            threading.Thread(target=load_and_run_email).start()
+    if 2 in mode_select:
         threading.Thread(target=load_and_run_audio).start()
     memo = {
         0: "当前为聊天模式",
@@ -320,7 +315,7 @@ if __name__ == '__main__':
         5: "当前为蓝屏模式",
         6: "当前为壁纸模式",
     }
-    mode, file_content, file_type, eval_content = 0, '', '', ''
+    mode, file_content, file_type, eval_content, history = 0, '', '', '', ''
     function_finished_flag = threading.Event()
     last_audio = []
     # 创建一个显示队列
@@ -331,7 +326,6 @@ if __name__ == '__main__':
     # 连接服务器
     client_socket.connect((server_addr, int(server_port)))
     # 创建线程接收消息
-    threading.Thread(target=load_and_run_email).start()
     threading.Thread(target=dmp_analysis).start()
     threading.Thread(target=load_and_run_sys).start()
     threading.Thread(target=receive_messages).start()
