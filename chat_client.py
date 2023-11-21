@@ -283,7 +283,7 @@ if __name__ == '__main__':
     server_port = input(f'请设置服务器端口，回车跳过，默认为：{server_port_default}：')
     dmp_addr = input(f'请设置dmp文件地址，回车跳过，默认为：{dmp_addr_default}：')
     mode_select = input("""请选择要打开的模式:
-0：默认（聊天，功能，文件分析，壁纸），1：默认+邮件，2：默认+邮件+语音
+0：仅默认（聊天+功能+文件分析+壁纸），1：默认+邮件，2：默认+邮件+语音识别
 输入数字（回车跳过，默认选择为：0）：
 """)
     if not server_addr:
