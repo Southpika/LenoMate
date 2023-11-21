@@ -275,33 +275,29 @@ if __name__ == '__main__':
     server_port_default = 17493
     dmp_addr_default = "C:/Users/Tzu-cheng Chang/Desktop/GLM"
     IMAP_SERVER_default = 'imap.qq.com'
-    EMAIL_ADDRESS_default = '849120568@qq.com'
-    EMAIL_PASSWORD_default = 'txnllkgnplsvbbij'
-    server_addr = input(f'请设置服务器地址，默认为{server_addr_default}：')
-    server_port = input(f'请设置服务器端口，默认为{server_port_default}：')
-    dmp_addr = input(f'请设置dmp文件地址，默认为{dmp_addr_default}：')
-    IMAP_SERVER = input(f'请选择邮件服务器，1：{IMAP_SERVER_default}（默认）， 2："outlook.office365.com"，输入数字：')
-    EMAIL_ADDRESS = input(f'请设置邮件地址，默认为{EMAIL_ADDRESS_default}：')
-    EMAIL_PASSWORD = input(f'请设置邮件验证码，默认为{len(EMAIL_PASSWORD_default) * "*"}：')
-    mode_select = input('请选择要打开的模式， 默认为 0 1 2 3 (0：聊天 1：功能 2：文件分析 3：壁纸 4: 语音)')
+    server_addr = input(f'请设置服务器地址，回车跳过，默认为：{server_addr_default}：')
+    server_port = input(f'请设置服务器端口，回车跳过，默认为：{server_port_default}：')
+    dmp_addr = input(f'请设置dmp文件地址，回车跳过，默认为：{dmp_addr_default}：')
+    mode_select = input("""请选择要打开的模式:
+    0：聊天，1：功能，2：文件分析，3：壁纸，4：邮件，5：语音
+    输入数字，空格隔开（回车跳过，默认选择为：0 1 2 3）：
+    """)
     if not server_addr:
         server_addr = server_addr_default
     if not server_port:
         server_port = server_port_default
     if not dmp_addr:
         dmp_addr = dmp_addr_default
-    if IMAP_SERVER == '2':
-        IMAP_SERVER = "outlook.office365.com"
-    else:
-        IMAP_SERVER = IMAP_SERVER_default
-    if not EMAIL_PASSWORD:
-        EMAIL_PASSWORD = EMAIL_PASSWORD_default
-    if not EMAIL_ADDRESS:
-        EMAIL_ADDRESS = EMAIL_ADDRESS_default
     if not mode_select:
         mode_select = [0, 1, 2, 3]
     else:
         mode_select = list(map(int, mode_select.split()))
+        if 4 in mode_select:
+            IMAP_SERVER = input(f'请选择邮件服务器，1：{IMAP_SERVER_default}（默认）， 2："outlook.office365.com"，输入数字：')
+            EMAIL_ADDRESS = input(f'请设置邮箱地址：')
+            EMAIL_PASSWORD = input(f'请设置邮箱验证码或密码：')
+            if IMAP_SERVER == '2':
+                IMAP_SERVER = "outlook.office365.com"
     # 聊天模式为0
     if 1 in mode_select:
         import utils.blue_screen as bs

@@ -4,8 +4,8 @@ from datetime import datetime, timedelta
 
 IMAP_SERVER = 'outlook.office365.com'
 difference = 14400
-EMAIL_ADDRESS = 'alibaba-zzzhang@assoc.main.ntu.edu.sg'
-EMAIL_PASSWORD = 'St283038!'
+EMAIL_ADDRESS = 'XXX@outlook.com'
+EMAIL_PASSWORD = '***'
 
 
 def decode_str(s):
