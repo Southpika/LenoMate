@@ -48,7 +48,8 @@ def get_parser():
     # parser.add_argument('--simmodel-dir',default=r"model\models--GanymedeNil--text2vec-large-chinese")
     parser.add_argument('--simmodel-dir', default="GanymedeNil/text2vec-large-chinese")
     # parser.add_argument('--qw-model-dir', default=r"C:\Users\admin\Desktop\qw\qwen")
-    parser.add_argument('--qw-model-dir', default=r"C:\Users\admin\Desktop\新建文件夹\glm_train\merged_model")
+    # parser.add_argument('--qw-model-dir', default=r"C:\Users\admin\Desktop\新建文件夹\glm_train\merged_model")
+    parser.add_argument('--qw-model-dir', default=r"D:\BaiduNetdiskDownload\merged_model")
 
     # parser.add_argument('--simmodel-dir',default="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2")
     parser.add_argument('--temperature', default=0.95)

@@ -33,3 +33,6 @@ transformers
 diffusers
 omegaconf
 xformers
+transformers_stream_generator
+einops
+tiktoken
