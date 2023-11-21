@@ -284,7 +284,7 @@ if __name__ == '__main__':
     dmp_addr = input(f'请设置dmp文件地址，回车跳过，默认为：{dmp_addr_default}：')
     mode_select = input("""请选择要打开的模式:
 0：仅默认（聊天+功能+文件分析+壁纸），1：默认+邮件，2：默认+邮件+语音识别
-输入数字（回车跳过，默认选择为：0）：
+输入数字（回车跳过，默认为：0）：
 """)
     if not server_addr:
         server_addr = server_addr_default
@@ -297,7 +297,7 @@ if __name__ == '__main__':
     else:
         mode_select = list(map(int, mode_select.split()))
         if 1 in mode_select or 2 in mode_select:
-            IMAP_SERVER = input(f'请选择邮件服务器，1：{IMAP_SERVER_default}（默认）， 2："outlook.office365.com"，输入数字：')
+            IMAP_SERVER = input(f'请选择邮件服务器，1：{IMAP_SERVER_default} 2："outlook.office365.com"，输入数字（回车跳过，默认为：1）：')
             EMAIL_ADDRESS = input(f'请设置邮箱地址：')
             EMAIL_PASSWORD = input(f'请设置邮箱验证码或密码：')
             if IMAP_SERVER == '2':
