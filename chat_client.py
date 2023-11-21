@@ -19,6 +19,7 @@ import utils.blue_screen as bs
 import operation
 import operation.read_file as rd
 import audio.speech_recognition as recognition
+from utils.wallpaper import main
 
 app = FastAPI()
 app.mount("/svg", StaticFiles(directory="svg"), name="svg")
@@ -150,7 +151,6 @@ def flag_join():
 
 @app.post("/image")
 def wallpaper_set(data: Dict):
-    from utils.wallpaper import main
     # data
     path = data['wall_path'].replace('http://localhost:8081/', '')
     # print(os.path.join(root_path, path))
