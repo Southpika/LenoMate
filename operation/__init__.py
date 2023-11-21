@@ -17,7 +17,7 @@ from .hello import *
 
 # from .operation import *
 
-# from .operation_server_glm import *
+from .operation_server_glm import *
 from .prompt import *
 
 
