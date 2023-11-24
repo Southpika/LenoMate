@@ -20,6 +20,7 @@ import operation
 import operation.read_file as rd
 import audio.speech_recognition as recognition
 from utils.wallpaper import main
+import json
 
 app = FastAPI()
 app.mount("/svg", StaticFiles(directory="svg"), name="svg")
@@ -121,7 +122,7 @@ def audio(data: Dict):
             image_num += 1
         # images_path:"["svg/1.png","svg/2.png","svg/3.png","svg/4.png"]"
         # print(images_path)
-        threading.Thread(target=flag_join).start()
+        function_finished_flag.set()
         return JSONResponse(content={"location": images_path, "bot": bot})
     else:
         result = data['chat']
@@ -132,20 +133,15 @@ def audio(data: Dict):
         if n < m:
             for i in range(n, m):
                 print(f'put: {sentences[i]}')
-                audio_queue.put(sentences[i])
+                audio_queue.put((sentences[i], bot))
             last_audio = sentences
         if 'end' in data:
             last_audio = []
-            threading.Thread(target=flag_join).start()
+            audio_queue.put((None, bot))
         if 'follow' in data:
             return JSONResponse(content={"result": result.strip('\n'), "bot": bot, "follow": data['follow']})
         else:
             return JSONResponse(content={"result": result.strip('\n'), "bot": bot})
-
-
-def flag_join():
-    audio_queue.join()
-    function_finished_flag.set()
 
 
 @app.post("/image")
@@ -247,9 +243,12 @@ def load_and_run_audio():
 
 def load_and_run_sys():
     while True:
-        sentence = audio_queue.get()
+        sentence, bot= audio_queue.get()
         print(f'get: {sentence}')
-        sys(sentence)
+        if not sentence:
+            function_finished_flag.set()
+        if sentence and bot:
+            sys(sentence)
 
 
 def load_and_run_email():
@@ -262,7 +261,7 @@ def load_and_run_email():
                 print(f'已发送邮件信息：{email}')
                 client_socket.sendall(str({"inputs": email, "state_code": 7}).encode("utf-8") + b'__end_of_socket__')
                 history = email
-        time.sleep(6)
+        time.sleep(15)
 
 
 def dmp_analysis():
@@ -273,17 +272,52 @@ def dmp_analysis():
             str({"inputs": test.analyze('blue_sceen.txt'), 'state_code': 5}).encode('utf-8') + b'__end_of_socket__')
 
 
+def load_from_json_file(file_path):
+    try:
+        with open(file_path, 'r') as file:
+            data = json.load(file)
+            return data
+    except FileNotFoundError:
+        print(f"File '{file_path}' not found.")
+        return None
+    except json.JSONDecodeError as e:
+        print(f"Error decoding JSON from '{file_path}': {e}")
+        return None
+
+
+def save_to_json_file(data, file_path):
+    try:
+        with open(file_path, 'w') as file:
+            json.dump(data, file, indent=2)  # indent参数可选，用于设置输出格式的缩进空格数
+        print(f"Data saved to '{file_path}' successfully.")
+    except json.JSONDecodeError as e:
+        print(f"Error encoding JSON to '{file_path}': {e}")
+
+
 if __name__ == '__main__':
-    server_addr_default = "n81595194d.zicp.fun"
-    server_port_default = 17493
-    dmp_addr_default = "C:/Users/Tzu-cheng Chang/Desktop/GLM"
-    IMAP_SERVER_default = 'imap.qq.com'
+    data = load_from_json_file('temp.json')
+    if not data:
+        server_addr_default = "8d352106u0.zicp.fun"
+        server_port_default = 12913
+        dmp_addr_default = "C:/Windows/Minidump"
+        mode_select_default = 0
+        IMAP_SERVER_default = 'imap.qq.com'
+        EMAIL_ADDRESS_default = None
+        EMAIL_PASSWORD_default = None
+    else:
+        server_addr_default = data['server_addr_default']
+        server_port_default = data['server_port_default']
+        dmp_addr_default = data['dmp_addr_default']
+        mode_select_default = data['mode_select_default']
+        IMAP_SERVER_default = data['IMAP_SERVER_default']
+        EMAIL_ADDRESS_default = data['EMAIL_ADDRESS_default']
+        EMAIL_PASSWORD_default = data['EMAIL_PASSWORD_default']
     server_addr = input(f'请设置服务器地址，回车跳过，默认为：{server_addr_default}：')
     server_port = input(f'请设置服务器端口，回车跳过，默认为：{server_port_default}：')
     dmp_addr = input(f'请设置dmp文件地址，回车跳过，默认为：{dmp_addr_default}：')
-    mode_select = input("""请选择要打开的模式:
+    mode_select = input(f"""请选择要打开的模式:
 0：仅默认（聊天+功能+文件分析+壁纸），1：默认+邮件，2：默认+邮件+语音识别
-输入数字（回车跳过，默认为：0）：
+输入数字（回车跳过，默认为：{mode_select_default}）：
 """)
     if not server_addr:
         server_addr = server_addr_default
@@ -292,19 +326,32 @@ if __name__ == '__main__':
     if not dmp_addr:
         dmp_addr = dmp_addr_default
     if not mode_select:
-        mode_select = [0]
-    else:
-        mode_select = list(map(int, mode_select.split()))
-        if 1 in mode_select or 2 in mode_select:
-            IMAP_SERVER = input(f'请选择邮件服务器，1：{IMAP_SERVER_default} 2："outlook.office365.com"，输入数字（回车跳过，默认为：1）：')
-            EMAIL_ADDRESS = input(f'请设置邮箱地址：')
-            EMAIL_PASSWORD = input(f'请设置邮箱验证码或密码：')
-            if IMAP_SERVER == '2':
-                IMAP_SERVER = "outlook.office365.com"
-            tzh = email_reciever(EMAIL_ADDRESS, EMAIL_PASSWORD, IMAP_SERVER)
-            threading.Thread(target=load_and_run_email).start()
-    if 2 in mode_select:
+        mode_select = mode_select_default
+    IMAP_SERVER = EMAIL_PASSWORD = EMAIL_ADDRESS = None
+    if mode_select in ["1", "2"]:
+        IMAP_SERVER = input(
+            f'请选择邮件服务器，1："imap.qq.com" 2："outlook.office365.com"，输入数字（回车跳过，默认为：{IMAP_SERVER_default}）：')
+        EMAIL_ADDRESS = input(f'请设置邮箱地址，回车跳过，默认为{EMAIL_ADDRESS_default}：')
+        EMAIL_PASSWORD = input(f'请设置邮箱验证码或密码，回车跳过，默认为{EMAIL_PASSWORD_default}：')
+        IMAP_SERVER = "outlook.office365.com" if IMAP_SERVER == '2' else "imap.qq.com"
+        if not EMAIL_PASSWORD:
+            EMAIL_PASSWORD = EMAIL_PASSWORD_default
+        if not EMAIL_ADDRESS:
+            EMAIL_ADDRESS = EMAIL_ADDRESS_default
+        tzh = email_reciever(EMAIL_ADDRESS, EMAIL_PASSWORD, IMAP_SERVER)
+        threading.Thread(target=load_and_run_email).start()
+    if mode_select == "2":
         threading.Thread(target=load_and_run_audio).start()
+    data = {
+        'server_addr_default': server_addr,
+        'server_port_default': server_port,
+        'dmp_addr_default': dmp_addr,
+        'IMAP_SERVER_default': IMAP_SERVER,
+        'mode_select_default': mode_select,
+        'EMAIL_ADDRESS_default': EMAIL_ADDRESS,
+        'EMAIL_PASSWORD_default': EMAIL_PASSWORD
+    }
+    save_to_json_file(data, 'temp.json')
     memo = {
         0: "当前为聊天模式",
         1: "当前为回传模式",
