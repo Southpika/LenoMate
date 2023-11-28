@@ -2,7 +2,7 @@ import azure.cognitiveservices.speech as speechsdk
 from time import sleep
 import threading
 
-SPEECH_KEY, SPEECH_REGION = 'f4cdaef2d60c4d95ba92ace56879e98c', 'eastasia'
+SPEECH_KEY, SPEECH_REGION = '729a7e9b72294950b07727391e561d79', 'eastasia'
 speech_config = speechsdk.SpeechConfig(subscription=SPEECH_KEY, region=SPEECH_REGION)
 audio_config = speechsdk.audio.AudioOutputConfig(use_default_speaker=True)
 speech_config.speech_synthesis_voice_name = 'zh-CN-XiaochenNeural'

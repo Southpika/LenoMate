@@ -197,7 +197,7 @@ def receive_messages():
                 if 'end' in data:
                     print(f"收到服务器的消息：{data}")
             else:
-                print(f"图片收取中...")
+                print(f"图片收取完成")
             handle(**data)
         except Exception as e:
             print(e)

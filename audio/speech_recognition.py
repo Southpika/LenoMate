@@ -1,7 +1,7 @@
 import azure.cognitiveservices.speech as speechsdk
 import time
 
-SPEECH_KEY, SPEECH_REGION = 'f4cdaef2d60c4d95ba92ace56879e98c', 'eastasia'
+SPEECH_KEY, SPEECH_REGION = '729a7e9b72294950b07727391e561d79', 'eastasia'
 speech_config = speechsdk.SpeechConfig(subscription=SPEECH_KEY, region=SPEECH_REGION)
 speech_config.speech_recognition_language = "zh-CN"
 audio_config = speechsdk.audio.AudioConfig(use_default_microphone=True)
